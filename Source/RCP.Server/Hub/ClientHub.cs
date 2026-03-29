@@ -1,6 +1,6 @@
-﻿using RPC.Shared.Hub;
+﻿using RPC.Shared.Interface;
 
-namespace RPC.Client.Hub;
+namespace RPC.Shared.Hub;
 
 /// <summary>
 /// RPC 통신을 위한 허브
@@ -8,6 +8,8 @@ namespace RPC.Client.Hub;
 /// <typeparam name="T1">서버에서 구현한 함수 선언을 가지는 객체</typeparam>
 /// <typeparam name="T2">클라이언트에서 구현한 함수 선언을 가지는 객체</typeparam>
 public class ClientHub<T1, T2> : HubBase<T1, T2>
+    where T1 : IProcedureDeclares
+    where T2 : IProcedureDeclares
 {
     
 }

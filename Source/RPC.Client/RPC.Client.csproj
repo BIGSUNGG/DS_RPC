@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="LiteNetLib" Version="2.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Communication.Network.RUDP.Client">
       <HintPath>..\Dll\Communication\Communication.Network.RUDP.Client.dll</HintPath>
     </Reference>

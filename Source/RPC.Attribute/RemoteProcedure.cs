@@ -1,6 +1,7 @@
 ﻿namespace RPC.Attribute;
 
-public class RemoteProcedure
+[AttributeUsage(AttributeTargets.Method)]
+public class RemoteProcedure : System.Attribute
 {
     
 }

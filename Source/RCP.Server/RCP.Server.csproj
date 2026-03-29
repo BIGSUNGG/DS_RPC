@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Communication.Network.RUDP.Server">
+      <HintPath>..\Dll\Communication\Communication.Network.RUDP.Server.dll</HintPath>
+    </Reference>
+    <Reference Include="Communication.Network.RUDP.Shared">
+      <HintPath>..\Dll\Communication\Communication.Network.RUDP.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="Communication.Shared">
+      <HintPath>..\Dll\Communication\Communication.Shared.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RPC.Shared\RPC.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

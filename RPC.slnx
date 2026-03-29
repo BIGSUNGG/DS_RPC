@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Source/">
+    <Project Path="Source/RCP.Server/RCP.Server.csproj" Id="02dc7831-4217-4df5-aa5f-6acf5d9d0ebd" />
+    <Project Path="Source/RPC.Attribute/RPC.Attribute.csproj" Id="8d990fb2-38bd-48e5-bc31-a137857b158d" />
+    <Project Path="Source/RPC.Client/RPC.Client.csproj" Id="1c2b799a-bd52-4afe-a9bc-39e93920aa39" />
+    <Project Path="Source/RPC.CodeGenerator/RPC.CodeGenerator.csproj" />
+    <Project Path="Source/RPC.Shared/RPC.Shared.csproj" />
+  </Folder>
+</Solution>

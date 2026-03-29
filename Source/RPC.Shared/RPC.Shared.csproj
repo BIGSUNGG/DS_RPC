@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>RPC</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="MessageProtocol">
+      <HintPath>..\Dll\MessageProtocol\MessageProtocol.dll</HintPath>
+    </Reference>
+    <Reference Include="MessageProtocol.CodeGenerator">
+      <HintPath>..\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll</HintPath>
+    </Reference>
+    <Reference Include="MessageProtocol.Core">
+      <HintPath>..\Dll\MessageProtocol\MessageProtocol.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RPC.Attribute\RPC.Attribute.csproj" />
+  </ItemGroup>
+
+</Project>

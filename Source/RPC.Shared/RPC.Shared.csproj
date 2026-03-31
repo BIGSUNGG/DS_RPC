@@ -8,6 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="Communication.Shared">
+      <HintPath>..\Dll\Communication\Communication.Shared.dll</HintPath>
+    </Reference>
     <Reference Include="MessageProtocol">
       <HintPath>..\Dll\MessageProtocol\MessageProtocol.dll</HintPath>
     </Reference>

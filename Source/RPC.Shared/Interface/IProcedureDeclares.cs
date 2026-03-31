@@ -1,6 +1,11 @@
 ﻿namespace RPC.Shared.Interface;
 
-public interface IProcedureDeclares
+public interface IServerProcedureDeclares
+{
+    
+}
+
+public interface IClientProcedureDeclares
 {
     
 }

@@ -1,6 +1,6 @@
-﻿using Communication.Shared.Sessions;
-using RPC.Shared.Network;
+using Communication.Shared.Sessions;
 using RPC.Shared.Interface;
+using RPC.Shared.Network;
 
 namespace RPC.Client.Network;
 
@@ -10,8 +10,8 @@ namespace RPC.Client.Network;
 /// <typeparam name="T1">서버에서 구현한 함수 선언을 가지는 객체</typeparam>
 /// <typeparam name="T2">클라이언트에서 구현한 함수 선언을 가지는 객체</typeparam>
 public abstract class ServerHub<T1, T2> : HubBase<T1, T2>
-    where T1 : IServerProcedureDeclares
-    where T2 : IClientProcedureDeclares
+    where T1 : IServerProcedureDeclarations
+    where T2 : IClientProcedureDeclarations
 {
     public ServerHub(Func<HubBase, ISession> sessionFactory)
         : base(sessionFactory)

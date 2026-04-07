@@ -50,18 +50,10 @@ public sealed class Listener
         };      
     }
 
-    public void Start()
-    {
-        _netManager.Start(_port);
-    }
-
-    public void Stop()
-    {
-        _netManager.Stop();
-    }
 
     public async Task ListenAsync(Func<NetPeer, NetManager, EventBasedNetListener, Task> onClientAccepted, CancellationToken token)
     {
+        _netManager.Start(_port);
         _onClientAccepted = onClientAccepted;
         _cancellationToken = token;
 

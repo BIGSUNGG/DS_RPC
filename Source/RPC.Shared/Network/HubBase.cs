@@ -13,8 +13,8 @@ namespace RPC.Shared.Network;
 /// <typeparam name="TSPD">서버에서 구현한 함수 선언을 가지는 객체</typeparam>
 /// <typeparam name="TCD">클라이언트에서 구현한 함수 선언을 가지는 객체</typeparam>
 public abstract class HubBase<TSPD, TCPD> : HubBase
-    where TSPD : IServerProcedureDeclares
-    where TCPD : IClientProcedureDeclares
+    where TSPD : IServerProcedureDeclarations
+    where TCPD : IClientProcedureDeclarations
 {
     public HubBase(Func<HubBase, ISession> sessionFactory)
         : base(sessionFactory)
@@ -29,7 +29,7 @@ public abstract class HubBase : IHubBase
     /// <summary>
     /// RPC 요청에 들어온 Method Id에 맞게 호출되어야 하는 Action 목록
     /// </summary>
-    Dictionary<int/*method id*/, Action/*method matched to method id*/> _methodCallActions = new ();
+    protected Dictionary<int/*method id*/, Func<byte[], byte[]>/*method matched to method id*/> MethodCallActions = new ();
     
     /// <summary>
     /// 사용 안 된 Call Id 중 제일 작은 수
@@ -65,11 +65,11 @@ public abstract class HubBase : IHubBase
 
     public void OnReceiveRPCRequestMessage(ProcedureCallRequestMessage message)
     {
-        _methodCallActions.TryGetValue(message.MethodId, out Action methodCallAction);
+        MethodCallActions.TryGetValue(message.MethodId, out Func<byte[], byte[]> methodCallAction);
         if(methodCallAction == null)
             throw new ArgumentException($"The method {message.MethodId} does not exist.");
         
-        methodCallAction.Invoke();
+        methodCallAction.Invoke(message.ParameterData);
     }
     
     public void OnReceiveRPCResponseMessage(ProcedureCallResponseMessage message)

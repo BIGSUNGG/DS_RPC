@@ -6,4 +6,9 @@
     <Project Path="Source/RPC.CodeGenerator/RPC.CodeGenerator.csproj" />
     <Project Path="Source/RPC.Shared/RPC.Shared.csproj" />
   </Folder>
+  <Folder Name="/TemplateSource/">
+    <Project Path="TemplateSource/TemplateSource/TemplateSource.csproj" />
+    <Project Path="TemplateSource/TemplateSource_Client/TemplateSource_Client.csproj" />
+    <Project Path="TemplateSource/TemplateSource_Server/TemplateSource_Server.csproj" />
+  </Folder>
 </Solution>

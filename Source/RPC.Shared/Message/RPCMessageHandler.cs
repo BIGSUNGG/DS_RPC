@@ -6,7 +6,7 @@ using RPC.Shared.Message;
 
 namespace RPC.Shared;
 
-public abstract class RPCMessageHandler : MessageHandler
+public class RPCMessageHandler : MessageHandler
 {
     IHubBase _hub;
     

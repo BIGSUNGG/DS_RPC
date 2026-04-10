@@ -7,7 +7,14 @@
     <RootNamespace>RPC</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<Analyzer Include="..\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+    <Reference Include="Communication.Network.RUDP.Shared">
+      <HintPath>..\Dll\Communication\Communication.Network.RUDP.Shared.dll</HintPath>
+    </Reference>
     <Reference Include="Communication.Shared">
       <HintPath>..\Dll\Communication\Communication.Shared.dll</HintPath>
     </Reference>

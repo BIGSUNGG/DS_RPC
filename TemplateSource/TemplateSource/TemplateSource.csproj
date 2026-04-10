@@ -7,12 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\RPC.Client\RPC.Client.csproj" />
-    <ProjectReference Include="..\..\Source\RCP.Server\RCP.Server.csproj" />
-    <ProjectReference Include="..\..\Source\RPC.Shared\RPC.Shared.csproj" />
+    <Compile Remove="ExampleClientHub_Ignore.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Source\RPC.Client\RPC.Client.csproj" />
+    <ProjectReference Include="..\..\Source\RCP.Server\RCP.Server.csproj" />
+    <ProjectReference Include="..\..\Source\RPC.CodeGenerator\RPC.CodeGenerator.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\Source\RPC.Shared\RPC.Shared.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<Analyzer Include="..\..\Source\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
     <Reference Include="Communication.Shared">
       <HintPath>..\..\Source\Dll\Communication\Communication.Shared.dll</HintPath>
     </Reference>
@@ -25,11 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Analyzer Include="..\..\Source\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="ExampleClientHub._Ignore" />
+    <None Include="ExampleClientHub_Ignore.cs" />
   </ItemGroup>
 
 </Project>

@@ -1,2 +1,12 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using TemplateSource;
+
+Console.ReadLine();
+var hub = await ExampleServerHub.ConnectAsync("localhost", 12345, CancellationToken.None);
+
+Console.WriteLine("Connected to server.");
+
+while (true)
+{
+        await Task.Delay(1000);
+}
+

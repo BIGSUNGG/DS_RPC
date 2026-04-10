@@ -2,13 +2,16 @@
 
 namespace RPC.Shared.Message;
 
-[MessageStandalone(1)]
-public class ProcedureCallResponseMessage
+[StandaloneMessage(1)]
+public partial class ProcedureCallResponseMessage
 {
     public uint CallId { get; private set; }
     public byte[] ReturnData { get; private set; }
-        
-    protected ProcedureCallResponseMessage(uint callId, byte[] returnData)
+
+    public ProcedureCallResponseMessage()
+    {
+    }
+    public ProcedureCallResponseMessage(uint callId, byte[] returnData)
     {
         CallId = callId;
         ReturnData = returnData;

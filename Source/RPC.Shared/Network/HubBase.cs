@@ -4,6 +4,7 @@ using Communication.Shared.Sessions;
 using RPC.Shared.Interface;
 using RPC.Shared.Message;
 using System.Linq;
+using Communication.Network.RUDP.Shared.Messages;
 
 namespace RPC.Shared.Network;
 
@@ -49,12 +50,14 @@ public abstract class HubBase : IHubBase
         _session = sessionFactory.Invoke(this);
     }
 
-    protected async Task<byte[]> RequestRPC(int methodId, byte[] parameterData)
+    protected async Task<byte[]> RequestRPC(int methodId, byte[] parameterData, ReliableType reliableType)
     {
         uint callId = _usedCallId.TryPop(out callId) ? callId : _notUsedMinCallId++;
-        
+
+        MessageSendContext messageSendContext = new MessageSendContext();
+        messageSendContext.Reliable = reliableType;
         ProcedureCallRequestMessage requestMessage = new ProcedureCallRequestMessage(callId, methodId, parameterData);
-        await _session.SendAsync(requestMessage);
+        await _session.SendAsync(requestMessage, messageSendContext);
         
         TaskCompletionSource<byte[]> waitResponseTask = new();
         WaitResponseTasks.TryAdd(callId, waitResponseTask);
@@ -69,7 +72,8 @@ public abstract class HubBase : IHubBase
         if(methodCallAction == null)
             throw new ArgumentException($"The method {message.MethodId} does not exist.");
         
-        methodCallAction.Invoke(message.ParameterData);
+        var result = methodCallAction.Invoke(message.ParameterData);
+        _session.SendAsync(new ProcedureCallResponseMessage(message.CallId, result));
     }
     
     public void OnReceiveRPCResponseMessage(ProcedureCallResponseMessage message)

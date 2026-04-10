@@ -3,6 +3,7 @@ using Communication.Shared.Messages;
 using Communication.Shared.Sessions;
 using MessageProtocol;
 using MessageProtocol.Serialize;
+using RPC.Client.Network;
 using RPC.Server.Netwrok;
 using RPC.Shared;
 using RPC.Shared.Interface;
@@ -19,52 +20,69 @@ public partial class ExampleServerHub
         MethodCallActions.Add(0, Sum_Requested);
     }
 
-    public static Task ListenAsync(int port, Func<ExampleServerHub, Task> onConnected)
+    public static async Task<ExampleServerHub> ConnectAsync(string host, int port, CancellationToken cancellationToken)
     {
-        return ListenAsync(port, "", onConnected);
+        return await ConnectAsync(host, port, "", cancellationToken);
     }
 
-    public static async Task ListenAsync(int port, string connectionKey, Func<ExampleServerHub, Task> onConnected)
+    public static async Task<ExampleServerHub> ConnectAsync(string host, int port, string connectionKey, CancellationToken cancellationToken)
     {
-        Listener listener = new(System.Net.IPAddress.Any, port, connectionKey);
-        int sessionId = 0;
+        ExampleServerHub? connectedHub = null;
+        Connector connector = new(host, port, connectionKey);
 
-        await listener.ListenAsync(async (peer, netManager, eventListener) =>
+        bool isConnected = await connector.ConnectAsync((peer, netManager, listener) =>
         {
-            ExampleServerHub hub = new(_ =>
-                new ClientSession(
-                    Interlocked.Increment(ref sessionId),
+            connectedHub = new ExampleServerHub(hub =>
+                new ServerSession(
                     peer,
                     netManager,
                     session => new RUDPMessageReceiver(
                         new DefaultMessageConverter(),
                         peer,
                         netManager,
-                        eventListener,
-                        new DefaultMessageHandler(session, _)),
-                    __ => new RUDPMessageSender(
+                        listener,
+                        new RPCMessageHandler(session, hub)),
+                    _ => new RUDPMessageSender(
                         new DefaultMessageConverter(),
                         peer)));
+            
+            _ = Task.Run(async () =>
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    netManager.PollEvents();
+                    await Task.Delay(10);
+                }
+            }, cancellationToken);
+            
+            return Task.CompletedTask;
+        });
 
-            await onConnected(hub);
-        }, CancellationToken.None);
+        if (isConnected == false || connectedHub == null)
+            throw new InvalidOperationException("Failed to connect to server.");
+
+        return connectedHub;
     }
+
 
     private byte[] Sum_Requested(byte[] parameterData)
     {
-        Sum_Parameter parameter = MessageSerializer.Deserialize(parameterData) as Sum_Parameter
-                                 ?? throw new InvalidOperationException("Failed to deserialize Sum_Parameter.");
+        Sum_Parameter parameter = MessageSerializer.Deserialize<Sum_Parameter>(parameterData);
         float result = Sum_Implementation(parameter.a, parameter.b);
         return BitConverter.GetBytes(result);
     }
     private partial float Sum_Implementation(float a, float b);
 
-    [Message]
-    partial class Sum_Parameter
+    [NonIdMessage]
+    public partial class Sum_Parameter
     {
         public float a;
         public float b;
-        
+
+        public Sum_Parameter()
+        {
+        }
+
         public Sum_Parameter(float a, float b)
         {
             this.a = a;
@@ -72,43 +90,33 @@ public partial class ExampleServerHub
         }
     }
 
-    public string SumResultString(int a, int b)
-    {
-        throw new NotImplementedException();
-    }
-
     private sealed class DefaultMessageConverter : IMessageConverter
     {
-        private static readonly MethodInfo SerializeMethod = ResolveMethod("Serialize");
-        private static readonly MethodInfo DeserializeMethod = ResolveMethod("Deserialize");
 
         public byte[] Serialize(object message)
         {
-            return (byte[])SerializeMethod.Invoke(null, new object[] { message })!;
+            return MessageSerializer.Serialize(message);
         }
 
         public object Deserialize(ReadOnlySpan<byte> messageData)
         {
-            return DeserializeMethod.Invoke(null, new object[] { messageData.ToArray() })!;
-        }
-
-        private static MethodInfo ResolveMethod(string methodName)
-        {
-            Type serializerType = Type.GetType("MessageProtocol.Serialize.MessageSerializer, MessageProtocol")
-                                  ?? throw new InvalidOperationException("MessageSerializer type was not found.");
-
-            return serializerType
-                       .GetMethods(BindingFlags.Public | BindingFlags.Static)
-                       .FirstOrDefault(method => method.Name == methodName && method.GetParameters().Length == 1)
-                   ?? throw new InvalidOperationException($"{methodName} method was not found on MessageSerializer.");
+            return MessageSerializer.Deserialize(messageData.ToArray());
         }
     }
+}
 
-    private sealed class DefaultMessageHandler : RPCMessageHandler
+
+[NonIdMessage]
+public partial class ExampleMessage
+{
+    public int Value;
+
+    public ExampleMessage()
     {
-        public DefaultMessageHandler(ISession session, IHubBase hub)
-            : base(session, hub)
-        {
-        }
+    }
+
+    public ExampleMessage(int value)
+    {
+        Value = value;
     }
 }

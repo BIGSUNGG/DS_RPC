@@ -1,4 +1,4 @@
-﻿using TemplateSource;
+﻿using TemplateSource.Server;
 
 internal class Program
 {

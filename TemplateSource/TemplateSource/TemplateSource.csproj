@@ -35,8 +35,4 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="ExampleClientHub_Ignore.cs" />
-  </ItemGroup>
-
 </Project>

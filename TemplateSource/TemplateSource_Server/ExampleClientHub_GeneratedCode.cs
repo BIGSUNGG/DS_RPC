@@ -12,9 +12,9 @@ using RPC.Shared.Network;
 using System.Reflection;
 using System.Security.Cryptography;
 
-namespace TemplateSource;
+namespace TemplateSource.Server;
 
-public partial class ExampleClientHub : ServerHub<IExampleServerProcedureDeclartions, IExampleClientProcedureDeclarations>
+public partial class ExampleClientHub
 {
     public ExampleClientHub(Func<HubBase, ISession> sessionFactory)
         : base(sessionFactory)

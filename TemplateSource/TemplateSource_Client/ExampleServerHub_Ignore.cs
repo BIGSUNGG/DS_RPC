@@ -4,7 +4,7 @@ using MessageProtocol.Serialize;
 using RPC.Client.Network;
 using RPC.Shared.Network;
 
-namespace TemplateSource;
+namespace TemplateSource.Client;
 
 public partial class ExampleServerHub : ServerHub<IExampleServerProcedureDeclartions,IExampleClientProcedureDeclarations>
 {

@@ -10,7 +10,7 @@ using RPC.Shared.Interface;
 using RPC.Shared.Network;
 using System.Reflection;
 
-namespace TemplateSource;
+namespace TemplateSource.Client;
 
 public partial class ExampleServerHub
 {

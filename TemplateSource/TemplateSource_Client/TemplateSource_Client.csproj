@@ -11,4 +11,19 @@
     <ProjectReference Include="..\TemplateSource\TemplateSource.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Communication.Network.RUDP.Shared">
+      <HintPath>..\..\Source\Dll\Communication\Communication.Network.RUDP.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="Communication.Shared">
+      <HintPath>..\..\Source\Dll\Communication\Communication.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="MessageProtocol.Core">
+      <HintPath>..\..\Source\Dll\MessageProtocol\MessageProtocol.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+	<ItemGroup>
+		<Analyzer Include="..\..\Source\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll" />
+	</ItemGroup>
 </Project>

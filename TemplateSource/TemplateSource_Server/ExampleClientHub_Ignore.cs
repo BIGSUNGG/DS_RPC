@@ -1,11 +1,15 @@
-﻿using Communication.Shared.Sessions;
+using Communication.Shared.Sessions;
 using MessageProtocol;
 using MessageProtocol.Serialize;
 using RPC.Client.Network;
+using RPC.Shared.Interface;
 using RPC.Shared.Network;
 
-namespace TemplateSource;
-
+namespace TemplateSource.Server;
 public partial class ExampleClientHub : ServerHub<IExampleServerProcedureDeclartions,IExampleClientProcedureDeclations>
+{
+}
+
+public interface IExampleClientProcedureDeclations : IClientProcedureDeclarations
 {
 }

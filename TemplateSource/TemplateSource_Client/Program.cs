@@ -1,4 +1,4 @@
-﻿using TemplateSource;
+﻿using TemplateSource.Client;
 
 Console.ReadLine();
 var hub = await ExampleServerHub.ConnectAsync("localhost", 12345, CancellationToken.None);

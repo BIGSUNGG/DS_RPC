@@ -29,13 +29,11 @@ public partial class ExampleClientHub
     public static async Task ListenAsync(int port, string connectionKey, Func<ExampleClientHub, Task> onConnected, CancellationToken cancellationToken)
     {
         Listener listener = new(System.Net.IPAddress.Any, port, connectionKey);
-        int sessionId = 0;
 
         await listener.ListenAsync(async (peer, netManager, eventListener) =>
         {
             ExampleClientHub hub = new(_ =>
                 new ClientSession(
-                    Interlocked.Increment(ref sessionId),
                     peer,
                     netManager,
                     session => new RUDPMessageReceiver(

@@ -6,6 +6,11 @@
     <Project Path="Source/RPC.CodeGenerator/RPC.CodeGenerator.csproj" />
     <Project Path="Source/RPC.Shared/RPC.Shared.csproj" />
   </Folder>
+  <Folder Name="/Source/Sandbox/">
+    <Project Path="Source/Sandbox/Sandbox.Contracts/Sandbox.Contracts.csproj" />
+    <Project Path="Source/Sandbox/Sandbox.Client/Sandbox.Client.csproj" />
+    <Project Path="Source/Sandbox/Sandbox.Server/Sandbox.Server.csproj" />
+  </Folder>
   <Folder Name="/TemplateSource/">
     <Project Path="TemplateSource/TemplateSource/TemplateSource.csproj" />
     <Project Path="TemplateSource/TemplateSource_Client/TemplateSource_Client.csproj" />

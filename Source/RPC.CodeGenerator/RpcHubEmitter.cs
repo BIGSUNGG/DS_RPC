@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using RPC.CodeGenerator.Metadata;
 
 namespace RPC.CodeGenerator;
 
@@ -190,7 +191,7 @@ internal static class RpcHubEmitter
         sb.AppendLine();
     }
 
-    static void EmitOutgoingProcedure(StringBuilder sb, RpcProcedureData proc, string indent)
+    static void EmitOutgoingProcedure(StringBuilder sb, MethodMetadata proc, string indent)
     {
         string syncReturn = proc.ReturnType.SpecialType == SpecialType.System_Void
             ? "void"
@@ -280,7 +281,7 @@ internal static class RpcHubEmitter
         sb.AppendLine();
     }
 
-    static void EmitIncomingProcedure(StringBuilder sb, RpcProcedureData proc, string indent)
+    static void EmitIncomingProcedure(StringBuilder sb, MethodMetadata proc, string indent)
     {
         sb.AppendLine($"{indent}private byte[] {proc.MethodName}_Requested(byte[] parameterData)");
         sb.AppendLine($"{indent}{{");
@@ -328,7 +329,7 @@ internal static class RpcHubEmitter
         sb.AppendLine();
     }
 
-    static string ParameterDeclarationList(RpcProcedureData proc)
+    static string ParameterDeclarationList(MethodMetadata proc)
     {
         return string.Join(", ", proc.Parameters.Select(p =>
             $"{p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} {p.Name}"));
@@ -379,16 +380,7 @@ internal sealed class RpcHubEmitModel
     public string HubTypeName { get; set; } = "";
     public string? Namespace { get; set; }
     public bool IsServerEndpoint { get; set; }
-    public RpcProcedureData[] Outgoing { get; set; } = Array.Empty<RpcProcedureData>();
-    public RpcProcedureData[] Incoming { get; set; } = Array.Empty<RpcProcedureData>();
+    public MethodMetadata[] Outgoing { get; set; } = Array.Empty<MethodMetadata>();
+    public MethodMetadata[] Incoming { get; set; } = Array.Empty<MethodMetadata>();
     public bool NeedsStringHelpers { get; set; }
-}
-
-internal sealed class RpcProcedureData
-{
-    public string MethodName { get; set; } = "";
-    public int MethodId { get; set; }
-    public ITypeSymbol ReturnType { get; set; } = null!;
-    public (string Name, ITypeSymbol Type)[] Parameters { get; set; } = Array.Empty<(string, ITypeSymbol)>();
-    public string ReliableTypeExpression { get; set; } = "";
 }

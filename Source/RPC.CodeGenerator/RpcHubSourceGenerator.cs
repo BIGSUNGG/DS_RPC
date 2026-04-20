@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +6,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using RPC.CodeGenerator.Metadata;
+using RPC.CodeGenerator.Reference;
 
 namespace RPC.CodeGenerator;
 
@@ -33,7 +34,7 @@ internal static class RpcHubSourceGenerator
             return;
         }
 
-        var attrRefs = new RpcAttributeSymbols(compilation);
+        var attrRefs = new AttributeReferences(compilation);
 
         var tSpd = hubBase!.TypeArguments[0] as INamedTypeSymbol;
         var tCpd = hubBase.TypeArguments[1] as INamedTypeSymbol;
@@ -43,35 +44,24 @@ internal static class RpcHubSourceGenerator
             return;
         }
 
-        int nextMethodId = 0;
-        var serverProcedures = CollectProcedures(
-            tSpd,
-            attrRefs.RemoteProcedureAttributeType,
-            compilation,
-            ref nextMethodId,
-            context,
-            location);
+        var declarationsMetadataCache = BuildDeclarationsMetadataCache(
+            new[] { tSpd, tCpd },
+            attrRefs);
 
-        if (serverProcedures == null)
+        var serverMetadata = BuildTypeMetadata(tSpd, declarationsMetadataCache, context, location);
+        if (serverMetadata is null)
         {
             return;
         }
 
-        var clientProcedures = CollectProcedures(
-            tCpd,
-            attrRefs.RemoteProcedureAttributeType,
-            compilation,
-            ref nextMethodId,
-            context,
-            location);
-
-        if (clientProcedures == null)
+        var clientMetadata = BuildTypeMetadata(tCpd, declarationsMetadataCache, context, location);
+        if (clientMetadata is null)
         {
             return;
         }
 
-        RpcProcedureData[] outgoing = isServerEndpoint ? clientProcedures : serverProcedures;
-        RpcProcedureData[] incoming = isServerEndpoint ? serverProcedures : clientProcedures;
+        MethodMetadata[] outgoing = isServerEndpoint ? clientMetadata.Methods : serverMetadata.Methods;
+        MethodMetadata[] incoming = isServerEndpoint ? serverMetadata.Methods : clientMetadata.Methods;
 
         bool needsString = NeedsStringReturnHelpers(outgoing, incoming);
 
@@ -108,7 +98,7 @@ internal static class RpcHubSourceGenerator
         context.AddSource($"{fileStem}.g.cs", SourceText.From(source, Encoding.UTF8));
     }
 
-    static bool NeedsStringReturnHelpers(RpcProcedureData[] outgoing, RpcProcedureData[] incoming)
+    static bool NeedsStringReturnHelpers(MethodMetadata[] outgoing, MethodMetadata[] incoming)
     {
         foreach (var p in outgoing.Concat(incoming))
         {
@@ -121,38 +111,54 @@ internal static class RpcHubSourceGenerator
         return false;
     }
 
-    static RpcProcedureData[]? CollectProcedures(
-        INamedTypeSymbol iface,
-        INamedTypeSymbol? remoteProcedureAttr,
-        Compilation compilation,
-        ref int nextMethodId,
+    static TypeMetadata? BuildTypeMetadata(
+        INamedTypeSymbol declarationsInterface,
+        Dictionary<INamedTypeSymbol, DeclarationsMetadata> declarationsMetadataCache,
         SourceProductionContext context,
         Location location)
     {
-        if (remoteProcedureAttr == null)
+        if (!declarationsMetadataCache.TryGetValue(declarationsInterface, out var declarationsMetadata))
         {
-            return Array.Empty<RpcProcedureData>();
+            return null;
         }
 
-        var list = new List<RpcProcedureData>();
-
-        foreach (var member in iface.GetMembers())
+        var typeMetadata = new TypeMetadata(declarationsInterface, declarationsMetadata);
+        if (!ValidateTypeMetadata(typeMetadata, context, location))
         {
-            if (member is not IMethodSymbol method || method.MethodKind != MethodKind.Ordinary)
+            return null;
+        }
+
+        return typeMetadata;
+    }
+
+    static Dictionary<INamedTypeSymbol, DeclarationsMetadata> BuildDeclarationsMetadataCache(
+        IEnumerable<INamedTypeSymbol> declarationInterfaces,
+        AttributeReferences references)
+    {
+        var cache = new Dictionary<INamedTypeSymbol, DeclarationsMetadata>(SymbolEqualityComparer.Default);
+        foreach (var declarationInterface in declarationInterfaces)
+        {
+            if (cache.ContainsKey(declarationInterface))
             {
                 continue;
             }
 
-            if (member.IsImplicitlyDeclared)
-            {
-                continue;
-            }
+            var metadata = new DeclarationsMetadata(declarationInterface, references);
+            cache.Add(declarationInterface, metadata);
+        }
 
-            var attr = method.FindAttribute(remoteProcedureAttr);
-            if (attr == null)
-            {
-                continue;
-            }
+        return cache;
+    }
+
+    static bool ValidateTypeMetadata(
+        TypeMetadata typeMetadata,
+        SourceProductionContext context,
+        Location location)
+    {
+        var iface = typeMetadata.Symbol;
+        foreach (var methodMetadata in typeMetadata.Methods)
+        {
+            var method = methodMetadata.Symbol;
 
             if (method.IsGenericMethod || iface.IsGenericType && method.TypeParameters.Length > 0)
             {
@@ -161,7 +167,7 @@ internal static class RpcHubSourceGenerator
                     location,
                     method.Name,
                     "generic method"));
-                return null;
+                return false;
             }
 
             foreach (var p in method.Parameters)
@@ -173,7 +179,7 @@ internal static class RpcHubSourceGenerator
                         location,
                         method.Name,
                         "ref/out parameters"));
-                    return null;
+                    return false;
                 }
 
                 if (!RpcMarshal.IsSupportedDataType(p.Type, allowVoid: false, out var td))
@@ -183,7 +189,7 @@ internal static class RpcHubSourceGenerator
                         location,
                         method.Name,
                         td));
-                    return null;
+                    return false;
                 }
             }
 
@@ -194,62 +200,10 @@ internal static class RpcHubSourceGenerator
                     location,
                     method.Name,
                     rd));
-                return null;
-            }
-
-            if (!TryBuildReliableTypeExpression(attr, compilation, out string reliableExpr))
-            {
-                reliableExpr = "global::Communication.Network.RUDP.Shared.Messages.ReliableType.ReliableOrdered";
-            }
-
-            var parameters = method.Parameters
-                .Select(p => (p.Name, p.Type))
-                .ToArray();
-
-            list.Add(new RpcProcedureData
-            {
-                MethodName = method.Name,
-                MethodId = nextMethodId++,
-                ReturnType = method.ReturnType,
-                Parameters = parameters,
-                ReliableTypeExpression = reliableExpr,
-            });
-        }
-
-        return list.ToArray();
-    }
-
-    static bool TryBuildReliableTypeExpression(AttributeData attr, Compilation compilation, out string expr)
-    {
-        expr = "";
-        if (attr.ConstructorArguments.Length == 0)
-        {
-            return false;
-        }
-
-        var reliableEnum = compilation.GetTypeByMetadataName("Communication.Network.RUDP.Shared.Messages.ReliableType");
-        var raw = attr.ConstructorArguments[0].Value;
-        int v = Convert.ToInt32(raw);
-
-        if (reliableEnum != null)
-        {
-            foreach (var m in reliableEnum.GetMembers())
-            {
-                if (m is IFieldSymbol field &&
-                    field.HasConstantValue &&
-                    field.ConstantValue is int iv &&
-                    iv == v &&
-                    field.Name != "value__")
-                {
-                    expr =
-                        $"global::Communication.Network.RUDP.Shared.Messages.ReliableType.{field.Name}";
-                    return true;
-                }
+                return false;
             }
         }
 
-        expr =
-            $"((global::Communication.Network.RUDP.Shared.Messages.ReliableType){v})";
         return true;
     }
 
@@ -307,16 +261,5 @@ internal static class RpcHubSourceGenerator
         }
 
         return string.Join("_", stack);
-    }
-}
-
-internal sealed class RpcAttributeSymbols
-{
-    public INamedTypeSymbol? RemoteProcedureAttributeType { get; }
-
-    public RpcAttributeSymbols(Compilation compilation)
-    {
-        RemoteProcedureAttributeType =
-            compilation.GetTypeByMetadataName("RPC.Attribute.RemoteProcedure");
     }
 }

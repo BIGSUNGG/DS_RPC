@@ -8,12 +8,12 @@ internal sealed class MethodMetadata
 {
     public IMethodSymbol Symbol { get; }
     public string MethodName { get; }
-    public int MethodId { get; }
+    public uint MethodId { get; }
     public ITypeSymbol ReturnType { get; }
     public (string Name, ITypeSymbol Type)[] Parameters { get; }
     public string ReliableTypeExpression { get; }
 
-    public MethodMetadata(IMethodSymbol methodSymbol, int methodId, AttributeReferences references)
+    public MethodMetadata(IMethodSymbol methodSymbol, uint methodId, AttributeReferences references)
     {
         Symbol = methodSymbol;
         MethodName = methodSymbol.Name;

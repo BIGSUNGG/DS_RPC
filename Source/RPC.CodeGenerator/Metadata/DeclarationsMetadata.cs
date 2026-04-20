@@ -14,7 +14,7 @@ internal sealed class DeclarationsMetadata
     {
         Symbol = declarationSymbol;
 
-        var methodId = 0;
+        uint methodId = 0;
         var methods = new List<MethodMetadata>();
 
         foreach (var method in declarationSymbol

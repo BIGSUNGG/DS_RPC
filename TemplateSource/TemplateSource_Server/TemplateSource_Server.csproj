@@ -26,8 +26,9 @@
       <HintPath>..\..\Source\Dll\MessageProtocol\MessageProtocol.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
-  
+
 	<ItemGroup>
 		<Analyzer Include="..\..\Source\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll" />
 	</ItemGroup>
+  
 </Project>

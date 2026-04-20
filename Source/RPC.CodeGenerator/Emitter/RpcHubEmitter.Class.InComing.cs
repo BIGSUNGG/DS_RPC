@@ -11,7 +11,7 @@ internal static partial class RpcHubEmitter
     {
         sb.AppendLine($"{indent}private byte[] {proc.MethodName}_Requested(byte[] parameterData)");
         sb.AppendLine($"{indent}{{");
-        sb.AppendLine($"{indent}    {proc.ParameterMessageTypeName} parameterPayload = ({proc.ParameterMessageTypeName})MessageSerializer.Deserialize(parameterData);");
+        sb.AppendLine($"{indent}    {proc.ParameterMessageTypeName} parameterPayload = MessageSerializer.Deserialize<{proc.ParameterMessageTypeName}>(parameterData);");
 
         if (proc.Parameters.Length == 0)
         {

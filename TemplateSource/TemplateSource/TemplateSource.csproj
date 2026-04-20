@@ -20,10 +20,6 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<Analyzer Include="..\..\Source\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll" />
-	</ItemGroup>
-
-	<ItemGroup>
     <Reference Include="Communication.Shared">
       <HintPath>..\..\Source\Dll\Communication\Communication.Shared.dll</HintPath>
     </Reference>
@@ -34,5 +30,9 @@
       <HintPath>..\..\Source\Dll\MessageProtocol\MessageProtocol.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+	<ItemGroup>
+		<Analyzer Include="..\..\Source\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll" />
+	</ItemGroup>
 
 </Project>

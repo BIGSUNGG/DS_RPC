@@ -80,6 +80,75 @@ internal static class RpcHubSourceGenerator
 #pragma warning restore RS1035
 
         context.AddSource($"{fileStem}.g.cs", SourceText.From(source, Encoding.UTF8));
+        EmitRpcMessageSerializationSources(typeMetadata, hubSymbol, source, compilation, context, fileStem, location);
+    }
+
+    static void EmitRpcMessageSerializationSources(
+        TypeMetadata typeMetadata,
+        INamedTypeSymbol hubSymbol,
+        string hubGeneratedSource,
+        Compilation compilation,
+        SourceProductionContext context,
+        string fileStem,
+        Location location)
+    {
+        var parseOptions = compilation.SyntaxTrees.FirstOrDefault()?.Options as CSharpParseOptions;
+        var generatedTree = CSharpSyntaxTree.ParseText(SourceText.From(hubGeneratedSource, Encoding.UTF8), parseOptions);
+        var augmentedCompilation = compilation.AddSyntaxTrees(generatedTree);
+        var generatedHub = augmentedCompilation.GetTypeByMetadataName(GetMetadataName(hubSymbol));
+        if (generatedHub == null)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                DiagnosticDescriptors.InvalidHubBase,
+                location,
+                hubSymbol.Name));
+            return;
+        }
+
+        var methods = typeMetadata.Outgoing
+            .Concat(typeMetadata.Incoming)
+            .GroupBy(static m => m.MethodName)
+            .Select(static group => group.First());
+
+        foreach (var method in methods)
+        {
+            EmitRpcMessageSerializationSourceForType(method.ParameterMessageTypeName, generatedHub, augmentedCompilation, context, fileStem, location);
+            EmitRpcMessageSerializationSourceForType(method.ReturnMessageTypeName, generatedHub, augmentedCompilation, context, fileStem, location);
+        }
+    }
+
+    static void EmitRpcMessageSerializationSourceForType(
+        string nestedTypeName,
+        INamedTypeSymbol generatedHub,
+        Compilation augmentedCompilation,
+        SourceProductionContext context,
+        string fileStem,
+        Location location)
+    {
+        var nestedType = generatedHub.GetTypeMembers(nestedTypeName).FirstOrDefault();
+        if (nestedType == null)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                DiagnosticDescriptors.UnsupportedType,
+                location,
+                nestedTypeName,
+                "generated nested message type not found"));
+            return;
+        }
+
+        if (!MessageCodeGenerator.TryGenerateMessageSource(nestedType, augmentedCompilation, out string? serializeCode, out string? error) ||
+            string.IsNullOrWhiteSpace(serializeCode))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                DiagnosticDescriptors.UnsupportedType,
+                location,
+                nestedTypeName,
+                error ?? "failed to generate message serialization source"));
+            return;
+        }
+
+        var generatedSource = serializeCode!;
+        context.AddSource($"{fileStem}.{nestedTypeName}.Message.g.cs", SourceText.From(generatedSource, Encoding.UTF8));
     }
 
     static TypeMetadata? BuildTypeMetadata(
@@ -262,5 +331,29 @@ internal static class RpcHubSourceGenerator
         }
 
         return string.Join("_", stack);
+    }
+
+    static string GetMetadataName(INamedTypeSymbol typeSymbol)
+    {
+        var typeNames = new Stack<string>();
+        for (INamedTypeSymbol? current = typeSymbol; current != null; current = current.ContainingType)
+        {
+            typeNames.Push(current.MetadataName);
+        }
+
+        var namespaceName = typeSymbol.ContainingNamespace?.ToDisplayString();
+        var fullName = string.IsNullOrEmpty(namespaceName) ? string.Empty : $"{namespaceName}.";
+
+        if (typeNames.Count > 0)
+        {
+            fullName += typeNames.Pop();
+        }
+
+        while (typeNames.Count > 0)
+        {
+            fullName += $"+{typeNames.Pop()}";
+        }
+
+        return fullName;
     }
 }

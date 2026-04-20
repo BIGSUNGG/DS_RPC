@@ -30,4 +30,5 @@
 	<ItemGroup>
 		<Analyzer Include="..\..\Source\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll" />
 	</ItemGroup>
+
 </Project>

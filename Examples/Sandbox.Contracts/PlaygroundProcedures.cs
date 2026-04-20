@@ -14,4 +14,8 @@ public interface IPlaygroundClientProcedureDeclarations : IClientProcedureDeclar
 {
     [RemoteProcedure(ReliableType.ReliableOrdered)]
     float Echo(float value);
+
+    [RemoteProcedure(ReliableType.ReliableOrdered)]
+    float Echo_List(List<float> value);
+
 }

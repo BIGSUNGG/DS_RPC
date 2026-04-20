@@ -11,6 +11,10 @@ internal static partial class RpcHubEmitter
     {
         sb.AppendLine($"{indent}private byte[] {proc.MethodName}_Requested(byte[] parameterData)");
         sb.AppendLine($"{indent}{{");
+        if (proc.Parameters.Length > 0)
+        {
+            sb.AppendLine($"{indent}    object?[] parameterPayload = (object?[])MessageSerializer.Deserialize(parameterData);");
+        }
 
         if (proc.Parameters.Length == 0)
         {
@@ -22,28 +26,22 @@ internal static partial class RpcHubEmitter
             else
             {
                 sb.AppendLine($"{indent}    {proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} result = {proc.MethodName}_Implementation();");
-                sb.AppendLine($"{indent}    return {RpcMarshal.EmitEncodeReturnExpression(proc.ReturnType, "result")};");
+                sb.AppendLine($"{indent}    return MessageSerializer.Serialize(result);");
             }
         }
         else
         {
-            sb.AppendLine($"{indent}    using (var __rpcMs = new global::System.IO.MemoryStream(parameterData))");
-            sb.AppendLine($"{indent}    using (var __rpcR = new global::System.IO.BinaryReader(__rpcMs))");
-            sb.AppendLine($"{indent}    {{");
-            RpcBinaryCodec.EmitDeserializeLocals(sb, indent + "        ", proc.Parameters, "__rpcR");
-            string args = RpcBinaryCodec.BuildArgumentListFromLocals(proc.Parameters);
+            string args = BuildArgumentListFromPayload(proc);
             if (proc.ReturnType.SpecialType == SpecialType.System_Void)
             {
-                sb.AppendLine($"{indent}        {proc.MethodName}_Implementation({args});");
-                sb.AppendLine($"{indent}    }}");
+                sb.AppendLine($"{indent}    {proc.MethodName}_Implementation({args});");
                 sb.AppendLine($"{indent}    return global::System.Array.Empty<byte>();");
             }
             else
             {
                 sb.AppendLine(
-                    $"{indent}        {proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} result = {proc.MethodName}_Implementation({args});");
-                sb.AppendLine($"{indent}        return {RpcMarshal.EmitEncodeReturnExpression(proc.ReturnType, "result")};");
-                sb.AppendLine($"{indent}    }}");
+                    $"{indent}    {proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} result = {proc.MethodName}_Implementation({args});");
+                sb.AppendLine($"{indent}    return MessageSerializer.Serialize(result);");
             }
         }
 
@@ -59,5 +57,11 @@ internal static partial class RpcHubEmitter
     {
         return string.Join(", ", proc.Parameters.Select(p =>
             $"{p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} {p.Name}"));
+    }
+
+    static string BuildArgumentListFromPayload(MethodMetadata proc)
+    {
+        return string.Join(", ", proc.Parameters.Select((p, idx) =>
+            $"({p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)})parameterPayload[{idx}]!"));
     }
 }

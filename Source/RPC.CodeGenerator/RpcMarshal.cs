@@ -34,7 +34,7 @@ internal static class RpcMarshal
             case SpecialType.System_String:
                 return true;
             default:
-                return false;
+                return IsEnumerableType(type);
         }
     }
 
@@ -99,5 +99,34 @@ internal static class RpcMarshal
             default:
                 return "global::System.Array.Empty<byte>()";
         }
+    }
+
+    static bool IsEnumerableType(ITypeSymbol type)
+    {
+        if (type.SpecialType == SpecialType.System_String)
+        {
+            return false;
+        }
+
+        if (type is IArrayTypeSymbol)
+        {
+            return true;
+        }
+
+        foreach (var iface in type.AllInterfaces)
+        {
+            if (iface.SpecialType == SpecialType.System_Collections_IEnumerable)
+            {
+                return true;
+            }
+
+            if (iface is INamedTypeSymbol named &&
+                named.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

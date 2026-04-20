@@ -10,4 +10,9 @@ public partial class PlaygroundServerHub : ServerHub<IPlaygroundServerProcedureD
     {
         return value * 2f;
     }
+
+    private partial float Echo_List_Implementation(List<float> value)
+    {
+        return value.Sum();
+    }
 }

@@ -24,14 +24,7 @@ internal static partial class RpcHubEmitter
         {
             sb.AppendLine($"{indent}public void {proc.MethodName}({paramList})");
             sb.AppendLine($"{indent}{{");
-            if (proc.Parameters.Length == 0)
-            {
-                sb.AppendLine($"{indent}    byte[] parameterData = global::System.Array.Empty<byte>();");
-            }
-            else
-            {
-                RpcBinaryCodec.EmitSerializeParameters(sb, indent + "    ", proc.Parameters);
-            }
+            EmitParameterPayloadSerialize(sb, indent + "    ", proc);
 
             sb.AppendLine($"{indent}    global::System.Threading.Tasks.Task<byte[]> rpcTask = RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
             sb.AppendLine($"{indent}    rpcTask.GetAwaiter().GetResult();");
@@ -41,18 +34,11 @@ internal static partial class RpcHubEmitter
         {
             sb.AppendLine($"{indent}public {syncReturn} {proc.MethodName}({paramList})");
             sb.AppendLine($"{indent}{{");
-            if (proc.Parameters.Length == 0)
-            {
-                sb.AppendLine($"{indent}    byte[] parameterData = global::System.Array.Empty<byte>();");
-            }
-            else
-            {
-                RpcBinaryCodec.EmitSerializeParameters(sb, indent + "    ", proc.Parameters);
-            }
+            EmitParameterPayloadSerialize(sb, indent + "    ", proc);
 
             sb.AppendLine($"{indent}    global::System.Threading.Tasks.Task<byte[]> rpcTask = RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
             sb.AppendLine($"{indent}    byte[] resultBytes = rpcTask.GetAwaiter().GetResult();");
-            sb.AppendLine($"{indent}    return {RpcMarshal.EmitDecodeReturnExpression(proc.ReturnType, "resultBytes")};");
+            sb.AppendLine($"{indent}    return ({proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)})MessageSerializer.Deserialize(resultBytes);");
             sb.AppendLine($"{indent}}}");
         }
 
@@ -62,14 +48,7 @@ internal static partial class RpcHubEmitter
         {
             sb.AppendLine($"{indent}public async {asyncReturn} {proc.MethodName}Async({paramList})");
             sb.AppendLine($"{indent}{{");
-            if (proc.Parameters.Length == 0)
-            {
-                sb.AppendLine($"{indent}    byte[] parameterData = global::System.Array.Empty<byte>();");
-            }
-            else
-            {
-                RpcBinaryCodec.EmitSerializeParameters(sb, indent + "    ", proc.Parameters);
-            }
+            EmitParameterPayloadSerialize(sb, indent + "    ", proc);
 
             sb.AppendLine($"{indent}    await RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
             sb.AppendLine($"{indent}}}");
@@ -78,20 +57,31 @@ internal static partial class RpcHubEmitter
         {
             sb.AppendLine($"{indent}public async {asyncReturn} {proc.MethodName}Async({paramList})");
             sb.AppendLine($"{indent}{{");
-            if (proc.Parameters.Length == 0)
-            {
-                sb.AppendLine($"{indent}    byte[] parameterData = global::System.Array.Empty<byte>();");
-            }
-            else
-            {
-                RpcBinaryCodec.EmitSerializeParameters(sb, indent + "    ", proc.Parameters);
-            }
+            EmitParameterPayloadSerialize(sb, indent + "    ", proc);
 
             sb.AppendLine($"{indent}    byte[] resultBytes = await RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
-            sb.AppendLine($"{indent}    return {RpcMarshal.EmitDecodeReturnExpression(proc.ReturnType, "resultBytes")};");
+            sb.AppendLine($"{indent}    return ({proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)})MessageSerializer.Deserialize(resultBytes);");
             sb.AppendLine($"{indent}}}");
         }
 
         sb.AppendLine();
+    }
+
+    static void EmitParameterPayloadSerialize(StringBuilder sb, string indent, MethodMetadata proc)
+    {
+        if (proc.Parameters.Length == 0)
+        {
+            sb.AppendLine($"{indent}byte[] parameterData = MessageSerializer.Serialize(global::System.Array.Empty<object?>());");
+            return;
+        }
+
+        sb.AppendLine($"{indent}object?[] parameterPayload = new object?[]");
+        sb.AppendLine($"{indent}{{");
+        foreach (var parameter in proc.Parameters)
+        {
+            sb.AppendLine($"{indent}    {parameter.Name},");
+        }
+        sb.AppendLine($"{indent}}};");
+        sb.AppendLine($"{indent}byte[] parameterData = MessageSerializer.Serialize(parameterPayload);");
     }
 }

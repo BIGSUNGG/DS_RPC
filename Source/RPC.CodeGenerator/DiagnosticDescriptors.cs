@@ -25,7 +25,7 @@ internal static class DiagnosticDescriptors
     public static readonly DiagnosticDescriptor UnsupportedType = new(
         id: "RPCGEN003",
         title: "RPC type not supported",
-        messageFormat: "Method '{0}' uses unsupported type '{1}' for RPC generation. Use void, primitives, or string.",
+        messageFormat: "Method '{0}' uses unsupported type '{1}' for RPC generation. Use void, primitives, string, or enumerable types.",
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);

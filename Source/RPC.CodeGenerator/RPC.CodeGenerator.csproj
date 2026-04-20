@@ -16,4 +16,10 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="MessageProtocol.CodeGenerator">
+      <HintPath>..\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

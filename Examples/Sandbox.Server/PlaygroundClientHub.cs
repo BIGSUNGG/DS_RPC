@@ -18,9 +18,9 @@ public partial class PlaygroundClientHub : ClientHub<IPlaygroundServerProcedureD
         return value1 + value2;
     }
 
-    private partial RegisterResult Register_Implementation(RegisterData message)
+    private partial RegisterResult Register_Implementation(int id, RegisterData message)
     {
         Console.WriteLine($"Register() called with message: Name={message.Name}");
-        return new RegisterResult() { Id = 1 };
+        return new RegisterResult() { Id = id };
     }
 }

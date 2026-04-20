@@ -14,7 +14,7 @@ public interface IPlaygroundServerProcedureDeclarations : IServerProcedureDeclar
     [RemoteProcedure(ReliableType.ReliableOrdered)]
     int Add(int value1, int value2);
     [RemoteProcedure(ReliableType.ReliableOrdered)]
-    RegisterResult Register(RegisterData message);
+    RegisterResult Register(int id, RegisterData message);
 }
 
 public interface IPlaygroundClientProcedureDeclarations : IClientProcedureDeclarations

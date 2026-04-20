@@ -1,9 +1,57 @@
 using System.Text;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+using RPC.CodeGenerator.Metadata;
 
 namespace RPC.CodeGenerator.Emitter;
 
 internal static partial class RpcHubEmitter
 {
+    static void EmitRpcMessageTypes(StringBuilder sb, TypeMetadata typeMeta, string indent)
+    {
+        var methods = typeMeta.Outgoing
+            .Concat(typeMeta.Incoming)
+            .GroupBy(static m => m.MethodName)
+            .Select(static g => g.First());
+
+        foreach (var method in methods)
+        {
+            EmitParameterMessageType(sb, method, indent);
+            EmitReturnMessageType(sb, method, indent);
+        }
+    }
+
+    static void EmitParameterMessageType(StringBuilder sb, MethodMetadata method, string indent)
+    {
+        sb.AppendLine($"{indent}[global::MessageProtocol.NonIdMessage]");
+        sb.AppendLine($"{indent}public partial class {method.ParameterMessageTypeName}");
+        sb.AppendLine($"{indent}{{");
+
+        foreach (var parameter in method.Parameters)
+        {
+            string initializer = parameter.Type.IsReferenceType ? " = default!;" : string.Empty;
+            sb.AppendLine($"{indent}    public {parameter.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} {parameter.Name} {{ get; set; }}{initializer}");
+        }
+
+        sb.AppendLine($"{indent}}}");
+        sb.AppendLine();
+    }
+
+    static void EmitReturnMessageType(StringBuilder sb, MethodMetadata method, string indent)
+    {
+        sb.AppendLine($"{indent}[global::MessageProtocol.NonIdMessage]");
+        sb.AppendLine($"{indent}public partial class {method.ReturnMessageTypeName}");
+        sb.AppendLine($"{indent}{{");
+
+        if (method.ReturnType.SpecialType != SpecialType.System_Void)
+        {
+            sb.AppendLine($"{indent}    public {method.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} Value {{ get; set; }} = default!;");
+        }
+
+        sb.AppendLine($"{indent}}}");
+        sb.AppendLine();
+    }
+
     static void EmitDefaultMessageConverter(StringBuilder sb, string indent)
     {
         sb.AppendLine($"{indent}private sealed class DefaultMessageConverter : Communication.Shared.Messages.IMessageConverter");

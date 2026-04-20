@@ -38,7 +38,8 @@ internal static partial class RpcHubEmitter
 
             sb.AppendLine($"{indent}    global::System.Threading.Tasks.Task<byte[]> rpcTask = RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
             sb.AppendLine($"{indent}    byte[] resultBytes = rpcTask.GetAwaiter().GetResult();");
-            sb.AppendLine($"{indent}    return ({proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)})MessageSerializer.Deserialize(resultBytes);");
+            sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = MessageSerializer.Deserialize<{proc.ReturnMessageTypeName}>(resultBytes);");
+            sb.AppendLine($"{indent}    return resultPayload.Value;");
             sb.AppendLine($"{indent}}}");
         }
 
@@ -60,7 +61,8 @@ internal static partial class RpcHubEmitter
             EmitParameterPayloadSerialize(sb, indent + "    ", proc);
 
             sb.AppendLine($"{indent}    byte[] resultBytes = await RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
-            sb.AppendLine($"{indent}    return ({proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)})MessageSerializer.Deserialize(resultBytes);");
+            sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = MessageSerializer.Deserialize<{proc.ReturnMessageTypeName}>(resultBytes);");
+            sb.AppendLine($"{indent}    return resultPayload.Value;");
             sb.AppendLine($"{indent}}}");
         }
 
@@ -69,19 +71,13 @@ internal static partial class RpcHubEmitter
 
     static void EmitParameterPayloadSerialize(StringBuilder sb, string indent, MethodMetadata proc)
     {
-        if (proc.Parameters.Length == 0)
-        {
-            sb.AppendLine($"{indent}byte[] parameterData = MessageSerializer.Serialize(global::System.Array.Empty<object?>());");
-            return;
-        }
-
-        sb.AppendLine($"{indent}object?[] parameterPayload = new object?[]");
+        sb.AppendLine($"{indent}{proc.ParameterMessageTypeName} parameterPayload = new {proc.ParameterMessageTypeName}");
         sb.AppendLine($"{indent}{{");
         foreach (var parameter in proc.Parameters)
         {
-            sb.AppendLine($"{indent}    {parameter.Name},");
+            sb.AppendLine($"{indent}    {parameter.Name} = {parameter.Name},");
         }
         sb.AppendLine($"{indent}}};");
-        sb.AppendLine($"{indent}byte[] parameterData = MessageSerializer.Serialize(parameterPayload);");
+        sb.AppendLine($"{indent}byte[] parameterData = MessageSerializer.Serialize<{proc.ParameterMessageTypeName}>(parameterPayload);");
     }
 }

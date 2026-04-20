@@ -23,6 +23,8 @@ internal static partial class RpcHubEmitter
             EmitConnectAsync(sb, hub, indent + "    ");
         }
 
+        EmitRpcMessageTypes(sb, typeMeta, indent + "    ");
+
         foreach (var proc in typeMeta.Outgoing)
         {
             EmitOutgoingProcedure(sb, proc, indent + "    ");

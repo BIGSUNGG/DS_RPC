@@ -12,6 +12,8 @@ internal sealed class MethodMetadata
     public ITypeSymbol ReturnType { get; }
     public (string Name, ITypeSymbol Type)[] Parameters { get; }
     public string ReliableTypeExpression { get; }
+    public string ParameterMessageTypeName => $"{MethodName}_Paramter";
+    public string ReturnMessageTypeName => $"{MethodName}_Return";
 
     public MethodMetadata(IMethodSymbol methodSymbol, uint methodId, AttributeReferences references)
     {

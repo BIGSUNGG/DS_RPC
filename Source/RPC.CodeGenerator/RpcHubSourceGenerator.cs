@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using MessageProtocol.CodeGenerator.Generate;
 using RPC.CodeGenerator.Emitter;
 using RPC.CodeGenerator.Metadata;
 using RPC.CodeGenerator.Reference;

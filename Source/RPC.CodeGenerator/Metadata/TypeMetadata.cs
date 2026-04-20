@@ -19,7 +19,7 @@ internal sealed class TypeMetadata
     public bool IsServerEndpoint => NetworkKind == NetworkKind.Server;
     public MethodMetadata[] Outgoing => IsServerEndpoint ? ClientDeclarations.Methods : ServerDeclarations.Methods;
     public MethodMetadata[] Incoming => IsServerEndpoint ? ServerDeclarations.Methods : ClientDeclarations.Methods;
-    public bool NeedsStringHelpers => Outgoing.Concat(Incoming).Any(m => m.ReturnType.SpecialType == SpecialType.System_String);
+    public bool NeedsStringHelpers => Outgoing.Concat(Incoming).Any(m => m.Return.Type.SpecialType == SpecialType.System_String);
 
     public TypeMetadata(
         INamedTypeSymbol symbol,

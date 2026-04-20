@@ -13,14 +13,14 @@ internal static partial class RpcHubEmitter
         sb.AppendLine($"{indent}{{");
         if (proc.Parameters.Length == 0)
         {
-            if (proc.ReturnType.SpecialType == SpecialType.System_Void)
+            if (proc.Return.Type.SpecialType == SpecialType.System_Void)
             {
                 sb.AppendLine($"{indent}    {proc.MethodName}_Implementation();");
                 sb.AppendLine($"{indent}    return global::System.Array.Empty<byte>();");
             }
             else
             {
-                sb.AppendLine($"{indent}    {proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} result = {proc.MethodName}_Implementation();");
+                sb.AppendLine($"{indent}    {proc.Return.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} result = {proc.MethodName}_Implementation();");
                 sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = new {proc.ReturnMessageTypeName} {{ Value = result }};");
                 sb.AppendLine($"{indent}    return MessageSerializer.Serialize<{proc.ReturnMessageTypeName}>(resultPayload);");
             }
@@ -29,7 +29,7 @@ internal static partial class RpcHubEmitter
         {
             sb.AppendLine($"{indent}    {proc.ParameterMessageTypeName} parameterPayload = MessageSerializer.Deserialize<{proc.ParameterMessageTypeName}>(parameterData);");
             string args = BuildArgumentListFromPayload(proc);
-            if (proc.ReturnType.SpecialType == SpecialType.System_Void)
+            if (proc.Return.Type.SpecialType == SpecialType.System_Void)
             {
                 sb.AppendLine($"{indent}    {proc.MethodName}_Implementation({args});");
                 sb.AppendLine($"{indent}    return global::System.Array.Empty<byte>();");
@@ -37,7 +37,7 @@ internal static partial class RpcHubEmitter
             else
             {
                 sb.AppendLine(
-                    $"{indent}    {proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} result = {proc.MethodName}_Implementation({args});");
+                    $"{indent}    {proc.Return.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} result = {proc.MethodName}_Implementation({args});");
                 sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = new {proc.ReturnMessageTypeName} {{ Value = result }};");
                 sb.AppendLine($"{indent}    return MessageSerializer.Serialize<{proc.ReturnMessageTypeName}>(resultPayload);");
             }
@@ -46,7 +46,7 @@ internal static partial class RpcHubEmitter
         sb.AppendLine($"{indent}}}");
         sb.AppendLine();
 
-        string partialKeyword = proc.ReturnType.SpecialType == SpecialType.System_Void ? "partial void" : $"partial {proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}";
+        string partialKeyword = proc.Return.Type.SpecialType == SpecialType.System_Void ? "partial void" : $"partial {proc.Return.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}";
         sb.AppendLine($"{indent}private {partialKeyword} {proc.MethodName}_Implementation({ParameterDeclarationList(proc)});");
         sb.AppendLine();
     }

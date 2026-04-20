@@ -9,18 +9,18 @@ internal static partial class RpcHubEmitter
 {
     static void EmitOutgoingProcedure(StringBuilder sb, MethodMetadata proc, string indent)
     {
-        string syncReturn = proc.ReturnType.SpecialType == SpecialType.System_Void
+        string syncReturn = proc.Return.Type.SpecialType == SpecialType.System_Void
             ? "void"
-            : proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+            : proc.Return.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
-        string asyncReturn = proc.ReturnType.SpecialType == SpecialType.System_Void
+        string asyncReturn = proc.Return.Type.SpecialType == SpecialType.System_Void
             ? "global::System.Threading.Tasks.Task"
-            : $"global::System.Threading.Tasks.Task<{proc.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}>";
+            : $"global::System.Threading.Tasks.Task<{proc.Return.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}>";
 
         var paramList = string.Join(", ", proc.Parameters.Select(p =>
             $"{p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} {p.Name}"));
 
-        if (proc.ReturnType.SpecialType == SpecialType.System_Void)
+        if (proc.Return.Type.SpecialType == SpecialType.System_Void)
         {
             sb.AppendLine($"{indent}public void {proc.MethodName}({paramList})");
             sb.AppendLine($"{indent}{{");
@@ -45,7 +45,7 @@ internal static partial class RpcHubEmitter
 
         sb.AppendLine();
 
-        if (proc.ReturnType.SpecialType == SpecialType.System_Void)
+        if (proc.Return.Type.SpecialType == SpecialType.System_Void)
         {
             sb.AppendLine($"{indent}public async {asyncReturn} {proc.MethodName}Async({paramList})");
             sb.AppendLine($"{indent}{{");

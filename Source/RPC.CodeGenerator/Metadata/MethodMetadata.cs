@@ -7,10 +7,10 @@ namespace RPC.CodeGenerator.Metadata;
 internal sealed class MethodMetadata
 {
     public IMethodSymbol Symbol { get; }
-    public string MethodName { get; }
+    public string MethodName => Symbol.Name;
     public uint MethodId { get; }
-    public ITypeSymbol ReturnType { get; }
-    public (string Name, ITypeSymbol Type)[] Parameters { get; }
+    public MethodReturnMetadata Return { get; }
+    public MethodParameterMetadata[] Parameters { get; }
     public string ReliableTypeExpression { get; }
     public string ParameterMessageTypeName => $"{MethodName}_Paramter";
     public string ReturnMessageTypeName => $"{MethodName}_Return";
@@ -18,10 +18,9 @@ internal sealed class MethodMetadata
     public MethodMetadata(IMethodSymbol methodSymbol, uint methodId, AttributeReferences references)
     {
         Symbol = methodSymbol;
-        MethodName = methodSymbol.Name;
         MethodId = methodId;
-        ReturnType = methodSymbol.ReturnType;
-        Parameters = methodSymbol.Parameters.Select(p => (p.Name, p.Type)).ToArray();
+        Return = new MethodReturnMetadata(methodSymbol.ReturnType);
+        Parameters = methodSymbol.Parameters.Select(p => new MethodParameterMetadata(p.Name, p.Type)).ToArray();
         ReliableTypeExpression = BuildReliableTypeExpression(methodSymbol, references);
     }
 

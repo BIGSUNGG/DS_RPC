@@ -1,17 +1,38 @@
 using Microsoft.CodeAnalysis;
+using System.Linq;
 
 namespace RPC.CodeGenerator.Metadata;
+
+internal enum NetworkKind
+{
+    Server,
+    Client
+}
 
 internal sealed class TypeMetadata
 {
     public INamedTypeSymbol Symbol { get; }
-    public MethodMetadata[] Methods { get; }
-    public DeclarationsMetadata Declarations { get; }
+    public DeclarationsMetadata ServerDeclarations { get; }
+    public DeclarationsMetadata ClientDeclarations { get; }
+    public NetworkKind NetworkKind { get; }
+    public string? Namespace { get; }
+    public bool IsServerEndpoint => NetworkKind == NetworkKind.Server;
+    public MethodMetadata[] Outgoing => IsServerEndpoint ? ClientDeclarations.Methods : ServerDeclarations.Methods;
+    public MethodMetadata[] Incoming => IsServerEndpoint ? ServerDeclarations.Methods : ClientDeclarations.Methods;
+    public bool NeedsStringHelpers => Outgoing.Concat(Incoming).Any(m => m.ReturnType.SpecialType == SpecialType.System_String);
 
-    public TypeMetadata(INamedTypeSymbol typeSymbol, DeclarationsMetadata declarations)
+    public TypeMetadata(
+        INamedTypeSymbol symbol,
+        DeclarationsMetadata serverDeclarations,
+        DeclarationsMetadata clientDeclarations,
+        NetworkKind networkKind)
     {
-        Symbol = typeSymbol;
-        Declarations = declarations;
-        Methods = declarations.Methods;
+        Symbol = symbol;
+        ServerDeclarations = serverDeclarations;
+        ClientDeclarations = clientDeclarations;
+        NetworkKind = networkKind;
+        Namespace = symbol.ContainingNamespace?.IsGlobalNamespace == true
+            ? null
+            : symbol.ContainingNamespace?.ToDisplayString();
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using RPC.CodeGenerator.Emitter;
 using RPC.CodeGenerator.Metadata;
 using RPC.CodeGenerator.Reference;
 
@@ -48,38 +49,20 @@ internal static class RpcHubSourceGenerator
             new[] { tSpd, tCpd },
             attrRefs);
 
-        var serverMetadata = BuildTypeMetadata(tSpd, declarationsMetadataCache, context, location);
-        if (serverMetadata is null)
+        var typeMetadata = BuildTypeMetadata(
+            hubSymbol,
+            tSpd,
+            tCpd,
+            declarationsMetadataCache,
+            context,
+            location,
+            isServerEndpoint ? NetworkKind.Server : NetworkKind.Client);
+        if (typeMetadata is null)
         {
             return;
         }
 
-        var clientMetadata = BuildTypeMetadata(tCpd, declarationsMetadataCache, context, location);
-        if (clientMetadata is null)
-        {
-            return;
-        }
-
-        MethodMetadata[] outgoing = isServerEndpoint ? clientMetadata.Methods : serverMetadata.Methods;
-        MethodMetadata[] incoming = isServerEndpoint ? serverMetadata.Methods : clientMetadata.Methods;
-
-        bool needsString = NeedsStringReturnHelpers(outgoing, incoming);
-
-        string? ns = hubSymbol.ContainingNamespace?.IsGlobalNamespace == true
-            ? null
-            : hubSymbol.ContainingNamespace?.ToDisplayString();
-
-        var emitModel = new RpcHubEmitModel
-        {
-            HubTypeName = hubSymbol.Name,
-            Namespace = ns,
-            IsServerEndpoint = isServerEndpoint,
-            Outgoing = outgoing,
-            Incoming = incoming,
-            NeedsStringHelpers = needsString
-        };
-
-        string source = RpcHubEmitter.Emit(emitModel);
+        string source = RpcHubEmitter.Emit(typeMetadata);
         string fileStem = BuildGeneratedFileName(hubSymbol);
 
 #pragma warning disable RS1035
@@ -98,31 +81,30 @@ internal static class RpcHubSourceGenerator
         context.AddSource($"{fileStem}.g.cs", SourceText.From(source, Encoding.UTF8));
     }
 
-    static bool NeedsStringReturnHelpers(MethodMetadata[] outgoing, MethodMetadata[] incoming)
-    {
-        foreach (var p in outgoing.Concat(incoming))
-        {
-            if (p.ReturnType.SpecialType == SpecialType.System_String)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     static TypeMetadata? BuildTypeMetadata(
-        INamedTypeSymbol declarationsInterface,
+        INamedTypeSymbol hubSymbol,
+        INamedTypeSymbol serverDeclarationsInterface,
+        INamedTypeSymbol clientDeclarationsInterface,
         Dictionary<INamedTypeSymbol, DeclarationsMetadata> declarationsMetadataCache,
         SourceProductionContext context,
-        Location location)
+        Location location,
+        NetworkKind networkKind)
     {
-        if (!declarationsMetadataCache.TryGetValue(declarationsInterface, out var declarationsMetadata))
+        if (!declarationsMetadataCache.TryGetValue(serverDeclarationsInterface, out var serverDeclarations))
         {
             return null;
         }
 
-        var typeMetadata = new TypeMetadata(declarationsInterface, declarationsMetadata);
+        if (!declarationsMetadataCache.TryGetValue(clientDeclarationsInterface, out var clientDeclarations))
+        {
+            return null;
+        }
+
+        var typeMetadata = new TypeMetadata(
+            hubSymbol,
+            serverDeclarations,
+            clientDeclarations,
+            networkKind);
         if (!ValidateTypeMetadata(typeMetadata, context, location))
         {
             return null;
@@ -155,12 +137,30 @@ internal static class RpcHubSourceGenerator
         SourceProductionContext context,
         Location location)
     {
-        var iface = typeMetadata.Symbol;
-        foreach (var methodMetadata in typeMetadata.Methods)
+        if (!ValidateDeclarations(typeMetadata.ServerDeclarations.Symbol, typeMetadata.ServerDeclarations.Methods, context, location))
+        {
+            return false;
+        }
+
+        if (!ValidateDeclarations(typeMetadata.ClientDeclarations.Symbol, typeMetadata.ClientDeclarations.Methods, context, location))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    static bool ValidateDeclarations(
+        INamedTypeSymbol declarationSymbol,
+        MethodMetadata[] methods,
+        SourceProductionContext context,
+        Location location)
+    {
+        foreach (var methodMetadata in methods)
         {
             var method = methodMetadata.Symbol;
 
-            if (method.IsGenericMethod || iface.IsGenericType && method.TypeParameters.Length > 0)
+            if (method.IsGenericMethod || declarationSymbol.IsGenericType && method.TypeParameters.Length > 0)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                     DiagnosticDescriptors.UnsupportedType,

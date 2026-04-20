@@ -9,10 +9,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TemplateSource\TemplateSource.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="ExampleClientHub_Ignore.cs" />
+    <ProjectReference Include="..\..\Source\RPC.Attribute\RPC.Attribute.csproj" />
+    <ProjectReference Include="..\..\Source\RPC.CodeGenerator\RPC.CodeGenerator.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -11,4 +11,9 @@
     <Project Path="TemplateSource/TemplateSource_Client/TemplateSource_Client.csproj" />
     <Project Path="TemplateSource/TemplateSource_Server/TemplateSource_Server.csproj" />
   </Folder>
+  <Folder Name="/Examples/">
+    <Project Path="Examples/Sandbox.Contracts/Sandbox.Contracts.csproj" />
+    <Project Path="Examples/Sandbox.Server/Sandbox.Server.csproj" />
+    <Project Path="Examples/Sandbox.Client/Sandbox.Client.csproj" />
+  </Folder>
 </Solution>

@@ -1,0 +1,14 @@
+using Examples.Sandbox.Server;
+
+using var cts = new CancellationTokenSource();
+Console.WriteLine("Sandbox server listening on 9050...");
+await PlaygroundClientHub.ListenAsync(
+    9050,
+    async hub =>
+    {
+        Console.WriteLine("Client connected.");
+        float echoed = hub.Echo(3.14f);
+        Console.WriteLine($"Echo(3.14f) -> {echoed}");
+        await Task.CompletedTask;
+    },
+    cts.Token);

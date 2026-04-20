@@ -1,10 +1,20 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using RPC.CodeGenerator.Reference;
 
 namespace RPC.CodeGenerator;
 
 internal static class Extensions
 {
+    public static bool IsMessage(this ITypeSymbol self, AttributeReferences references)
+    {
+        return self.HasAttribute(references.MessageAttributeType)
+               || self.HasAttribute(references.NonIdMessageAttributeType)
+               || self.HasAttribute(references.GroupRootMessageAttributeType)
+               || self.HasAttribute(references.GroupElementMessageAttributeType)
+               || self.HasAttribute(references.StandaloneMessageAttributeType);
+    }
+
     public static bool HasAttribute(this ISymbol self, INamedTypeSymbol? attributeSymbol)
     {
         if (attributeSymbol == null)

@@ -19,8 +19,13 @@ internal sealed class MethodMetadata
     {
         Symbol = methodSymbol;
         MethodId = methodId;
-        Return = new MethodReturnMetadata(methodSymbol.ReturnType);
-        Parameters = methodSymbol.Parameters.Select(p => new MethodParameterMetadata(p.Name, p.Type)).ToArray();
+        Return = new MethodReturnMetadata(methodSymbol.ReturnType, references);
+        Parameters = methodSymbol.Parameters
+            .Select(p => new MethodParameterMetadata(
+                p.Name,
+                p.Type,
+                references))
+            .ToArray();
         ReliableTypeExpression = BuildReliableTypeExpression(methodSymbol, references);
     }
 

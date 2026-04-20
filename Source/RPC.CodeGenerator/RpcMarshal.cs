@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using System.Linq;
 
 namespace RPC.CodeGenerator;
 
@@ -7,6 +8,11 @@ internal static class RpcMarshal
     public static bool IsSupportedDataType(ITypeSymbol type, bool allowVoid, out string display)
     {
         display = type.ToDisplayString();
+        if (IsMessageType(type))
+        {
+            return true;
+        }
+
         if (allowVoid && type.SpecialType == SpecialType.System_Void)
         {
             return true;
@@ -37,6 +43,31 @@ internal static class RpcMarshal
                 return IsEnumerableType(type);
         }
     }
+
+    static bool IsMessageType(ITypeSymbol type)
+    {
+        return type.GetAttributes().Any(static a =>
+        {
+            var attributeClass = a.AttributeClass;
+            if (attributeClass == null)
+            {
+                return false;
+            }
+
+            if (attributeClass.Name == "MessageAttribute" &&
+                attributeClass.ContainingNamespace?.ToDisplayString() == "MessageProtocol")
+            {
+                return true;
+            }
+
+            return attributeClass.ContainingNamespace?.ToDisplayString() == "MessageProtocol" &&
+                   (attributeClass.Name == "NonIdMessageAttribute" ||
+                    attributeClass.Name == "GroupRootMessageAttribute" ||
+                    attributeClass.Name == "GroupElementMessageAttribute" ||
+                    attributeClass.Name == "StandaloneMessageAttribute");
+        });
+    }
+
     static bool IsEnumerableType(ITypeSymbol type)
     {
         if (type.SpecialType == SpecialType.System_String)
@@ -56,8 +87,7 @@ internal static class RpcMarshal
                 return true;
             }
 
-            if (iface is INamedTypeSymbol named &&
-                named.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T)
+            if (iface.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T)
             {
                 return true;
             }

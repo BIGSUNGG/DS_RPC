@@ -71,6 +71,12 @@ internal static partial class RpcHubEmitter
 
     static void EmitParameterPayloadSerialize(StringBuilder sb, string indent, MethodMetadata proc)
     {
+        if (proc.Parameters.Length == 0)
+        {
+            sb.AppendLine($"{indent}byte[] parameterData = global::System.Array.Empty<byte>();");
+            return;
+        }
+
         sb.AppendLine($"{indent}{proc.ParameterMessageTypeName} parameterPayload = new {proc.ParameterMessageTypeName}");
         sb.AppendLine($"{indent}{{");
         foreach (var parameter in proc.Parameters)

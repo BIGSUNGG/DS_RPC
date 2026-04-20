@@ -112,8 +112,15 @@ internal static class RpcHubSourceGenerator
 
         foreach (var method in methods)
         {
-            EmitRpcMessageSerializationSourceForType(method.ParameterMessageTypeName, generatedHub, augmentedCompilation, context, fileStem, location);
-            EmitRpcMessageSerializationSourceForType(method.ReturnMessageTypeName, generatedHub, augmentedCompilation, context, fileStem, location);
+            if (method.Parameters.Length > 0)
+            {
+                EmitRpcMessageSerializationSourceForType(method.ParameterMessageTypeName, generatedHub, augmentedCompilation, context, fileStem, location);
+            }
+
+            if (method.ReturnType.SpecialType != SpecialType.System_Void)
+            {
+                EmitRpcMessageSerializationSourceForType(method.ReturnMessageTypeName, generatedHub, augmentedCompilation, context, fileStem, location);
+            }
         }
     }
 

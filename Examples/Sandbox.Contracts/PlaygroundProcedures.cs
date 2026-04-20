@@ -8,6 +8,9 @@ public interface IPlaygroundServerProcedureDeclarations : IServerProcedureDeclar
 {
     [RemoteProcedure(ReliableType.ReliableOrdered)]
     int GetBuildId();
+    
+    [RemoteProcedure(ReliableType.ReliableOrdered)]
+    int Add(int value1, int value2);
 }
 
 public interface IPlaygroundClientProcedureDeclarations : IClientProcedureDeclarations

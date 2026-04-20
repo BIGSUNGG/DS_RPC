@@ -11,14 +11,12 @@ internal static partial class RpcHubEmitter
     {
         sb.AppendLine($"{indent}private byte[] {proc.MethodName}_Requested(byte[] parameterData)");
         sb.AppendLine($"{indent}{{");
-        sb.AppendLine($"{indent}    {proc.ParameterMessageTypeName} parameterPayload = MessageSerializer.Deserialize<{proc.ParameterMessageTypeName}>(parameterData);");
-
         if (proc.Parameters.Length == 0)
         {
             if (proc.ReturnType.SpecialType == SpecialType.System_Void)
             {
                 sb.AppendLine($"{indent}    {proc.MethodName}_Implementation();");
-                sb.AppendLine($"{indent}    return MessageSerializer.Serialize<{proc.ReturnMessageTypeName}>(new {proc.ReturnMessageTypeName}());");
+                sb.AppendLine($"{indent}    return global::System.Array.Empty<byte>();");
             }
             else
             {
@@ -29,11 +27,12 @@ internal static partial class RpcHubEmitter
         }
         else
         {
+            sb.AppendLine($"{indent}    {proc.ParameterMessageTypeName} parameterPayload = MessageSerializer.Deserialize<{proc.ParameterMessageTypeName}>(parameterData);");
             string args = BuildArgumentListFromPayload(proc);
             if (proc.ReturnType.SpecialType == SpecialType.System_Void)
             {
                 sb.AppendLine($"{indent}    {proc.MethodName}_Implementation({args});");
-                sb.AppendLine($"{indent}    return MessageSerializer.Serialize<{proc.ReturnMessageTypeName}>(new {proc.ReturnMessageTypeName}());");
+                sb.AppendLine($"{indent}    return global::System.Array.Empty<byte>();");
             }
             else
             {

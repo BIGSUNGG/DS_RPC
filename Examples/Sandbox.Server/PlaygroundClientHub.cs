@@ -12,4 +12,9 @@ public partial class PlaygroundClientHub : ClientHub<IPlaygroundServerProcedureD
         Console.WriteLine("GetBuildId() called");
         return 2026;
     }
+
+    private partial int Add_Implementation(int value1, int value2)
+    {
+        return value1 + value2;
+    }
 }

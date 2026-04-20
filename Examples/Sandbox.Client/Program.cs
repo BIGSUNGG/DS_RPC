@@ -8,7 +8,8 @@ Console.WriteLine("Connected to server.");
 Console.WriteLine($"GetBuildId() -> {id}");
 while (true)
 {
-    Console.ReadLine();
-    id = hub.GetBuildId();
-    Console.WriteLine($"GetBuildId() -> {id}");
+    int value1 = int.Parse(Console.ReadLine() ?? "0");
+    int value2 = int.Parse(Console.ReadLine() ?? "0");
+    var result = await hub.AddAsync(value1, value2);
+    Console.WriteLine($"Add({value1}, {value2}) -> {result}");
 }

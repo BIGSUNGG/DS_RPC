@@ -16,8 +16,15 @@ internal static partial class RpcHubEmitter
 
         foreach (var method in methods)
         {
-            EmitParameterMessageType(sb, method, indent);
-            EmitReturnMessageType(sb, method, indent);
+            if (method.Parameters.Length > 0)
+            {
+                EmitParameterMessageType(sb, method, indent);
+            }
+
+            if (method.ReturnType.SpecialType != SpecialType.System_Void)
+            {
+                EmitReturnMessageType(sb, method, indent);
+            }
         }
     }
 
@@ -42,12 +49,7 @@ internal static partial class RpcHubEmitter
         sb.AppendLine($"{indent}[global::MessageProtocol.NonIdMessage]");
         sb.AppendLine($"{indent}public partial class {method.ReturnMessageTypeName}");
         sb.AppendLine($"{indent}{{");
-
-        if (method.ReturnType.SpecialType != SpecialType.System_Void)
-        {
-            sb.AppendLine($"{indent}    public {method.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} Value {{ get; set; }} = default!;");
-        }
-
+        sb.AppendLine($"{indent}    public {method.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} Value {{ get; set; }} = default!;");
         sb.AppendLine($"{indent}}}");
         sb.AppendLine();
     }

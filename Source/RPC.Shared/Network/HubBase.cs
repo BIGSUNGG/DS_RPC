@@ -53,14 +53,13 @@ public abstract class HubBase : IHubBase
     protected async Task<byte[]> RequestRPC(int methodId, byte[] parameterData, ReliableType reliableType)
     {
         uint callId = _usedCallId.TryPop(out callId) ? callId : _notUsedMinCallId++;
+        TaskCompletionSource<byte[]> waitResponseTask = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        WaitResponseTasks.TryAdd(callId, waitResponseTask);
 
         MessageSendContext messageSendContext = new MessageSendContext();
         messageSendContext.Reliable = reliableType;
         ProcedureCallRequestMessage requestMessage = new ProcedureCallRequestMessage(callId, methodId, parameterData);
         await _session.SendAsync(requestMessage, messageSendContext);
-        
-        TaskCompletionSource<byte[]> waitResponseTask = new();
-        WaitResponseTasks.TryAdd(callId, waitResponseTask);
         
         await waitResponseTask.Task;
         return waitResponseTask.Task.Result;
@@ -73,7 +72,7 @@ public abstract class HubBase : IHubBase
             throw new ArgumentException($"The method {message.MethodId} does not exist.");
         
         var result = methodCallAction.Invoke(message.ParameterData);
-        _session.SendAsync(new ProcedureCallResponseMessage(message.CallId, result));
+        _session.SendAsync(new ProcedureCallResponseMessage(message.CallId, result)).GetAwaiter().GetResult();
     }
     
     public void OnReceiveRPCResponseMessage(ProcedureCallResponseMessage message)

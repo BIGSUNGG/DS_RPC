@@ -16,6 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Communication.Network.RUDP.Client">
+      <HintPath>..\..\Source\Dll\Communication\Communication.Network.RUDP.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Communication.Network.RUDP.Server">
+      <HintPath>..\..\Source\Dll\Communication\Communication.Network.RUDP.Server.dll</HintPath>
+    </Reference>
     <Reference Include="Communication.Network.RUDP.Shared">
       <HintPath>..\..\Source\Dll\Communication\Communication.Network.RUDP.Shared.dll</HintPath>
     </Reference>

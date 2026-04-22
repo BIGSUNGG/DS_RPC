@@ -15,4 +15,9 @@ public partial class PlaygroundServerHub : ServerHub<IPlaygroundServerProcedureD
     {
         return value.Sum();
     }
+
+    private partial void PrintMessage_Implementation(PlaygroundMessageGroup message, int a)
+    {
+        message.PrintMessage();
+    }
 }

@@ -25,6 +25,9 @@ public interface IPlaygroundClientProcedureDeclarations : IClientProcedureDeclar
     [RemoteProcedure(ReliableType.ReliableOrdered)]
     float Echo_List(List<float> value);
 
+
+    [RemoteProcedure(ReliableType.ReliableOrdered)]
+     void PrintMessage(PlaygroundMessageGroup message, int a);
 }
 
 [NonIdMessage]
@@ -38,3 +41,22 @@ public partial class RegisterResult
 {
     public int Id { get; set; }
 }
+
+[GroupRootMessage(11)]
+public partial class PlaygroundMessageGroup
+{
+    virtual public void PrintMessage()
+    {
+        Console.WriteLine("PlaygroundMessageGroup");
+    }
+}
+
+[GroupElementMessage(0)]
+public partial class PlaygroundMessageGroupElement : PlaygroundMessageGroup
+{
+    public override void PrintMessage()
+    {
+        Console.WriteLine("PlaygroundMessageGroupElement");
+    }
+}
+

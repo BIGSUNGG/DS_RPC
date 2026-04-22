@@ -2,9 +2,10 @@ using Examples.Sandbox;
 using Examples.Sandbox.Client;
 
 using var cts = new CancellationTokenSource();
-var hub = await PlaygroundServerHub.ConnectAsync("127.0.0.1", 9050, cts.Token);
-int id = hub.GetBuildId();
+const string connectionKey = "sandbox-key";
+var hub = await PlaygroundServerHub.ConnectAsync("127.0.0.1", 9050, connectionKey, cts.Token);
 Console.WriteLine("Connected to server.");
+int id = await hub.GetBuildIdAsync();
 Console.WriteLine($"GetBuildId() -> {id}");
 var userId = await hub.RegisterAsync(5, new RegisterData { Name = "Test" });
 Console.WriteLine($"Register() -> Id={userId.Id}");

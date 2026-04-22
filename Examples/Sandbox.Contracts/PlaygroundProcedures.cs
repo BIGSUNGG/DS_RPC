@@ -27,7 +27,7 @@ public interface IPlaygroundClientProcedureDeclarations : IClientProcedureDeclar
 
 
     [RemoteProcedure(ReliableType.ReliableOrdered)]
-     void PrintMessage(PlaygroundMessageGroup message, int a);
+     void PrintMessage(PlaygroundMessageGroup message);
 }
 
 [NonIdMessage]

@@ -38,15 +38,8 @@ internal static partial class RpcHubEmitter
 
             sb.AppendLine($"{indent}    global::System.Threading.Tasks.Task<byte[]> rpcTask = RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
             sb.AppendLine($"{indent}    byte[] resultBytes = rpcTask.GetAwaiter().GetResult();");
-            if (proc.Return.IsMessage)
-            {
-                sb.AppendLine($"{indent}    return global::MessageProtocol.Serialize.MessageSerializer.Deserialize<{proc.Return.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}>(resultBytes);");
-            }
-            else
-            {
-                sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = MessageSerializer.Deserialize<{proc.ReturnMessageTypeName}>(resultBytes);");
-                sb.AppendLine($"{indent}    return resultPayload.Value;");
-            }
+            sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = MessageSerializer.Deserialize<{proc.ReturnMessageTypeName}>(resultBytes);");
+            sb.AppendLine($"{indent}    return resultPayload.Value;");
             sb.AppendLine($"{indent}}}");
         }
 
@@ -68,15 +61,8 @@ internal static partial class RpcHubEmitter
             EmitParameterPayloadSerialize(sb, indent + "    ", proc);
 
             sb.AppendLine($"{indent}    byte[] resultBytes = await RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
-            if (proc.Return.IsMessage)
-            {
-                sb.AppendLine($"{indent}    return global::MessageProtocol.Serialize.MessageSerializer.Deserialize<{proc.Return.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}>(resultBytes);");
-            }
-            else
-            {
-                sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = MessageSerializer.Deserialize<{proc.ReturnMessageTypeName}>(resultBytes);");
-                sb.AppendLine($"{indent}    return resultPayload.Value;");
-            }
+            sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = MessageSerializer.Deserialize<{proc.ReturnMessageTypeName}>(resultBytes);");
+            sb.AppendLine($"{indent}    return resultPayload.Value;");
             sb.AppendLine($"{indent}}}");
         }
 
@@ -88,12 +74,6 @@ internal static partial class RpcHubEmitter
         if (proc.Parameters.Length == 0)
         {
             sb.AppendLine($"{indent}byte[] parameterData = global::System.Array.Empty<byte>();");
-            return;
-        }
-
-        if (proc.Parameters.Length == 1 && proc.Parameters[0].IsMessage)
-        {
-            sb.AppendLine($"{indent}byte[] parameterData = global::MessageProtocol.Serialize.MessageSerializer.Serialize<{proc.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}>({proc.Parameters[0].Name});");
             return;
         }
 

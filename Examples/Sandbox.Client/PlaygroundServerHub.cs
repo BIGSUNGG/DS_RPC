@@ -16,8 +16,11 @@ public partial class PlaygroundServerHub : ServerHub<IPlaygroundServerProcedureD
         return value.Sum();
     }
 
-    private partial void PrintMessage_Implementation(PlaygroundMessageGroup message, int a)
+    private partial void PrintMessage_Implementation(PlaygroundMessageGroup message)
     {
-        message.PrintMessage();
+        if(message != null)
+            message.PrintMessage();
+        else
+            Console.WriteLine("Received null message");
     }
 }

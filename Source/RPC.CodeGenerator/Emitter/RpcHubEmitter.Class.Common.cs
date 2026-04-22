@@ -16,15 +16,13 @@ internal static partial class RpcHubEmitter
 
         foreach (var method in methods)
         {
-            bool needParameterWrapper = method.Parameters.Length > 0 &&
-                                        !(method.Parameters.Length == 1 && method.Parameters[0].IsMessage);
+            bool needParameterWrapper = method.Parameters.Length > 0;
             if (needParameterWrapper)
             {
                 EmitParameterMessageType(sb, method, indent);
             }
 
-            bool needReturnWrapper = method.Return.Type.SpecialType != SpecialType.System_Void &&
-                                     !method.Return.IsMessage;
+            bool needReturnWrapper = method.Return.Type.SpecialType != SpecialType.System_Void;
             if (needReturnWrapper)
             {
                 EmitReturnMessageType(sb, method, indent);

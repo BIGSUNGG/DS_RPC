@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- netstandard2.0 기본 언어 버전(C# 7.3)에서는 Nullable 등과 호환되지 않음 -->
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+</Project>

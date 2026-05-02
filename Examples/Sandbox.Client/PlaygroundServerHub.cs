@@ -1,6 +1,6 @@
 using Examples.Sandbox;
-using RPC.Client.Network;
-using RPC.Shared.Network;
+using DRPC.Client.Network;
+using DRPC.Shared.Network;
 
 namespace Examples.Sandbox.Client;
 

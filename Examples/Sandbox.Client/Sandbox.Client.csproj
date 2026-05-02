@@ -10,11 +10,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sandbox.Contracts\Sandbox.Contracts.csproj" />
-    <ProjectReference Include="..\..\Source\RPC.Attribute\RPC.Attribute.csproj" />
-    <ProjectReference Include="..\..\Source\RPC.Shared\RPC.Shared.csproj" />
-    <ProjectReference Include="..\..\Source\RPC.Client\RPC.Client.csproj" />
-    <ProjectReference Include="..\..\Source\RCP.Server\RCP.Server.csproj" />
-    <ProjectReference Include="..\..\Source\RPC.CodeGenerator\RPC.CodeGenerator.csproj"
+    <ProjectReference Include="..\..\Source\DRPC.Attribute\DRPC.Attribute.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Shared\DRPC.Shared.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Client\DRPC.Client.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Server\DRPC.Server.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.CodeGenerator\DRPC.CodeGenerator.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>

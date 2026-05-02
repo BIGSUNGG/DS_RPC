@@ -1,7 +1,7 @@
-﻿using MessageProtocol;
+using MessageProtocol;
 using MessageProtocol.Serialize;
-using RPC.Client.Network;
-using RPC.Shared.Network;
+using DRPC.Client.Network;
+using DRPC.Shared.Network;
 
 namespace TemplateSource.Client;
 

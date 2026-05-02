@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\RPC.Attribute\RPC.Attribute.csproj" />
-    <ProjectReference Include="..\..\Source\RPC.Shared\RPC.Shared.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Attribute\DRPC.Attribute.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Shared\DRPC.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

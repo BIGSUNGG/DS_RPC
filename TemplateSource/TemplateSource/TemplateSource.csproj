@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -11,12 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\RPC.Client\RPC.Client.csproj" />
-    <ProjectReference Include="..\..\Source\RCP.Server\RCP.Server.csproj" />
-    <ProjectReference Include="..\..\Source\RPC.CodeGenerator\RPC.CodeGenerator.csproj"
+    <ProjectReference Include="..\..\Source\DRPC.Client\DRPC.Client.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Server\DRPC.Server.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.CodeGenerator\DRPC.CodeGenerator.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\Source\RPC.Shared\RPC.Shared.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Shared\DRPC.Shared.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

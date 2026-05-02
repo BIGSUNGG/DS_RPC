@@ -1,7 +1,7 @@
 using Communication.Network.RUDP.Shared.Messages;
 using MessageProtocol;
-using RPC.Attribute;
-using RPC.Shared.Interface;
+using DRPC.Attribute;
+using DRPC.Shared.Interface;
 using System.Diagnostics.Tracing;
 
 namespace Examples.Sandbox;

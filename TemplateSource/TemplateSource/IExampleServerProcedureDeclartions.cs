@@ -1,6 +1,6 @@
-﻿using Communication.Network.RUDP.Shared.Messages;
-using RPC.Attribute;
-using RPC.Shared.Interface;
+using Communication.Network.RUDP.Shared.Messages;
+using DRPC.Attribute;
+using DRPC.Shared.Interface;
 
 namespace TemplateSource
 {

@@ -60,7 +60,19 @@ jobs:
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          dotnet nuget push "artifacts/*.nupkg" \
-            --source https://api.nuget.org/v3/index.json \
-            --api-key "$NUGET_API_KEY" \
-            --skip-duplicate
+          set -euo pipefail
+          shopt -s nullglob
+          pkgs=(artifacts/*.nupkg)
+          if [ ${#pkgs[@]} -eq 0 ]; then
+            echo "::error::artifacts 폴더에 .nupkg가 없습니다. pack 단계 로그를 확인하세요."
+            ls -la artifacts || true
+            exit 1
+          fi
+          # 따옴표로 "*.nupkg"만 쓰면 bash 글롭이 안 되어 Linux에서 푸시가 실패할 수 있음
+          for f in "${pkgs[@]}"; do
+            echo "Pushing: $f"
+            dotnet nuget push "$f" \
+              --source https://api.nuget.org/v3/index.json \
+              --api-key "$NUGET_API_KEY" \
+              --skip-duplicate
+          done

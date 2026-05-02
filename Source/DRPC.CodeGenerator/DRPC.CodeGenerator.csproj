@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -14,11 +14,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    <PackageReference Include="MessageProtocol.CodeGenerator" Version="$(MessageProtocolPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="MessageProtocol.CodeGenerator">
-      <HintPath>..\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll</HintPath>
+      <HintPath>$(PkgMessageProtocol_CodeGenerator)\analyzers\dotnet\cs\MessageProtocol.CodeGenerator.dll</HintPath>
     </Reference>
   </ItemGroup>
 

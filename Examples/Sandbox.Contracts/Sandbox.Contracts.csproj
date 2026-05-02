@@ -13,16 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Communication.Network.RUDP.Shared">
-      <HintPath>..\..\Source\Dll\Communication\Communication.Network.RUDP.Shared.dll</HintPath>
-    </Reference>
-    <Reference Include="MessageProtocol.Core">
-      <HintPath>..\..\Source\Dll\MessageProtocol\MessageProtocol.Core.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Analyzer Include="..\..\Source\Dll\MessageProtocol\MessageProtocol.CodeGenerator.dll" />
+    <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
+    <PackageReference Include="MessageProtocol.CodeGenerator" Version="$(MessageProtocolPackageVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

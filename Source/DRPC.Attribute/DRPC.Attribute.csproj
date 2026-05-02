@@ -1,13 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+
+    <PackageId>DRPC.Attribute</PackageId>
+
+    <Description>DRPC 계약 메서드에 붙이는 특성(Attribute) 모음. Unity 및 .NET(netstandard2.1)에서 사용합니다.</Description>
+
+    <RootNamespace>DRPC</RootNamespace>
+
   </PropertyGroup>
 
   <ItemGroup>
+
     <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
+
   </ItemGroup>
 
 </Project>

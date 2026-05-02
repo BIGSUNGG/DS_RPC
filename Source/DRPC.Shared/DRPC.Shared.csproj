@@ -1,25 +1,37 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <!-- MessageProtocol.Core NuGet는 netstandard2.1만 제공 (Unity: netstandard 2.1 API 호환) -->
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RootNamespace>DRPC</RootNamespace>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="MessageProtocol.Core" Version="$(MessageProtocolPackageVersion)" />
-    <PackageReference Include="MessageProtocol.CodeGenerator" Version="$(MessageProtocolPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Communication.Shared" Version="$(CommunicationPackageVersion)" />
-    <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\DRPC.Attribute\DRPC.Attribute.csproj" />
-  </ItemGroup>
-
-</Project>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <PackageId>DRPC.Shared</PackageId>
+
+    <Description>DRPC 공유 타입·직렬화·메시지 프로토콜 연동 코드. 서버/클라이언트 패키지의 공통 기반입니다.</Description>
+
+    <RootNamespace>DRPC</RootNamespace>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+
+    <PackageReference Include="MessageProtocol.Core" Version="$(MessageProtocolPackageVersion)" />
+
+    <PackageReference Include="MessageProtocol.CodeGenerator" Version="$(MessageProtocolPackageVersion)">
+
+      <PrivateAssets>all</PrivateAssets>
+
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+
+    </PackageReference>
+
+    <PackageReference Include="Communication.Shared" Version="$(CommunicationPackageVersion)" />
+
+    <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\DRPC.Attribute\DRPC.Attribute.csproj" />
+
+  </ItemGroup>
+
+</Project>

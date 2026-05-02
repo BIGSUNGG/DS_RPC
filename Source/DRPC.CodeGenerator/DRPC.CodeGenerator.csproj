@@ -1,26 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+
+    <PackageId>DRPC.CodeGenerator</PackageId>
+
+    <Description>Roslyn 소스 생성기: DRPC 계약 및 RPC 관련 코드를 빌드 시 생성합니다. 프로젝트에 Analyzer로 참조합니다.</Description>
+
+    <PackageTags>DRPC;Roslyn;SourceGenerator;Analyzer</PackageTags>
+
+    <DevelopmentDependency>true</DevelopmentDependency>
+
     <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
+
     <ImplicitUsings>disable</ImplicitUsings>
 
     <IsRoslynAnalyzer>true</IsRoslynAnalyzer>
+
     <IncludeBuildOutput>false</IncludeBuildOutput>
+
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+
     <NoWarn>$(NoWarn);RS2008;RS1032</NoWarn>
+
   </PropertyGroup>
 
   <ItemGroup>
+
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+
     <PackageReference Include="MessageProtocol.CodeGenerator" Version="$(MessageProtocolPackageVersion)" GeneratePathProperty="true" />
+
   </ItemGroup>
 
   <ItemGroup>
+
     <Reference Include="MessageProtocol.CodeGenerator">
+
       <HintPath>$(PkgMessageProtocol_CodeGenerator)\analyzers\dotnet\cs\MessageProtocol.CodeGenerator.dll</HintPath>
+
     </Reference>
+
   </ItemGroup>
 
 </Project>

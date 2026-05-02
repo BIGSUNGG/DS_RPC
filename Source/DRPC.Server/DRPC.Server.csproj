@@ -1,20 +1,29 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="LiteNetLib" Version="1.3.5" />
-    <PackageReference Include="Communication.Shared" Version="$(CommunicationPackageVersion)" />
-    <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
-    <PackageReference Include="Communication.Network.RUDP.Server" Version="$(CommunicationPackageVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\DRPC.Shared\DRPC.Shared.csproj" />
-  </ItemGroup>
-
-</Project>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <PackageId>DRPC.Server</PackageId>
+
+    <Description>DRPC 서버 측 RPC 및 RUDP 호스트. DRPC.Shared와 함께 게임·실시간 서비스 백엔드에 사용합니다.</Description>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+
+    <PackageReference Include="LiteNetLib" Version="1.3.5" />
+
+    <PackageReference Include="Communication.Shared" Version="$(CommunicationPackageVersion)" />
+
+    <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
+
+    <PackageReference Include="Communication.Network.RUDP.Server" Version="$(CommunicationPackageVersion)" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\DRPC.Shared\DRPC.Shared.csproj" />
+
+  </ItemGroup>
+
+</Project>

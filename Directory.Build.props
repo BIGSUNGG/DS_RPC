@@ -1,28 +1,64 @@
-<Project>
-
-  <PropertyGroup>
-
-    <!-- netstandard2.0 기본 언어 버전(C# 7.3)에서는 Nullable 등과 호환되지 않음 -->
-
-    <LangVersion>latest</LangVersion>
-
-    <!-- NuGet MessageProtocol.* 패키지 버전 (여러 프로젝트에서 공통 참조) -->
-
-    <MessageProtocolPackageVersion>1.0.0</MessageProtocolPackageVersion>
-
-    <!-- NuGet Communication.* (DS_Communication) 패키지 버전 -->
-
-    <CommunicationPackageVersion>1.0.0</CommunicationPackageVersion>
-
-  </PropertyGroup>
-
-  <!-- MessageProtocol 생성기가 [module: ModuleInitializer] 사용 시 netstandard2.x에서 필요 -->
-
-  <ItemGroup>
-    <PackageReference Include="PolySharp" Version="1.14.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-</Project>
+<Project>
+
+
+
+  <PropertyGroup>
+
+
+
+    <!-- netstandard2.0 기본 언어 버전(C# 7.3)에서는 Nullable 등과 호환되지 않음 -->
+
+
+
+    <LangVersion>latest</LangVersion>
+
+
+
+    <!-- 예제·앱 프로젝트는 기본 비패키징; Source/ 하위에서 true로 재정의 -->
+
+
+
+    <IsPackable>false</IsPackable>
+
+
+
+    <!-- NuGet MessageProtocol.* 패키지 버전 (여러 프로젝트에서 공통 참조) -->
+
+
+
+    <MessageProtocolPackageVersion>1.0.0</MessageProtocolPackageVersion>
+
+
+
+    <!-- NuGet Communication.* (DS_Communication) 패키지 버전 -->
+
+
+
+    <CommunicationPackageVersion>1.0.0</CommunicationPackageVersion>
+
+
+
+  </PropertyGroup>
+
+
+
+  <!-- MessageProtocol 생성기가 [module: ModuleInitializer] 사용 시 netstandard2.x에서 필요 -->
+
+
+
+  <ItemGroup>
+
+    <PackageReference Include="PolySharp" Version="1.14.1">
+
+      <PrivateAssets>all</PrivateAssets>
+
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+
+    </PackageReference>
+
+  </ItemGroup>
+
+
+
+</Project>
+

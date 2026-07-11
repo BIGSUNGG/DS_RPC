@@ -1,7 +1,7 @@
 ---
 project: DS_RPC
 type: overview
-status: stub
+status: draft
 tags: [changelog]
 updated: 2026-07-11
 ---
@@ -12,4 +12,5 @@ updated: 2026-07-11
 
 ## 2026-07-11
 
+- 코드 분석 기반 프로젝트·아키텍처 문서 동기화: Overview, Components, Data-Flow, Packages, Public-API, Scope, Configuration, GLOSSARY, Getting-Started, How-To, FAQ
 - Document Obsidian Vault 공통 스켈레톤 초기화

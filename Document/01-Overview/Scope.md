@@ -15,7 +15,7 @@ updated: 2026-07-11
 
 - `Source/` 라이브러리: Attribute·Shared·Client·Server·CodeGenerator
 - MessageProtocol / Communication(RUDP) NuGet 연동
-- `Sandbox/Sandbox.*` (Contracts, Server, Client) 동작 예제
+- `Sandbox/Sandbox.*` (Contracts: Attribute·Shared + Contracts-only MP CodeGenerator; Client/Server: DRPC CodeGenerator)
 - `TemplateSource/` Hub·생성기 최소 템플릿
 - `Test/DRPC.Shared.Tests` (HubBase 단위 테스트)
 - 솔루션 `DRPC.slnx`, NuGet 패키징·태그 게시 워크플로

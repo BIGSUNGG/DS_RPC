@@ -32,8 +32,17 @@ updated: 2026-07-11
 | Listen 수명 | `RpcListenHandle` (`IAsyncDisposable`) |
 | Hub 명명 혼동 (단기) | `ClientToServerHub` / `ServerToClientHub` alias ([[0002-defer-netwrok-rename]]) |
 | `Test/` 부재 | `Test/DRPC.Shared.Tests` |
+| Sandbox MP analyzer 이중 로드 | `Sandbox.Contracts`에서 MP CodeGenerator **`buildtransitive` 제거** ([[Packages]]·[[Configuration]]) |
 
-## 잔여 (형제·major)
+## 잔여 — 운영/CI (우선)
+
+| 이슈 | 영향 | 방향 |
+|------|------|------|
+| `DRPC.CodeGenerator`가 형제 `DS_MessageProtocol` **ProjectReference** | `.github/workflows/nuget-publish.yml`은 DS_RPC만 checkout → **태그 pack 실패 가능** | CI에서 MP clone, 또는 NuGet MP CodeGenerator로 되돌리기 ([[Configuration]]) |
+| `ListenAsync`의 `ListenTask` 미관찰 | `onConnected`/리스너 예외 unobserved; Dispose와 레이스 | 핸들 반환 전/후 `ListenTask` 관측 또는 예외 로깅 |
+| `MaxConcurrentIncoming` setter가 사용 중 `SemaphoreSlim` Dispose | 런타임 중 상한 변경 시 `ObjectDisposedException` | 재생성 대신 거부, 또는 드레인 후 교체 |
+
+## 잔여 — 형제·major
 
 | 이슈 | 영향 | 방향 |
 |------|------|------|
@@ -42,14 +51,18 @@ updated: 2026-07-11
 | `Netwrok` 철자·Hub 의미 정렬 | DX | v2 / [[0002-defer-netwrok-rename]] |
 | sync Outgoing 생성 제거 | 블로킹 API 잔존 | major |
 | 생성기 스냅샷 테스트 | 회귀 수동(Sandbox) | P1 |
+| `RequestRPC` 호출측 `CancellationToken` 없음 | 개별 호출 취소 불가 | Hub API 확장 |
+| 타임아웃 1초 Timer 스캔 | 지정 대비 최대 ~1초 지연 | 정밀 휠/타이머 |
+| 생성 타입명 `{Method}_Paramter` 오타 | DX (와이어와 무관) | major에서 `Parameter`로 |
 
 ## 권장 사용
 
 - Outgoing은 `{Method}Async`만.
 - Implementation은 `async Task` / `Task<T>`.
 - 알림성 void는 `OneWay = true`.
-- 서버는 `await using var handle = await Hub.ListenAsync(...)`.
-- 필요 시 `MaxConcurrentIncoming`, `RpcTimeout` 조정.
+- 서버는 `await using var handle = await Hub.ListenAsync(...)`; 필요 시 `handle.ListenTask` 관측.
+- `MaxConcurrentIncoming`은 **연결 직후·유휴 시**에만 설정.
+- 필요 시 `RpcTimeout` 조정.
 
 ## 관련
 
@@ -59,3 +72,5 @@ updated: 2026-07-11
 - [[FAQ]]
 - [[Data-Flow]]
 - [[Public-API]]
+- [[Packages]]
+- [[Configuration]]

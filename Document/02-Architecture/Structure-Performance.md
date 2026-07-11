@@ -260,14 +260,15 @@ OneWay는 응답이 없어 CallId가 풀에 돌아오지 않음 → `_nextCallId
 
 ---
 
-## 4. 권장 운영 (코드 변경 전)
+## 4. 권장 운영
 
 - Outgoing은 **`{Method}Async`만**.
-- 알림성 void는 **`OneWay = true`** (응답·TCS 비용 제거). 단, CallId 누수 수정 전엔 OneWay 폭주 주의.
+- 알림성 void는 **`OneWay = true`**.
 - 계약에 **명시 MethodId**.
-- Implementation은 짧게; 긴 I/O는 별도 큐/백그라운드로 빼고 결과를 다른 RPC로 통지하는 패턴 검토.
-- `hub.RpcTimeout`을 워크로드에 맞게 조정.
+- Implementation은 짧게; 긴 I/O는 async Implementation에서 await.
+- `hub.RpcTimeout` / `MaxConcurrentIncoming`을 워크로드에 맞게 조정 (상한은 유휴 시 설정).
 - 대용량 페이로드는 RPC 인자로 넣지 말 것.
+- 태그 NuGet 게시 전 CodeGenerator↔MP CI 경로를 확인 ([[Known-Issues]]).
 
 ---
 

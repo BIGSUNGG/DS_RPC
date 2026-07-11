@@ -34,7 +34,11 @@ A: `partial Task` / `Task<T>` (async). Sandbox·TemplateSource도 Task 반환.
 
 ## Q: ListenAsync 반환 타입이 바뀌었나?
 
-A: `Task<RpcListenHandle>`. `await using var handle = await Hub.ListenAsync(...)`로 수명을 관리한다.
+A: `Task<RpcListenHandle>`. `await using var handle = await Hub.ListenAsync(...)`. 리스너 루프 예외를 보려면 `handle.ListenTask`도 관측한다 ([[Known-Issues]]).
+
+## Q: Sandbox.Contracts는 무엇을 참조하나?
+
+A: `DRPC.Attribute`·`DRPC.Shared`·RUDP.Shared. 메시지 생성용 `MessageProtocol.CodeGenerator`는 Contracts에만 두고 **`buildtransitive` 없이** Client/Server로 흘리지 않는다 ([[Packages]]).
 
 ## Q: Sandbox 빌드 시 RpcIncrementalGenerator MissingMethodException / 생성 코드 없음?
 

@@ -56,9 +56,9 @@ Sandbox 예제 기본값: host `127.0.0.1`, port `9050`, key `sandbox-key`.
 
 | 항목 | 설정 |
 |------|------|
-| `DRPC.CodeGenerator` | 형제 `DS_MessageProtocol/.../MessageProtocol.CodeGenerator.csproj` ProjectReference; 빌드 후 `MessageProtocol.CodeGenerator.dll`을 출력 옆에 복사. `Microsoft.CodeAnalysis*.dll` / `System.*.dll`은 출력에서 삭제(호스트 Roslyn 사용) |
-| `Sandbox.Contracts` | `MessageProtocol.CodeGenerator` NuGet: `PrivateAssets=all`, `IncludeAssets=runtime; build; native; contentfiles; analyzers` — **`buildtransitive` 제외**로 Client/Server에 MP analyzer가 흘러가지 않음 |
-| Sandbox Client/Server | Analyzer로 `DRPC.CodeGenerator`만 참조 (Contracts의 MP 생성기와 이중 로드 방지) |
+| `DRPC.CodeGenerator` | 형제 `DS_MessageProtocol/.../MessageProtocol.CodeGenerator.csproj` ProjectReference; 빌드 후 `MessageProtocol.CodeGenerator.dll`을 출력 옆에 복사. `Microsoft.CodeAnalysis*.dll` / `System.*.dll`은 출력에서 삭제(호스트 Roslyn 사용). **주의:** `nuget-publish` CI는 DS_RPC만 checkout하므로 현재 상태로는 CodeGenerator **pack이 실패할 수 있음** ([[Known-Issues]]) |
+| `Sandbox.Contracts` | Attribute + Shared 프로젝트 참조. `MessageProtocol.CodeGenerator` NuGet: `PrivateAssets=all`, `IncludeAssets=runtime; build; native; contentfiles; analyzers` — **`buildtransitive` 없음** (Client/Server로 MP analyzer 미전파) |
+| Sandbox Client/Server | Analyzer로 `DRPC.CodeGenerator`만 참조 |
 
 로컬에서 CodeGenerator를 쓰려면 형제 `DS_MessageProtocol` 저장소가 `../DS_MessageProtocol` 상대 경로에 있어야 한다.
 

@@ -23,11 +23,11 @@ updated: 2026-07-11
 
 ## Sandbox 예제
 
-| 프로젝트 | 경로 |
-|----------|------|
-| Contracts | `Sandbox/Sandbox.Contracts/` |
-| Server | `Sandbox/Sandbox.Server/` |
-| Client | `Sandbox/Sandbox.Client/` |
+| 프로젝트 | 경로 | 비고 |
+|----------|------|------|
+| Contracts | `Sandbox/Sandbox.Contracts/` | Attribute·Shared; MP CodeGenerator는 Contracts만 (`buildtransitive` 없음) |
+| Server | `Sandbox/Sandbox.Server/` | Analyzer: `DRPC.CodeGenerator` |
+| Client | `Sandbox/Sandbox.Client/` | Analyzer: `DRPC.CodeGenerator` |
 
 ```bash
 dotnet build DRPC.slnx

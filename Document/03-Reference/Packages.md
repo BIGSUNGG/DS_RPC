@@ -45,7 +45,7 @@ flowchart LR
 
 | 프로젝트 | 경로 | TFM | 역할 |
 |----------|------|-----|------|
-| Sandbox.Contracts | `Sandbox/Sandbox.Contracts/` | net10.0 | 계약·메시지 타입. `MessageProtocol.CodeGenerator`는 **Contracts 전용** analyzer (`IncludeAssets`에 `analyzers`, **`buildtransitive` 없음**) — Client/Server로 MP 생성기가 전파되지 않아 DRPC 생성기와 DLL 이중 로드를 피한다 |
+| Sandbox.Contracts | `Sandbox/Sandbox.Contracts/` | net10.0 | 계약·메시지. 참조: `DRPC.Attribute`, `DRPC.Shared`, `Communication.Network.RUDP.Shared`. `MessageProtocol.CodeGenerator` NuGet은 **Contracts 전용** analyzer (`IncludeAssets`: runtime; build; native; contentfiles; analyzers — **`buildtransitive` 없음**) |
 | Sandbox.Client | `Sandbox/Sandbox.Client/` | net10.0 Exe | 클라 Hub + Connect; Analyzer는 `DRPC.CodeGenerator` |
 | Sandbox.Server | `Sandbox/Sandbox.Server/` | net10.0 Exe | 서버 Hub + Listen; Analyzer는 `DRPC.CodeGenerator` |
 | TemplateSource | `TemplateSource/` | net10.0 | 최소 계약 (+ 필요 시 MP CodeGenerator) |
@@ -61,7 +61,7 @@ NuGet.org에서 패키지 ID로 검색한다. 서버/클라 조합에 맞게 Sha
 ## 버전
 
 - 형제 NuGet: `MessageProtocolPackageVersion`, `CommunicationPackageVersion` (루트 `Directory.Build.props`, 현재 `1.0.0`)
-- 게시: 태그 `v1.1.0` → GitHub Actions가 동일 버전으로 pack·publish (`NUGET_API_KEY`)
+- 게시: 태그 `v*` → GitHub Actions pack·publish. **CodeGenerator는 형제 MP ProjectReference 의존** → CI에 MP가 없으면 pack 실패 ([[Known-Issues]]·[[Configuration]])
 
 ## 관련
 

@@ -12,6 +12,8 @@ updated: 2026-07-11
 
 ## 2026-07-11
 
+- Sandbox.Contracts.csproj 훅 동기화: [[Getting-Started]] Sandbox 표에 Contracts-only MP CodeGenerator(`buildtransitive` 없음)·Client/Server DRPC Analyzer 비고 추가; Packages·Scope·FAQ·Configuration과 일치 재확인
+- 잔여 이슈 재점검 반영: NuGet CI에서 CodeGenerator↔형제 MP ProjectReference pack 위험, ListenTask 미관찰, MaxConcurrentIncoming setter Dispose; Sandbox.Contracts 참조·`buildtransitive` 없음 재확인; [[Known-Issues]]·[[Packages]]·[[Configuration]]·[[FAQ]]·[[Structure-Performance]] 동기화
 - Sandbox.Contracts·CodeGenerator 빌드 문서화: Contracts MP analyzer에서 `buildtransitive` 제거, DRPC.CodeGenerator→형제 MP CodeGenerator ProjectReference/옆 DLL 복사·CA 4.14; [[Packages]]·[[Configuration]]·[[Components]]·[[FAQ]]·[[Structure-Performance]] 동기화
 - P0–P3 구현 반영: OneWay CallId=0, CallId 비재사용, MaxConcurrentIncoming, ReliableType 응답, Disconnect/Disconnected, Hub 타임아웃 스캔, async Implementation, RpcListenHandle, Hub alias, `Test/DRPC.Shared.Tests`; ADR [[0001-defer-double-serialization]]·[[0002-defer-netwrok-rename]]; Known-Issues·Public-API·FAQ·Configuration 동기화
 - DRPC.CodeGenerator가 형제 `DS_MessageProtocol` CodeGenerator(ProjectReference, CA 4.14)를 옆에 복사해 SDK 10 Roslyn에서 Nested 메시지 생성 `MissingMethodException`/`FileNotFoundException` 회피; Sandbox.Contracts analyzer `buildtransitive` 제거

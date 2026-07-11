@@ -30,7 +30,7 @@ updated: 2026-07-11
 | `IsPackable` | `true` |
 | `TargetFramework` | `netstandard2.1` |
 | `Nullable` / `ImplicitUsings` | enable |
-| `Version` | 기본 `1.0.0` |
+| `Version` | 기본 `1.1.0` |
 | `Authors`, `RepositoryUrl`, `PackageReadmeFile` | 패키지 메타 |
 
 ## 런타임 옵션
@@ -42,7 +42,11 @@ Hub 생성 API(생성기 출력) 인자:
 | `ConnectAsync` | `host`, `port`, `connectionKey` (선택, 기본 `""`), `CancellationToken` | 클라 → 서버 RUDP 연결 |
 | `ListenAsync` | `port`, `connectionKey` (선택, 기본 `""`), `onConnected`, `CancellationToken` | 서버 리스닝; peer마다 Hub 콜백 |
 
-메서드별 전송 reliability는 `[RemoteProcedure(ReliableType)]`로 계약에 고정된다. HubBase에 별도 타임아웃/재시도 설정 키는 없다.
+메서드별 전송 reliability는 `[RemoteProcedure(ReliableType, methodId)]`로 계약에 고정된다. one-way는 `OneWay = true`(void만).
+
+| 키 | 기본 | 설명 |
+|----|------|------|
+| `HubBase.RpcTimeout` | `30s` | Outgoing `RequestRPC` 응답 대기. `Timeout.InfiniteTimeSpan` 또는 `<= Zero`면 무제한 |
 
 Sandbox 예제 기본값: host `127.0.0.1`, port `9050`, key `sandbox-key`.
 
@@ -52,3 +56,4 @@ Sandbox 예제 기본값: host `127.0.0.1`, port `9050`, key `sandbox-key`.
 - [[Getting-Started]]
 - [[Public-API]]
 - [[Data-Flow]]
+- [[Known-Issues]]

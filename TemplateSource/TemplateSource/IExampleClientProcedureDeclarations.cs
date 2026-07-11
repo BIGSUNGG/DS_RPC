@@ -6,7 +6,7 @@ namespace TemplateSource
 {
     public interface IExampleClientProcedureDeclarations : IClientProcedureDeclarations
     {
-        [RemoteProcedure(ReliableType.ReliableOrdered)]
+        [RemoteProcedure(ReliableType.ReliableOrdered, 0)]
         float Sum(float a, float b);
     }
 }

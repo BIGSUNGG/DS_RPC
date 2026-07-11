@@ -20,12 +20,21 @@ internal static partial class RpcHubEmitter
         var paramList = string.Join(", ", proc.Parameters.Select(p =>
             $"{p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} {p.Name}"));
 
-        if (proc.Return.Type.SpecialType == SpecialType.System_Void)
+        sb.AppendLine($"{indent}[global::System.Obsolete(\"Use {proc.MethodName}Async instead.\")]");
+        if (proc.OneWay)
         {
             sb.AppendLine($"{indent}public void {proc.MethodName}({paramList})");
             sb.AppendLine($"{indent}{{");
             EmitParameterPayloadSerialize(sb, indent + "    ", proc);
-
+            sb.AppendLine($"{indent}    global::System.Threading.Tasks.Task rpcTask = SendRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
+            sb.AppendLine($"{indent}    rpcTask.GetAwaiter().GetResult();");
+            sb.AppendLine($"{indent}}}");
+        }
+        else if (proc.Return.Type.SpecialType == SpecialType.System_Void)
+        {
+            sb.AppendLine($"{indent}public void {proc.MethodName}({paramList})");
+            sb.AppendLine($"{indent}{{");
+            EmitParameterPayloadSerialize(sb, indent + "    ", proc);
             sb.AppendLine($"{indent}    global::System.Threading.Tasks.Task<byte[]> rpcTask = RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
             sb.AppendLine($"{indent}    rpcTask.GetAwaiter().GetResult();");
             sb.AppendLine($"{indent}}}");
@@ -35,7 +44,6 @@ internal static partial class RpcHubEmitter
             sb.AppendLine($"{indent}public {syncReturn} {proc.MethodName}({paramList})");
             sb.AppendLine($"{indent}{{");
             EmitParameterPayloadSerialize(sb, indent + "    ", proc);
-
             sb.AppendLine($"{indent}    global::System.Threading.Tasks.Task<byte[]> rpcTask = RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
             sb.AppendLine($"{indent}    byte[] resultBytes = rpcTask.GetAwaiter().GetResult();");
             sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = MessageSerializer.Deserialize<{proc.ReturnMessageTypeName}>(resultBytes);");
@@ -45,12 +53,19 @@ internal static partial class RpcHubEmitter
 
         sb.AppendLine();
 
-        if (proc.Return.Type.SpecialType == SpecialType.System_Void)
+        if (proc.OneWay)
         {
             sb.AppendLine($"{indent}public async {asyncReturn} {proc.MethodName}Async({paramList})");
             sb.AppendLine($"{indent}{{");
             EmitParameterPayloadSerialize(sb, indent + "    ", proc);
-
+            sb.AppendLine($"{indent}    await SendRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
+            sb.AppendLine($"{indent}}}");
+        }
+        else if (proc.Return.Type.SpecialType == SpecialType.System_Void)
+        {
+            sb.AppendLine($"{indent}public async {asyncReturn} {proc.MethodName}Async({paramList})");
+            sb.AppendLine($"{indent}{{");
+            EmitParameterPayloadSerialize(sb, indent + "    ", proc);
             sb.AppendLine($"{indent}    await RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
             sb.AppendLine($"{indent}}}");
         }
@@ -59,7 +74,6 @@ internal static partial class RpcHubEmitter
             sb.AppendLine($"{indent}public async {asyncReturn} {proc.MethodName}Async({paramList})");
             sb.AppendLine($"{indent}{{");
             EmitParameterPayloadSerialize(sb, indent + "    ", proc);
-
             sb.AppendLine($"{indent}    byte[] resultBytes = await RequestRPC({proc.MethodId}, parameterData, {proc.ReliableTypeExpression});");
             sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = MessageSerializer.Deserialize<{proc.ReturnMessageTypeName}>(resultBytes);");
             sb.AppendLine($"{indent}    return resultPayload.Value;");

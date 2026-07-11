@@ -30,7 +30,7 @@
 | Serialization / wire / protocol behavior | Data-Flow, Public-API |
 | Client/server transport | Data-Flow, Components |
 | `Test/` asserting contracts | Public-API or FAQ if behavior clarified |
-| `Sandbox/` / `Examples/` samples | Getting-Started, How-To |
+| `Sandbox/` samples | Getting-Started, How-To |
 | `Directory.Build.props` versions/deps | Configuration, Scope (sibling deps) |
 | Breaking change / trade-off | ADR under `05-Decisions/` |
 

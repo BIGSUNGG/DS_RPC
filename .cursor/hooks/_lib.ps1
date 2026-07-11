@@ -4,7 +4,7 @@ $script:HooksDir = $PSScriptRoot
 $script:RepoRoot = (Resolve-Path (Join-Path $HooksDir "..\..")).Path
 $script:StatePath = Join-Path $HooksDir ".session-edits.json"
 
-$script:CodePattern = '(?i)^(Source|Test|Sandbox|Examples|TemplateSource)(/|\\)'
+$script:CodePattern = '(?i)^(Source|Test|Sandbox|TemplateSource)(/|\\)'
 $script:DocPattern = '(?i)^Document(/|\\)'
 
 function Get-RelativeRepoPath {

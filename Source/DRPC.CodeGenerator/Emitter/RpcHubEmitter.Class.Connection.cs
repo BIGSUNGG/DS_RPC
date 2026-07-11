@@ -68,7 +68,7 @@ internal static partial class RpcHubEmitter
         sb.AppendLine($"{indent}                    peer)));");
         sb.AppendLine();
         sb.AppendLine($"{indent}        return global::System.Threading.Tasks.Task.CompletedTask;");
-        sb.AppendLine($"{indent}    }});");
+        sb.AppendLine($"{indent}    }}, cancellationToken);");
         sb.AppendLine();
         sb.AppendLine($"{indent}    if (isConnected == false || connectedHub == null)");
         sb.AppendLine($"{indent}        throw new global::System.InvalidOperationException(\"Failed to connect to server.\");");

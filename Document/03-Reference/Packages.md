@@ -18,7 +18,7 @@ updated: 2026-07-11
 | **DRPC.Server** | `Source/DRPC.Server/` | netstandard2.1 | 서버 RPC 및 RUDP 서버 연동 |
 | **DRPC.CodeGenerator** | `Source/DRPC.CodeGenerator/` | netstandard2.1 | Roslyn Analyzer/소스 생성기 (`DevelopmentDependency`) |
 
-`Source/Directory.Build.props`에서 `IsPackable=true`, 기본 `Version=1.0.0`.
+`Source/Directory.Build.props`에서 `IsPackable=true`, 기본 `Version=1.1.0`.
 
 ## 패키지 간 의존
 
@@ -45,9 +45,9 @@ flowchart LR
 
 | 프로젝트 | 경로 | TFM | 역할 |
 |----------|------|-----|------|
-| Sandbox.Contracts | `Examples/Sandbox.Contracts/` | net10.0 | 계약·메시지 타입 |
-| Sandbox.Client | `Examples/Sandbox.Client/` | net10.0 Exe | 클라 Hub + Connect |
-| Sandbox.Server | `Examples/Sandbox.Server/` | net10.0 Exe | 서버 Hub + Listen |
+| Sandbox.Contracts | `Sandbox/Sandbox.Contracts/` | net10.0 | 계약·메시지 타입 |
+| Sandbox.Client | `Sandbox/Sandbox.Client/` | net10.0 Exe | 클라 Hub + Connect |
+| Sandbox.Server | `Sandbox/Sandbox.Server/` | net10.0 Exe | 서버 Hub + Listen |
 | TemplateSource | `TemplateSource/` | net10.0 | 최소 계약 |
 | TemplateSource_Client / _Server | `TemplateSource/` | net10.0 Exe | Hub 구현 템플릿 |
 
@@ -60,7 +60,7 @@ NuGet.org에서 패키지 ID로 검색한다. 서버/클라 조합에 맞게 Sha
 ## 버전
 
 - 형제 NuGet: `MessageProtocolPackageVersion`, `CommunicationPackageVersion` (루트 `Directory.Build.props`, 현재 `1.0.0`)
-- 게시: 태그 `v1.2.3` → GitHub Actions가 동일 버전으로 pack·publish (`NUGET_API_KEY`)
+- 게시: 태그 `v1.1.0` → GitHub Actions가 동일 버전으로 pack·publish (`NUGET_API_KEY`)
 
 ## 관련
 

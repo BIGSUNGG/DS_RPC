@@ -15,15 +15,15 @@ Attribute로 계약을 선언하고 CodeGenerator가 스텁을 생성한다. Sha
 | 경로 | 역할 |
 |------|------|
 | `Source/` | NuGet 배포 라이브러리 5개 (`IsPackable=true`, TFM `netstandard2.1`) |
-| `Examples/` | Sandbox 데모 (Contracts / Server / Client, TFM `net10.0`) |
+| `Sandbox/` | 데모 (Contracts / Server / Client, TFM `net10.0`) |
 | `TemplateSource/` | Hub·생성기 사용 최소 템플릿 (비배포) |
 | `Document/` | Obsidian 문서 vault |
-| `DRPC.slnx` | 솔루션 (Source + TemplateSource + Examples) |
+| `DRPC.slnx` | 솔루션 (Source + TemplateSource + Sandbox) |
 | `Directory.Build.props` | 공통 LangVersion, PolySharp, MP/Comm 패키지 버전 |
 | `Source/Directory.Build.props` | 패키징 메타·TFM·루트 props Import |
 | `.github/workflows/` | 태그 `v*` NuGet 게시 |
 
-`Test/` 폴더는 없다. 샌드박스는 루트 `Sandbox/`가 아니라 `Examples/Sandbox.*`이다.
+`Test/` 폴더는 없다. 샌드박스는 루트 `Sandbox/` 아래 `Sandbox.*` 프로젝트이다.
 
 ## 패키지·레이어
 

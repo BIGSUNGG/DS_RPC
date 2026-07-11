@@ -235,15 +235,45 @@ internal static class RpcHubSourceGenerator
         SourceProductionContext context,
         Location location)
     {
+        var methodIds = new HashSet<int>();
         foreach (var methodMetadata in methods)
         {
             var method = methodMetadata.Symbol;
+            var methodLocation = method.Locations.FirstOrDefault() ?? location;
+
+            if (!methodMetadata.HasExplicitMethodId)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    DiagnosticDescriptors.MissingExplicitMethodId,
+                    methodLocation,
+                    method.Name,
+                    methodMetadata.MethodId));
+            }
+
+            if (!methodIds.Add(methodMetadata.MethodId))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    DiagnosticDescriptors.DuplicateMethodId,
+                    methodLocation,
+                    methodMetadata.MethodId,
+                    declarationSymbol.Name));
+                return false;
+            }
+
+            if (methodMetadata.OneWay && method.ReturnType.SpecialType != SpecialType.System_Void)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    DiagnosticDescriptors.OneWayRequiresVoid,
+                    methodLocation,
+                    method.Name));
+                return false;
+            }
 
             if (method.IsGenericMethod || declarationSymbol.IsGenericType && method.TypeParameters.Length > 0)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                     DiagnosticDescriptors.UnsupportedType,
-                    location,
+                    methodLocation,
                     method.Name,
                     "generic method"));
                 return false;
@@ -255,7 +285,7 @@ internal static class RpcHubSourceGenerator
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
                         DiagnosticDescriptors.UnsupportedType,
-                        location,
+                        methodLocation,
                         method.Name,
                         "ref/out parameters"));
                     return false;
@@ -265,7 +295,7 @@ internal static class RpcHubSourceGenerator
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
                         DiagnosticDescriptors.UnsupportedType,
-                        location,
+                        methodLocation,
                         method.Name,
                         td));
                     return false;
@@ -276,7 +306,7 @@ internal static class RpcHubSourceGenerator
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                     DiagnosticDescriptors.UnsupportedType,
-                    location,
+                    methodLocation,
                     method.Name,
                     rd));
                 return false;

@@ -9,20 +9,20 @@ internal static partial class RpcHubEmitter
 {
     static void EmitIncomingProcedure(StringBuilder sb, MethodMetadata proc, string indent)
     {
-        sb.AppendLine($"{indent}private byte[] {proc.MethodName}_Requested(byte[] parameterData)");
+        sb.AppendLine($"{indent}private global::System.Threading.Tasks.Task<byte[]> {proc.MethodName}_Requested(byte[] parameterData)");
         sb.AppendLine($"{indent}{{");
         if (proc.Parameters.Length == 0)
         {
             if (proc.Return.Type.SpecialType == SpecialType.System_Void)
             {
                 sb.AppendLine($"{indent}    {proc.MethodName}_Implementation();");
-                sb.AppendLine($"{indent}    return global::System.Array.Empty<byte>();");
+                sb.AppendLine($"{indent}    return global::System.Threading.Tasks.Task.FromResult(global::System.Array.Empty<byte>());");
             }
             else
             {
                 sb.AppendLine($"{indent}    {proc.Return.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} result = {proc.MethodName}_Implementation();");
                 sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = new {proc.ReturnMessageTypeName} {{ Value = result }};");
-                sb.AppendLine($"{indent}    return MessageSerializer.Serialize<{proc.ReturnMessageTypeName}>(resultPayload);");
+                sb.AppendLine($"{indent}    return global::System.Threading.Tasks.Task.FromResult(MessageSerializer.Serialize<{proc.ReturnMessageTypeName}>(resultPayload));");
             }
         }
         else
@@ -33,14 +33,14 @@ internal static partial class RpcHubEmitter
             if (proc.Return.Type.SpecialType == SpecialType.System_Void)
             {
                 sb.AppendLine($"{indent}    {proc.MethodName}_Implementation({args});");
-                sb.AppendLine($"{indent}    return global::System.Array.Empty<byte>();");
+                sb.AppendLine($"{indent}    return global::System.Threading.Tasks.Task.FromResult(global::System.Array.Empty<byte>());");
             }
             else
             {
                 sb.AppendLine(
                     $"{indent}    {proc.Return.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} result = {proc.MethodName}_Implementation({args});");
                 sb.AppendLine($"{indent}    {proc.ReturnMessageTypeName} resultPayload = new {proc.ReturnMessageTypeName} {{ Value = result }};");
-                sb.AppendLine($"{indent}    return MessageSerializer.Serialize<{proc.ReturnMessageTypeName}>(resultPayload);");
+                sb.AppendLine($"{indent}    return global::System.Threading.Tasks.Task.FromResult(MessageSerializer.Serialize<{proc.ReturnMessageTypeName}>(resultPayload));");
             }
         }
 

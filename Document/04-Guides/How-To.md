@@ -18,10 +18,10 @@ updated: 2026-07-11
 ## 계약 인터페이스 추가
 
 1. 공유 프로젝트(또는 Contracts)에 `IServerProcedureDeclarations` / `IClientProcedureDeclarations`를 상속한 인터페이스를 만든다.
-2. 원격 메서드에 `[RemoteProcedure(ReliableType....)]`를 붙인다.
+2. 원격 메서드에 `[RemoteProcedure(ReliableType...., methodId)]`를 붙인다. 알림성 void는 `OneWay = true`.
 3. 파라미터·반환 타입이 생성기 지원 범위인지 확인한다 ([[Public-API]]).
 
-Sandbox 참고: `Examples/Sandbox.Contracts/PlaygroundProcedures.cs`.
+Sandbox 참고: `Sandbox/Sandbox.Contracts/PlaygroundProcedures.cs`.
 
 ## Hub partial 구현
 

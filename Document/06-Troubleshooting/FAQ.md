@@ -18,19 +18,23 @@ A: 맞다. 코드·생성기 진단(DRPCGEN002)에 `Netwrok`로 고정되어 있
 
 ## Q: Hub에서 생성 코드가 안 나온다 / DRPCGEN00x
 
-A: Hub를 `partial`로 선언했는지(DRPCGEN001), `ServerHub`/`ClientHub`를 상속했는지(DRPCGEN002), 파라미터·반환 타입이 지원되는지(DRPCGEN003)를 확인한다. [[Public-API]] 제약 절 참고.
+A: DRPCGEN001 partial, DRPCGEN002 Hub base, DRPCGEN003 타입, DRPCGEN004 명시 MethodId 권장(warning), DRPCGEN005 중복 MethodId, DRPCGEN006 OneWay+non-void. [[Public-API]] 참고.
 
 ## Q: 단위 테스트 프로젝트는 어디에 있나?
 
-A: 현재 저장소에 `Test/` 폴더는 없다. 동작 확인은 `Examples/Sandbox.*`를 사용한다.
+A: 현재 저장소에 `Test/` 폴더는 없다. 동작 확인은 `Sandbox/Sandbox.*`를 사용한다.
 
 ## Q: RPC 응답이 안 오면 타임아웃되나?
 
-A: `HubBase.RequestRPC`는 응답 TCS가 완료될 때까지 `await`한다. Hub 수준의 타임아웃·재시도 설정은 없다. CallId 불일치 시 `InvalidOperationException`이 난다. [[Data-Flow]] 참고. 끊김·Unreliable·누수 등 관련 한계는 [[Known-Issues]].
+A: `HubBase.RpcTimeout`(기본 30초) 후 `TimeoutException`. `Timeout.InfiniteTimeSpan`이면 무제한. 원격 예외는 `ProcedureCallErrorMessage` → `RpcFaultException`. 끊김 시 pending은 `CancelPendingCalls`로 실패한다. [[Data-Flow]]·[[Configuration]].
 
-## Q: 구조·성능상 알려진 문제는?
+## Q: sync `{Method}`를 써도 되나?
 
-A: sync-over-async, CallId 레이스, pending Task 누수, 이중 직렬화, MethodId 선언 순서 의존 등은 [[Known-Issues]]에 모아 두었다.
+A: 생성되지만 `[Obsolete]`이다. `{Method}Async`를 쓴다. 알림성 void는 `OneWay = true`.
+
+## Q: 구조·성능상 남은 문제는?
+
+A: [[Known-Issues]]의 **잔여** 절(이중 직렬화, 응답 ReliableType, Netwrok 명명, Test 부재 등).
 
 ## 관련
 

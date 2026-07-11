@@ -1,8 +1,8 @@
-using Examples.Sandbox;
+using Sandbox;
 using DRPC.Client.Network;
 using DRPC.Shared.Network;
 
-namespace Examples.Sandbox.Client;
+namespace Sandbox.Client;
 
 public partial class PlaygroundServerHub : ServerHub<IPlaygroundServerProcedureDeclarations, IPlaygroundClientProcedureDeclarations>
 {

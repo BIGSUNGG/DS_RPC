@@ -29,4 +29,28 @@ internal static class DiagnosticDescriptors
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor MissingExplicitMethodId = new(
+        id: "DRPCGEN004",
+        title: "DRPC method should declare an explicit MethodId",
+        messageFormat: "Method '{0}' relies on declaration-order MethodId {1}. Pass an explicit methodId to [RemoteProcedure] for stable contracts.",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor DuplicateMethodId = new(
+        id: "DRPCGEN005",
+        title: "DRPC MethodId is duplicated",
+        messageFormat: "MethodId {0} is used more than once in declaration '{1}'.",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor OneWayRequiresVoid = new(
+        id: "DRPCGEN006",
+        title: "DRPC OneWay requires void return",
+        messageFormat: "Method '{0}' sets OneWay=true but does not return void.",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

@@ -20,16 +20,16 @@ NuGet.org에서 패키지 ID로 검색해 설치할 수 있습니다. 서버/클
 
 ## 예제
 
-동작 예제는 `Examples/Sandbox.Contracts`, `Examples/Sandbox.Server`, `Examples/Sandbox.Client`를 참고하세요.
+동작 예제는 `Sandbox/Sandbox.Contracts`, `Sandbox/Sandbox.Server`, `Sandbox/Sandbox.Client`를 참고하세요.
 
 ## 빌드·패키징
 
 ```bash
 dotnet build DRPC.slnx
-dotnet pack Source/DRPC.Shared/DRPC.Shared.csproj -c Release -p:Version=1.0.0 -o ./artifacts
+dotnet pack Source/DRPC.Shared/DRPC.Shared.csproj -c Release -p:Version=1.1.0 -o ./artifacts
 ```
 
-태그 `v1.2.3` 푸시 시 GitHub Actions가 동일 버전(`1.2.3`)으로 라이브러리 패키지를 빌드·게시합니다. 저장소 시크릿 `NUGET_API_KEY`가 필요합니다.
+태그 `v1.1.0` 푸시 시 GitHub Actions가 동일 버전(`1.1.0`)으로 라이브러리 패키지를 빌드·게시합니다. 저장소 시크릿 `NUGET_API_KEY`가 필요합니다.
 
 ## 저장소
 

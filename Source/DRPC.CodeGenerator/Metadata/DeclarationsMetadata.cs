@@ -14,7 +14,7 @@ internal sealed class DeclarationsMetadata
     {
         Symbol = declarationSymbol;
 
-        uint methodId = 0;
+        int ordinal = 0;
         var methods = new List<MethodMetadata>();
 
         foreach (var method in declarationSymbol
@@ -24,7 +24,7 @@ internal sealed class DeclarationsMetadata
                      .Where(m => !m.IsImplicitlyDeclared)
                      .Where(m => m.FindAttribute(references.RemoteProcedureAttributeType) != null))
         {
-            methods.Add(new MethodMetadata(method, methodId++, references));
+            methods.Add(new MethodMetadata(method, ordinal++, references));
         }
 
         Methods = methods.ToArray();

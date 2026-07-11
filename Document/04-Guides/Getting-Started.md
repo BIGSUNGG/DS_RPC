@@ -11,7 +11,7 @@ updated: 2026-07-11
 ## 사전 요구
 
 - .NET Standard 2.1을 지원하는 런타임 또는 Unity (해당 API 호환 버전)
-- 예제 실행: .NET 10 SDK (`Examples` / `TemplateSource`는 `net10.0`)
+- 예제 실행: .NET 10 SDK (`Sandbox` / `TemplateSource`는 `net10.0`)
 - 형제 NuGet: MessageProtocol, Communication (버전은 `Directory.Build.props`)
 
 ## 빠른 시작 (라이브러리)
@@ -24,16 +24,16 @@ updated: 2026-07-11
 
 | 프로젝트 | 경로 |
 |----------|------|
-| Contracts | `Examples/Sandbox.Contracts/` |
-| Server | `Examples/Sandbox.Server/` |
-| Client | `Examples/Sandbox.Client/` |
+| Contracts | `Sandbox/Sandbox.Contracts/` |
+| Server | `Sandbox/Sandbox.Server/` |
+| Client | `Sandbox/Sandbox.Client/` |
 
 ```bash
 dotnet build DRPC.slnx
 ```
 
-1. 서버 실행: `Examples/Sandbox.Server` — port `9050`, key `sandbox-key`
-2. 클라 실행: `Examples/Sandbox.Client` — `ConnectAsync("127.0.0.1", 9050, "sandbox-key", ...)`
+1. 서버 실행: `Sandbox/Sandbox.Server` — port `9050`, key `sandbox-key`
+2. 클라 실행: `Sandbox/Sandbox.Client` — `ConnectAsync("127.0.0.1", 9050, "sandbox-key", ...)`
 
 클라 Hub: `PlaygroundServerHub` (`ServerHub<,>`). 서버 Hub: `PlaygroundClientHub` (`ClientHub<,>`).
 

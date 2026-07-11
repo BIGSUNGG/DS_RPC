@@ -1,5 +1,5 @@
-using Examples.Sandbox;
-using Examples.Sandbox.Client;
+using Sandbox;
+using Sandbox.Client;
 
 using var cts = new CancellationTokenSource();
 const string connectionKey = "sandbox-key";

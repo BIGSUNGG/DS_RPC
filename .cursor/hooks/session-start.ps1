@@ -11,7 +11,7 @@ try {
   $ctx = @"
 [$display] Document vault sync is mandatory for this repo.
 Before code/test work, read Document/00-AI/CONTEXT.md (then GLOSSARY / Architecture / Reference as needed).
-After changing Source/, Test/, Sandbox/, Examples/, or TemplateSource/, update Document/ in the same turn (Packages, Components, Public-API, Data-Flow, Scope, ADR, FAQ as applicable).
+After changing Source/, Test/, Sandbox/, or TemplateSource/, update Document/ in the same turn (Packages, Components, Public-API, Data-Flow, Scope, ADR, FAQ as applicable).
 Human MOC: Document/01-Overview/Home.md. Follow skill ds-document-vault and rule document-sync.
 "@
 

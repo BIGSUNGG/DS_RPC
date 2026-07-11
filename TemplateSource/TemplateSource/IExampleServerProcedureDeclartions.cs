@@ -6,7 +6,7 @@ namespace TemplateSource
 {
     public interface IExampleServerProcedureDeclartions : IServerProcedureDeclarations
     {
-        [RemoteProcedure(ReliableType.ReliableOrdered)]
+        [RemoteProcedure(ReliableType.ReliableOrdered, 0)]
         int GetAnswer();
     }
 }

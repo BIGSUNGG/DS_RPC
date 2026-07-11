@@ -5,7 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Examples.Sandbox.Client</RootNamespace>
+    <RootNamespace>Sandbox.Server</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

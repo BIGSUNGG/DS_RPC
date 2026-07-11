@@ -8,17 +8,18 @@ internal sealed class MethodMetadata
 {
     public IMethodSymbol Symbol { get; }
     public string MethodName => Symbol.Name;
-    public uint MethodId { get; }
+    public int MethodId { get; }
+    public bool OneWay { get; }
+    public bool HasExplicitMethodId { get; }
     public MethodReturnMetadata Return { get; }
     public MethodParameterMetadata[] Parameters { get; }
     public string ReliableTypeExpression { get; }
     public string ParameterMessageTypeName => $"{MethodName}_Paramter";
     public string ReturnMessageTypeName => $"{MethodName}_Return";
 
-    public MethodMetadata(IMethodSymbol methodSymbol, uint methodId, AttributeReferences references)
+    public MethodMetadata(IMethodSymbol methodSymbol, int ordinalMethodId, AttributeReferences references)
     {
         Symbol = methodSymbol;
-        MethodId = methodId;
         Return = new MethodReturnMetadata(methodSymbol.ReturnType, references);
         Parameters = methodSymbol.Parameters
             .Select(p => new MethodParameterMetadata(
@@ -26,12 +27,61 @@ internal sealed class MethodMetadata
                 p.Type,
                 references))
             .ToArray();
-        ReliableTypeExpression = BuildReliableTypeExpression(methodSymbol, references);
+
+        var attr = methodSymbol.FindAttribute(references.RemoteProcedureAttributeType);
+        ReliableTypeExpression = BuildReliableTypeExpression(attr, references);
+        (MethodId, HasExplicitMethodId) = ResolveMethodId(attr, ordinalMethodId);
+        OneWay = ResolveOneWay(attr);
     }
 
-    static string BuildReliableTypeExpression(IMethodSymbol methodSymbol, AttributeReferences references)
+    static (int methodId, bool explicitId) ResolveMethodId(AttributeData? attr, int ordinalMethodId)
     {
-        var attr = methodSymbol.FindAttribute(references.RemoteProcedureAttributeType);
+        if (attr == null)
+        {
+            return (ordinalMethodId, false);
+        }
+
+        if (attr.ConstructorArguments.Length >= 2 && attr.ConstructorArguments[1].Value is int ctorId)
+        {
+            if (ctorId >= 0)
+            {
+                return (ctorId, true);
+            }
+
+            return (ordinalMethodId, false);
+        }
+
+        foreach (var named in attr.NamedArguments)
+        {
+            if (named.Key == "MethodId" && named.Value.Value is int namedId && namedId >= 0)
+            {
+                return (namedId, true);
+            }
+        }
+
+        return (ordinalMethodId, false);
+    }
+
+    static bool ResolveOneWay(AttributeData? attr)
+    {
+        if (attr == null)
+        {
+            return false;
+        }
+
+        foreach (var named in attr.NamedArguments)
+        {
+            if (named.Key == "OneWay" && named.Value.Value is bool oneWay)
+            {
+                return oneWay;
+            }
+        }
+
+        return false;
+    }
+
+    static string BuildReliableTypeExpression(AttributeData? attr, AttributeReferences references)
+    {
         if (attr == null || attr.ConstructorArguments.Length == 0)
         {
             return "global::Communication.Network.RUDP.Shared.Messages.ReliableType.ReliableOrdered";

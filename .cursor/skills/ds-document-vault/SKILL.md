@@ -7,7 +7,7 @@ description: Keep the project Document Obsidian vault synchronized with code, te
 
 ## When to use
 
-- Any `Source/`, `Test/`, `Sandbox/`, `Examples/`, or `TemplateSource/` change
+- Any `Source/`, `Test/`, `Sandbox/`, or `TemplateSource/` change
 - Code analysis that discovers outdated or missing docs
 - Explicit Document / vault / docs sync requests
 

@@ -2,32 +2,31 @@ using Communication.Network.RUDP.Shared.Messages;
 using MessageProtocol;
 using DRPC.Attribute;
 using DRPC.Shared.Interface;
-using System.Diagnostics.Tracing;
 
-namespace Examples.Sandbox;
+namespace Sandbox;
 
 public interface IPlaygroundServerProcedureDeclarations : IServerProcedureDeclarations
 {
-    [RemoteProcedure(ReliableType.ReliableOrdered)]
+    [RemoteProcedure(ReliableType.ReliableOrdered, 0)]
     int GetBuildId();
-    
-    [RemoteProcedure(ReliableType.ReliableOrdered)]
+
+    [RemoteProcedure(ReliableType.ReliableOrdered, 1)]
     int Add(int value1, int value2);
-    [RemoteProcedure(ReliableType.ReliableOrdered)]
+
+    [RemoteProcedure(ReliableType.ReliableOrdered, 2)]
     RegisterResult Register(int id, RegisterData message);
 }
 
 public interface IPlaygroundClientProcedureDeclarations : IClientProcedureDeclarations
 {
-    [RemoteProcedure(ReliableType.ReliableOrdered)]
+    [RemoteProcedure(ReliableType.ReliableOrdered, 0)]
     float Echo(float value);
 
-    [RemoteProcedure(ReliableType.ReliableOrdered)]
+    [RemoteProcedure(ReliableType.ReliableOrdered, 1)]
     float Echo_List(List<float> value);
 
-
-    [RemoteProcedure(ReliableType.ReliableOrdered)]
-     void PrintMessage(PlaygroundMessageGroup message);
+    [RemoteProcedure(ReliableType.ReliableOrdered, 2, OneWay = true)]
+    void PrintMessage(PlaygroundMessageGroup message);
 }
 
 [NonIdMessage]
@@ -59,4 +58,3 @@ public partial class PlaygroundMessageGroupElement : PlaygroundMessageGroup
         Console.WriteLine("PlaygroundMessageGroupElement");
     }
 }
-

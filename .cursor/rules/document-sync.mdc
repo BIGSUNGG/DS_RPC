@@ -7,7 +7,7 @@ alwaysApply: true
 
 Before writing or analyzing code/tests, read `Document/00-AI/CONTEXT.md` (then Glossary / related Architecture or Reference notes).
 
-When you change `Source/`, `Test/`, `Sandbox/`, `Examples/`, or `TemplateSource/`, update `Document/` in the **same turn**.
+When you change `Source/`, `Test/`, `Sandbox/`, or `TemplateSource/`, update `Document/` in the **same turn**.
 
 ## Map changes to notes
 

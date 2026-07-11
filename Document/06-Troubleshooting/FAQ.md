@@ -26,10 +26,15 @@ A: 현재 저장소에 `Test/` 폴더는 없다. 동작 확인은 `Examples/Sand
 
 ## Q: RPC 응답이 안 오면 타임아웃되나?
 
-A: `HubBase.RequestRPC`는 응답 TCS가 완료될 때까지 `await`한다. Hub 수준의 타임아웃·재시도 설정은 없다. CallId 불일치 시 `InvalidOperationException`이 난다. [[Data-Flow]] 참고.
+A: `HubBase.RequestRPC`는 응답 TCS가 완료될 때까지 `await`한다. Hub 수준의 타임아웃·재시도 설정은 없다. CallId 불일치 시 `InvalidOperationException`이 난다. [[Data-Flow]] 참고. 끊김·Unreliable·누수 등 관련 한계는 [[Known-Issues]].
+
+## Q: 구조·성능상 알려진 문제는?
+
+A: sync-over-async, CallId 레이스, pending Task 누수, 이중 직렬화, MethodId 선언 순서 의존 등은 [[Known-Issues]]에 모아 두었다.
 
 ## 관련
 
+- [[Known-Issues]]
 - [[How-To]]
 - [[Getting-Started]]
 - [[Data-Flow]]

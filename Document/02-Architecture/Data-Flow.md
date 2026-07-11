@@ -68,3 +68,4 @@ sequenceDiagram
 - [[Components]]
 - [[Public-API]]
 - [[FAQ]]
+- [[Known-Issues]] — 타임아웃 부재·sync-over-async·직렬화 병목 등

@@ -6,21 +6,22 @@ namespace Sandbox.Client;
 
 public partial class PlaygroundServerHub : ServerHub<IPlaygroundServerProcedureDeclarations, IPlaygroundClientProcedureDeclarations>
 {
-    private partial float Echo_Implementation(float value)
+    private partial Task<float> Echo_Implementation(float value)
     {
-        return value * 2f;
+        return Task.FromResult(value * 2f);
     }
 
-    private partial float Echo_List_Implementation(List<float> value)
+    private partial Task<float> Echo_List_Implementation(List<float> value)
     {
-        return value.Sum();
+        return Task.FromResult(value.Sum());
     }
 
-    private partial void PrintMessage_Implementation(PlaygroundMessageGroup message)
+    private partial Task PrintMessage_Implementation(PlaygroundMessageGroup message)
     {
-        if(message != null)
+        if (message != null)
             message.PrintMessage();
         else
             Console.WriteLine("Received null message");
+        return Task.CompletedTask;
     }
 }

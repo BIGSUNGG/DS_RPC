@@ -20,26 +20,42 @@
 
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
-    <NoWarn>$(NoWarn);RS2008;RS1032</NoWarn>
+    <NoWarn>$(NoWarn);RS2008;RS1032;RS1041</NoWarn>
+
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddAnalyzerAssembliesToPackage</TargetsForTfmSpecificContentInPackage>
 
   </PropertyGroup>
 
+  <Target Name="AddAnalyzerAssembliesToPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(TargetDir)MessageProtocol.CodeGenerator.dll" PackagePath="analyzers/dotnet/cs" Condition="Exists('$(TargetDir)MessageProtocol.CodeGenerator.dll')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Analyzer 로드 시 MessageProtocol.CodeGenerator만 옆에 둔다 (CodeAnalysis는 호스트 제공). -->
+  <Target Name="CopyMessageProtocolGeneratorBeside" AfterTargets="Build">
+    <PropertyGroup>
+      <_MpGenDll>$(MSBuildThisFileDirectory)..\..\..\DS_MessageProtocol\Source\MessageProtocol.CodeGenerator\bin\$(Configuration)\netstandard2.1\MessageProtocol.CodeGenerator.dll</_MpGenDll>
+    </PropertyGroup>
+    <Copy SourceFiles="$(_MpGenDll)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="Exists('$(_MpGenDll)')" />
+  </Target>
+
   <ItemGroup>
-
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
-
-    <PackageReference Include="MessageProtocol.CodeGenerator" Version="$(MessageProtocolPackageVersion)" GeneratePathProperty="true" />
-
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-
-    <Reference Include="MessageProtocol.CodeGenerator">
-
-      <HintPath>$(PkgMessageProtocol_CodeGenerator)\analyzers\dotnet\cs\MessageProtocol.CodeGenerator.dll</HintPath>
-
-    </Reference>
-
+    <ProjectReference Include="..\..\..\DS_MessageProtocol\Source\MessageProtocol.CodeGenerator\MessageProtocol.CodeGenerator.csproj" PrivateAssets="all" ReferenceOutputAssembly="true" />
   </ItemGroup>
+
+  <!-- ProjectReference가 CodeAnalysis 등을 출력에 끌어오지 않도록 -->
+  <Target Name="RemoveCodeAnalysisFromOutput" AfterTargets="CopyMessageProtocolGeneratorBeside;Build">
+    <ItemGroup>
+      <_RemoveDlls Include="$(TargetDir)Microsoft.CodeAnalysis*.dll" />
+      <_RemoveDlls Include="$(TargetDir)System.*.dll" />
+    </ItemGroup>
+    <Delete Files="@(_RemoveDlls)" TreatErrorsAsWarnings="true" />
+  </Target>
 
 </Project>

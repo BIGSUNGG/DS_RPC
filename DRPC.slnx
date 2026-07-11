@@ -11,4 +11,7 @@
     <Project Path="Sandbox/Sandbox.Server/Sandbox.Server.csproj" />
     <Project Path="Sandbox/Sandbox.Client/Sandbox.Client.csproj" />
   </Folder>
+  <Folder Name="/Test/">
+    <Project Path="Test/DRPC.Shared.Tests/DRPC.Shared.Tests.csproj" />
+  </Folder>
 </Solution>

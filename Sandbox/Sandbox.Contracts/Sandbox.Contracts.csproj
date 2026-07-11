@@ -16,7 +16,7 @@
     <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
     <PackageReference Include="MessageProtocol.CodeGenerator" Version="$(MessageProtocolPackageVersion)">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 

@@ -1,7 +1,6 @@
 using Communication.Shared.Messages;
 using Communication.Shared.Sessions;
 using LiteNetLib;
-using System;
 
 namespace DRPC.Server.Netwrok;
 
@@ -14,6 +13,5 @@ public sealed class ClientSession : RUDPSession
 
     protected override void OnDisconnected()
     {
-        Console.WriteLine("클라이언트 연결 종료");
     }
 }

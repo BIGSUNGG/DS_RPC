@@ -8,9 +8,8 @@ updated: 2026-07-11
 
 # Scope
 
-## 목적
-
-Attribute 기반 RPC 계약과 RUDP 전송을 결합해 클라이언트↔서버 원격 호출을 제공한다.
+- Attribute 기반 RPC 계약과 RUDP 전송을 결합해 클라이언트↔서버 원격 호출을 제공한다.
+- `Test/DRPC.Shared.Tests` HubBase 단위 테스트
 
 ## In scope
 
@@ -18,6 +17,7 @@ Attribute 기반 RPC 계약과 RUDP 전송을 결합해 클라이언트↔서버
 - MessageProtocol / Communication(RUDP) NuGet 연동
 - `Sandbox/Sandbox.*` (Contracts, Server, Client) 동작 예제
 - `TemplateSource/` Hub·생성기 최소 템플릿
+- `Test/DRPC.Shared.Tests` (HubBase 단위 테스트)
 - 솔루션 `DRPC.slnx`, NuGet 패키징·태그 게시 워크플로
 - 이 Document vault의 구조·API·데이터 흐름 문서
 
@@ -25,7 +25,8 @@ Attribute 기반 RPC 계약과 RUDP 전송을 결합해 클라이언트↔서버
 
 - 저수준 소켓/전송 구현 (→ DS_Communication)
 - 범용 메시지 직렬화 엔진 (→ DS_MessageProtocol)
-- 단위/통합 `Test/` 프로젝트 (현재 저장소에 없음)
+- 이중 직렬화 전면 제거 (→ [[0001-defer-double-serialization]])
+- `Netwrok` → `Network` breaking rename (→ [[0002-defer-netwrok-rename]], v2)
 
 ## 의존·형제 프로젝트
 

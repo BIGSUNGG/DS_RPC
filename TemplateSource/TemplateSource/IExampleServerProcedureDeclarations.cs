@@ -4,7 +4,7 @@ using DRPC.Shared.Interface;
 
 namespace TemplateSource
 {
-    public interface IExampleServerProcedureDeclartions : IServerProcedureDeclarations
+    public interface IExampleServerProcedureDeclarations : IServerProcedureDeclarations
     {
         [RemoteProcedure(ReliableType.ReliableOrdered, 0)]
         int GetAnswer();

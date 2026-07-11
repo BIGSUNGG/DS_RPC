@@ -5,14 +5,13 @@ internal class Program
     private static async Task Main(string[] args)
     {
         var a = new A();
-        await ExampleClientHub.ListenAsync(12345, a.OnConnected, CancellationToken.None);
+        await using var listenHandle = await ExampleClientHub.ListenAsync(12345, a.OnConnected, CancellationToken.None);
 
-        while(true)
-        {             
+        while (true)
+        {
             await Task.Delay(1000);
         }
     }
-
 }
 
 public class A

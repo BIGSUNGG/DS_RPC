@@ -2,6 +2,7 @@ using Communication.Shared.Messages;
 using Communication.Shared.Sessions;
 using DRPC.Shared.Interface;
 using DRPC.Shared.Message;
+using DRPC.Shared.Network;
 
 namespace DRPC.Shared;
 
@@ -42,7 +43,15 @@ public class DRPCMessageHandler : MessageHandler
 
     public override void OnDetectedDisconnection()
     {
-        _hub.CancelPendingCalls(new InvalidOperationException("RPC session disconnected."));
+        if (_hub is HubBase hubBase)
+        {
+            hubBase.NotifyDisconnected(new InvalidOperationException("RPC session disconnected."));
+        }
+        else
+        {
+            _hub.CancelPendingCalls(new InvalidOperationException("RPC session disconnected."));
+        }
+
         base.OnDetectedDisconnection();
     }
 }

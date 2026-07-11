@@ -6,7 +6,7 @@ const string connectionKey = "sandbox-key";
 Console.WriteLine("Sandbox server listening on 9050...");
 
 List<PlaygroundClientHub> hubs = new();
-_ = PlaygroundClientHub.ListenAsync(
+await using var listenHandle = await PlaygroundClientHub.ListenAsync(
     9050,
     connectionKey,
     async hub =>
@@ -21,16 +21,16 @@ _ = PlaygroundClientHub.ListenAsync(
     },
     cts.Token);
 
-while(true)
+while (true)
 {
     string? input = Console.ReadLine();
 
     PlaygroundMessageGroup message;
-    if(input == "0")
+    if (input == "0")
     {
         message = null!;
     }
-    else if(input == "1")
+    else if (input == "1")
     {
         message = new PlaygroundMessageGroupElement();
     }
@@ -43,5 +43,4 @@ while(true)
     {
         await hub.PrintMessageAsync(message);
     }
-
 }

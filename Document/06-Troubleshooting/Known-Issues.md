@@ -8,46 +8,54 @@ updated: 2026-07-11
 
 # Known Issues — 구조·성능·병목
 
-코드 기준 한계와 **수정 상태**. 잔여 항목만 운영 전제로 둔다.
+코드 기준 한계와 **수정 상태**. 상세는 [[Structure-Performance]].
 
 ## 수정됨 (2026-07-11)
 
 | 이슈 | 조치 |
 |------|------|
-| 수신 sync-over-async (`GetAwaiter().GetResult`) | `ProcessRequestAsync` fire-and-forget; Incoming `Func<byte[], Task<byte[]>>` |
+| 수신 sync-over-async | `ProcessRequestAsync` fire-and-forget; Incoming `Task` |
 | CallId 할당 레이스 | `Interlocked.Increment` |
-| 타임아웃·끊김 pending 누수 | `HubBase.RpcTimeout`(기본 30s); `CancelPendingCalls` + `DRPCMessageHandler.OnDetectedDisconnection` |
-| Implementation 예외 시 hang | `ProcedureCallErrorMessage` (StandaloneMessage 2) + `RpcFaultException` |
-| `DefaultMessageConverter.ToArray` 복사 | `MessageSerializer.Deserialize(ReadOnlySpan)` 직통 |
-| void도 항상 Request/Response | `[RemoteProcedure(..., OneWay = true)]` + `SendRPC` |
-| MethodId 선언 순서만 | 명시 `methodId` (미지정 시 DRPCGEN004 warning, 중복 DRPCGEN005) |
-| sync Outgoing | `[Obsolete]` + `{Method}Async` 권장; Sandbox는 Async 사용 |
-| `ConnectAsync` CT 미전달 | 생성기에서 `RUDPConnector.ConnectAsync(..., cancellationToken)` 전달 |
+| 타임아웃·끊김 pending 누수 | Hub 타임아웃 스캔; `CancelPendingCalls` / `NotifyDisconnected` |
+| Implementation 예외 hang | `ProcedureCallErrorMessage` + `RpcFaultException` |
+| void 항상 Request/Response | `OneWay` + `SendRPC` |
+| MethodId 순서 의존 | 명시 methodId + DRPCGEN004/005 |
+| sync Outgoing | Obsolete + Async |
+| ConnectAsync CT | 생성기 전달 |
+| OneWay CallId 누수 | OneWay CallId **고정 0** |
+| CallId 재사용 + 늦은 응답 | CallId **비재사용** |
+| Incoming concurrency | `MaxConcurrentIncoming` + `RpcErrorCode.Overloaded` |
+| 응답 ReliableType | `MethodReliableTypes` → Response/Error `MessageSendContext` |
+| Session Console | 제거; `HubBase.Disconnected` / `Disconnect` / `IDisposable` |
+| per-call CTS | Hub `Timer` 스캔으로 대체 |
+| Incoming sync Implementation | `partial Task` / `Task<T>` |
+| Listen 수명 | `RpcListenHandle` (`IAsyncDisposable`) |
+| Hub 명명 혼동 (단기) | `ClientToServerHub` / `ServerToClientHub` alias ([[0002-defer-netwrok-rename]]) |
+| `Test/` 부재 | `Test/DRPC.Shared.Tests` |
 
-## 잔여
+## 잔여 (형제·major)
 
-| 이슈 | 영향 |
-|------|------|
-| Communication `MessageHandler`가 동기 `Action<object>` | 진짜 awaitable 수신 큐는 형제 프로젝트 변경 필요; DRPC는 fire-and-forget으로 큐 블로킹만 제거 |
-| Incoming `partial` Implementation이 sync only | I/O가 긴 Implementation은 여전히 요청 Task를 점유 |
-| Nested `[NonIdMessage]` + outer Standalone 이중 직렬화 | MessageProtocol 제약; ArrayPool 전면 도입 없음 |
-| 응답 `SendAsync` ReliableType 미매핑 | 응답은 세션 기본(ReliableOrdered) |
-| `ServerHub`/`ClientHub` 명명·`Netwrok` 오타 | 공개 API; 수정 시 breaking |
-| Client/Server thin wrapper·`Test/` 없음 | 회귀는 Sandbox/수동 검증 |
-| Hub `IDisposable` 전체 수명 모델 | disconnect cancel은 있으나 Hub/Listener Dispose API는 없음 |
+| 이슈 | 영향 | 방향 |
+|------|------|------|
+| Nested + Standalone 이중 직렬화 / ArrayPool | CPU·GC | [[0001-defer-double-serialization]] |
+| Communication 동기 `Action<object>` 수신 | awaitable 큐 불가 | DS_Communication |
+| `Netwrok` 철자·Hub 의미 정렬 | DX | v2 / [[0002-defer-netwrok-rename]] |
+| sync Outgoing 생성 제거 | 블로킹 API 잔존 | major |
+| 생성기 스냅샷 테스트 | 회귀 수동(Sandbox) | P1 |
 
 ## 권장 사용
 
-- Outgoing은 `{Method}Async`만 사용한다 (sync는 Obsolete).
-- 계약에 **명시 MethodId**를 넣는다.
+- Outgoing은 `{Method}Async`만.
+- Implementation은 `async Task` / `Task<T>`.
 - 알림성 void는 `OneWay = true`.
-- 필요 시 `hub.RpcTimeout`을 조정하거나 `Timeout.InfiniteTimeSpan`으로 끈다.
+- 서버는 `await using var handle = await Hub.ListenAsync(...)`.
+- 필요 시 `MaxConcurrentIncoming`, `RpcTimeout` 조정.
 
 ## 관련
 
+- [[Structure-Performance]]
+- [[0001-defer-double-serialization]]
+- [[0002-defer-netwrok-rename]]
 - [[FAQ]]
 - [[Data-Flow]]
-- [[Components]]
-- [[Overview]]
 - [[Public-API]]
-- [[Configuration]]

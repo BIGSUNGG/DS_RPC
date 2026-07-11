@@ -23,7 +23,7 @@ Attribute로 계약을 선언하고 CodeGenerator가 스텁을 생성한다. Sha
 | `Source/Directory.Build.props` | 패키징 메타·TFM·루트 props Import |
 | `.github/workflows/` | 태그 `v*` NuGet 게시 |
 
-`Test/` 폴더는 없다. 샌드박스는 루트 `Sandbox/` 아래 `Sandbox.*` 프로젝트이다.
+`Test/` 폴더는 `Test/DRPC.Shared.Tests`이다. 샌드박스는 루트 `Sandbox/` 아래 `Sandbox.*` 프로젝트이다.
 
 ## 패키지·레이어
 
@@ -67,5 +67,6 @@ flowchart TB
 
 - [[Components]]
 - [[Data-Flow]]
+- [[Structure-Performance]]
 - [[Packages]]
 - [[CONTEXT]]

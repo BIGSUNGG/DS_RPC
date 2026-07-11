@@ -5,10 +5,10 @@ using DRPC.Shared.Network;
 
 namespace TemplateSource.Client;
 
-public partial class ExampleServerHub : ServerHub<IExampleServerProcedureDeclartions, IExampleClientProcedureDeclarations>
+public partial class ExampleServerHub : ServerHub<IExampleServerProcedureDeclarations, IExampleClientProcedureDeclarations>
 {
-    private partial float Sum_Implementation(float a, float b)
+    private partial Task<float> Sum_Implementation(float a, float b)
     {
-        return a + b;
+        return Task.FromResult(a + b);
     }
 }

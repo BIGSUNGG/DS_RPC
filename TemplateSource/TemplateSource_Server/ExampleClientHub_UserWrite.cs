@@ -7,10 +7,10 @@ using DRPC.Shared.Network;
 
 namespace TemplateSource.Server;
 
-public partial class ExampleClientHub : ClientHub<IExampleServerProcedureDeclartions, IExampleClientProcedureDeclarations>
+public partial class ExampleClientHub : ClientHub<IExampleServerProcedureDeclarations, IExampleClientProcedureDeclarations>
 {
-    private partial int GetAnswer_Implementation()
+    private partial Task<int> GetAnswer_Implementation()
     {
-        return 42;
+        return Task.FromResult(42);
     }
 }

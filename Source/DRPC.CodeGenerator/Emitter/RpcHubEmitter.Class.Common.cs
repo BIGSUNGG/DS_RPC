@@ -56,20 +56,5 @@ internal static partial class RpcHubEmitter
         sb.AppendLine();
     }
 
-    static void EmitDefaultMessageConverter(StringBuilder sb, string indent)
-    {
-        sb.AppendLine($"{indent}private sealed class DefaultMessageConverter : Communication.Shared.Messages.IMessageConverter");
-        sb.AppendLine($"{indent}{{");
-        sb.AppendLine($"{indent}    public byte[] Serialize(object message)");
-        sb.AppendLine($"{indent}    {{");
-        sb.AppendLine($"{indent}        return MessageSerializer.Serialize(message);");
-        sb.AppendLine($"{indent}    }}");
-        sb.AppendLine();
-        sb.AppendLine($"{indent}    public object Deserialize(global::System.ReadOnlySpan<byte> messageData)");
-        sb.AppendLine($"{indent}    {{");
-        sb.AppendLine($"{indent}        return MessageSerializer.Deserialize(messageData);");
-        sb.AppendLine($"{indent}    }}");
-        sb.AppendLine($"{indent}}}");
-        sb.AppendLine();
-    }
+    // DefaultMessageConverter는 HubSessionFactory.CreateDefaultConverter()로 대체
 }

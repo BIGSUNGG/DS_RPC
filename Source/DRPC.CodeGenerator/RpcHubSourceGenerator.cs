@@ -335,14 +335,16 @@ internal static class RpcHubSourceGenerator
                 string ons = named.OriginalDefinition.ContainingNamespace?.ToDisplayString() ?? "";
                 string oname = named.OriginalDefinition.Name;
 
-                if (ons == "DRPC.Server.Netwrok" && oname == "ClientHub")
+                if (ons == "DRPC.Server.Netwrok" &&
+                    (oname == "ClientHub" || oname == "ServerToClientHub"))
                 {
                     hubBase = named;
                     isServerEndpoint = true;
                     return true;
                 }
 
-                if (ons == "DRPC.Client.Network" && oname == "ServerHub")
+                if (ons == "DRPC.Client.Network" &&
+                    (oname == "ServerHub" || oname == "ClientToServerHub"))
                 {
                     hubBase = named;
                     isServerEndpoint = false;

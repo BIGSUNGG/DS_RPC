@@ -35,8 +35,6 @@ internal static partial class RpcHubEmitter
             EmitIncomingProcedure(sb, proc, indent + "    ");
         }
 
-        EmitDefaultMessageConverter(sb, indent + "    ");
-
         sb.AppendLine($"{indent}}}");
     }
 
@@ -49,6 +47,7 @@ internal static partial class RpcHubEmitter
         foreach (var proc in model.Incoming)
         {
             sb.AppendLine($"{indent}    MethodCallActions.Add({proc.MethodId}, {proc.MethodName}_Requested);");
+            sb.AppendLine($"{indent}    MethodReliableTypes[{proc.MethodId}] = {proc.ReliableTypeExpression};");
             if (proc.OneWay)
             {
                 sb.AppendLine($"{indent}    OneWayMethodIds.Add({proc.MethodId});");

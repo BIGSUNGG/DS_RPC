@@ -17,7 +17,7 @@ internal static class DiagnosticDescriptors
     public static readonly DiagnosticDescriptor InvalidHubBase = new(
         id: "DRPCGEN002",
         title: "DRPC hub must inherit ServerHub or ClientHub",
-        messageFormat: "The type '{0}' must inherit DRPC.Client.Network.ServerHub<,> or DRPC.Server.Netwrok.ClientHub<,>.",
+        messageFormat: "The type '{0}' must inherit ServerHub/ClientToServerHub (DRPC.Client.Network) or ClientHub/ServerToClientHub (DRPC.Server.Netwrok).",
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);

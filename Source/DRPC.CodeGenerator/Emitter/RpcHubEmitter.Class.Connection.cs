@@ -6,35 +6,37 @@ internal static partial class RpcHubEmitter
 {
     static void EmitListenAsync(StringBuilder sb, string hubTypeName, string indent)
     {
-        sb.AppendLine($"{indent}public static global::System.Threading.Tasks.Task ListenAsync(int port, global::System.Func<{hubTypeName}, global::System.Threading.Tasks.Task> onConnected, global::System.Threading.CancellationToken cancellationToken)");
+        sb.AppendLine($"{indent}public static global::System.Threading.Tasks.Task<global::DRPC.Shared.Network.RpcListenHandle> ListenAsync(int port, global::System.Func<{hubTypeName}, global::System.Threading.Tasks.Task> onConnected, global::System.Threading.CancellationToken cancellationToken)");
         sb.AppendLine($"{indent}{{");
         sb.AppendLine($"{indent}    return ListenAsync(port, \"\", onConnected, cancellationToken);");
         sb.AppendLine($"{indent}}}");
         sb.AppendLine();
-        sb.AppendLine($"{indent}public static async global::System.Threading.Tasks.Task ListenAsync(int port, string connectionKey, global::System.Func<{hubTypeName}, global::System.Threading.Tasks.Task> onConnected, global::System.Threading.CancellationToken cancellationToken)");
+        sb.AppendLine($"{indent}public static async global::System.Threading.Tasks.Task<global::DRPC.Shared.Network.RpcListenHandle> ListenAsync(int port, string connectionKey, global::System.Func<{hubTypeName}, global::System.Threading.Tasks.Task> onConnected, global::System.Threading.CancellationToken cancellationToken)");
         sb.AppendLine($"{indent}{{");
         sb.AppendLine($"{indent}    global::Communication.Network.RUDP.Server.RUDPListener listener = new(global::System.Net.IPAddress.Any, port, connectionKey);");
         sb.AppendLine($"{indent}    listener.Start();");
-        sb.AppendLine($"{indent}    await listener.ListenAsync(async (peer, netManager, eventListener, dispatcher) =>");
+        sb.AppendLine($"{indent}    global::System.Threading.CancellationTokenSource linkedCts = global::System.Threading.CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);");
+        sb.AppendLine($"{indent}    global::System.Threading.Tasks.Task listenTask = listener.ListenAsync(async (peer, netManager, eventListener, dispatcher) =>");
         sb.AppendLine($"{indent}    {{");
         sb.AppendLine($"{indent}        {hubTypeName} hub = new(_ =>");
         sb.AppendLine($"{indent}            new ClientSession(");
         sb.AppendLine($"{indent}                peer,");
         sb.AppendLine($"{indent}                netManager,");
         sb.AppendLine($"{indent}                session => new RUDPMessageReceiver(");
-        sb.AppendLine($"{indent}                    new DefaultMessageConverter(),");
+        sb.AppendLine($"{indent}                    global::DRPC.Shared.Network.HubSessionFactory.CreateDefaultConverter(),");
         sb.AppendLine($"{indent}                    peer,");
         sb.AppendLine($"{indent}                    netManager,");
         sb.AppendLine($"{indent}                    eventListener,");
         sb.AppendLine($"{indent}                    new DRPCMessageHandler(session, _),");
         sb.AppendLine($"{indent}                    dispatcher),");
         sb.AppendLine($"{indent}                __ => new RUDPMessageSender(");
-        sb.AppendLine($"{indent}                    new DefaultMessageConverter(),");
+        sb.AppendLine($"{indent}                    global::DRPC.Shared.Network.HubSessionFactory.CreateDefaultConverter(),");
         sb.AppendLine($"{indent}                    peer)));");
         sb.AppendLine();
         sb.AppendLine($"{indent}        await onConnected(hub);");
         sb.AppendLine();
-        sb.AppendLine($"{indent}    }}, cancellationToken);");
+        sb.AppendLine($"{indent}    }}, linkedCts.Token);");
+        sb.AppendLine($"{indent}    return new global::DRPC.Shared.Network.RpcListenHandle(() => {{ listener.Stop(); listener.Dispose(); }}, linkedCts) {{ ListenTask = listenTask }};");
         sb.AppendLine($"{indent}}}");
         sb.AppendLine();
     }
@@ -58,13 +60,13 @@ internal static partial class RpcHubEmitter
         sb.AppendLine($"{indent}                peer,");
         sb.AppendLine($"{indent}                netManager,");
         sb.AppendLine($"{indent}                session => new RUDPMessageReceiver(");
-        sb.AppendLine($"{indent}                    new DefaultMessageConverter(),");
+        sb.AppendLine($"{indent}                    global::DRPC.Shared.Network.HubSessionFactory.CreateDefaultConverter(),");
         sb.AppendLine($"{indent}                    peer,");
         sb.AppendLine($"{indent}                    netManager,");
         sb.AppendLine($"{indent}                    listener,");
         sb.AppendLine($"{indent}                    new DRPCMessageHandler(session, hub)),");
         sb.AppendLine($"{indent}                _ => new RUDPMessageSender(");
-        sb.AppendLine($"{indent}                    new DefaultMessageConverter(),");
+        sb.AppendLine($"{indent}                    global::DRPC.Shared.Network.HubSessionFactory.CreateDefaultConverter(),");
         sb.AppendLine($"{indent}                    peer)));");
         sb.AppendLine();
         sb.AppendLine($"{indent}        return global::System.Threading.Tasks.Task.CompletedTask;");

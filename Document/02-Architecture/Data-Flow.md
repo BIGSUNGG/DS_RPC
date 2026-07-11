@@ -46,11 +46,11 @@ sequenceDiagram
 
 1. **연결 (클라)**: 생성 `ConnectAsync(host, port, connectionKey?, ct)` → `RUDPConnector.ConnectAsync(..., ct)` → `ServerHub` + `ServerSession` + `DRPCMessageHandler`. 실패 시 `InvalidOperationException("Failed to connect to server.")`.
 2. **연결 (서버)**: 생성 `ListenAsync(port, connectionKey?, onConnected, ct)` → `RUDPListener` → peer마다 `ClientHub` + `ClientSession` + `DRPCMessageHandler` → `onConnected(hub)`.
-3. **Outgoing**: 직렬화 후 one-way면 `SendRPC`, 아니면 `RequestRPC` (TCS + `RpcTimeout`).
-4. **요청 전송**: CallId(`Interlocked`/재사용 스택), `ProcedureCallRequestMessage`(id 0).
-5. **Incoming**: `OnReceiveRPCRequestMessage`가 `ProcessRequestAsync`를 논블로킹 시작 → `MethodCallActions` → `{Name}_Implementation`.
-6. **응답**: 성공 시 id 1 `ProcedureCallResponseMessage`; 예외/UnknownMethod 시 id 2 `ProcedureCallErrorMessage` (`RpcFaultException`). OneWay면 응답 없음.
-7. **완료**: Response → TCS `SetResult`; Error → `SetException`; CallId 재사용. 끊김 시 `CancelPendingCalls`.
+3. **Outgoing**: 직렬화 후 one-way면 `SendRPC`(CallId **0**), 아니면 `RequestRPC` (TCS + Hub 타임아웃 스캔).
+4. **요청 전송**: CallId(`Interlocked`, 비재사용; 0은 OneWay 예약), `ProcedureCallRequestMessage`(id 0).
+5. **Incoming**: `OnReceiveRPCRequestMessage` → `ProcessRequestAsync`(논블로킹; `MaxConcurrentIncoming` 시 세마포어) → `MethodCallActions` → `{Name}_Implementation` (`Task`/`Task<T>`).
+6. **응답**: 성공 시 id 1; 예외/UnknownMethod/Overloaded 시 id 2. 응답 ReliableType은 Incoming MethodId 맵. OneWay면 응답 없음.
+7. **완료**: Response → TCS `SetResult`; Error → `SetException`. 끊김 시 `NotifyDisconnected` / `CancelPendingCalls`.
 
 ## 와이어 메시지
 
@@ -66,10 +66,12 @@ sequenceDiagram
 |------|------|
 | Unknown MethodId (non-one-way) | ErrorCode `UnknownMethod` 응답 |
 | Implementation 예외 | ErrorCode `Unhandled` 응답 → 호출측 `RpcFaultException` |
-| 응답 대기 초과 | `HubBase.RpcTimeout`(기본 30s) → `TimeoutException` |
-| 세션 끊김 | `CancelPendingCalls` → pending TCS에 exception |
+| Incoming 동시성 초과 | ErrorCode `Overloaded` (one-way는 drop) |
+| 응답 대기 초과 | `HubBase.RpcTimeout`(기본 30s, Timer 스캔) → `TimeoutException` |
+| 세션 끊김 | `NotifyDisconnected` → pending TCS exception + `Disconnected` 이벤트 |
 | 늦은/중복 응답 CallId | 대기 Task 없으면 ignore |
 | `ConnectAsync` 실패 | `InvalidOperationException("Failed to connect to server.")` |
+| `ListenAsync` 수명 | `RpcListenHandle` Dispose → listener Stop/Dispose + CT cancel |
 
 생성기 진단: DRPCGEN001 partial, DRPCGEN002 Hub base, DRPCGEN003 타입, DRPCGEN004 명시 MethodId 권장(warning), DRPCGEN005 중복 MethodId, DRPCGEN006 OneWay+non-void.
 
@@ -77,6 +79,7 @@ sequenceDiagram
 
 - [[Overview]]
 - [[Components]]
+- [[Structure-Performance]]
 - [[Public-API]]
 - [[FAQ]]
 - [[Known-Issues]]

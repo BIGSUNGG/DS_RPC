@@ -27,6 +27,7 @@ updated: 2026-07-11
 - [[Overview]]
 - [[Components]]
 - [[Data-Flow]]
+- [[Structure-Performance]] — 구조·성능·병목·해결 방안
 
 ### Reference
 
@@ -42,12 +43,14 @@ updated: 2026-07-11
 ### Decisions
 
 - [[_Template]] — ADR 템플릿
-- (ADR은 `05-Decisions/NNNN-*.md`)
+- [[0001-defer-double-serialization]]
+- [[0002-defer-netwrok-rename]]
 
 ### Troubleshooting
 
 - [[FAQ]]
-- [[Known-Issues]] — 구조·성능·병목
+- [[Known-Issues]] — 수정/잔여 체크리스트
+- [[Structure-Performance]] — 상세 분석·해결
 
 ### Meta
 

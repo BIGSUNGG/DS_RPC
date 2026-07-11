@@ -7,20 +7,20 @@ namespace Sandbox.Server;
 
 public partial class PlaygroundClientHub : ClientHub<IPlaygroundServerProcedureDeclarations, IPlaygroundClientProcedureDeclarations>
 {
-    private partial int GetBuildId_Implementation()
+    private partial Task<int> GetBuildId_Implementation()
     {
         Console.WriteLine("GetBuildId() called");
-        return 2026;
+        return Task.FromResult(2026);
     }
 
-    private partial int Add_Implementation(int value1, int value2)
+    private partial Task<int> Add_Implementation(int value1, int value2)
     {
-        return value1 + value2;
+        return Task.FromResult(value1 + value2);
     }
 
-    private partial RegisterResult Register_Implementation(int id, RegisterData message)
+    private partial Task<RegisterResult> Register_Implementation(int id, RegisterData message)
     {
         Console.WriteLine($"Register() called with message: Name={message.Name}");
-        return new RegisterResult() { Id = id };
+        return Task.FromResult(new RegisterResult() { Id = id });
     }
 }

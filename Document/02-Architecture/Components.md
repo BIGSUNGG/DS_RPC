@@ -26,22 +26,22 @@ updated: 2026-07-11
 | **DRPC.Shared** | Hub 런타임, RPC 메시지, 수신 핸들러, 계약 마커 | `HubBase`, `IHubBase`, `ProcedureCallRequest/Response/ErrorMessage` (0/1/2), `RpcFaultException`, `DRPCMessageHandler` | Attribute, MessageProtocol.Core, Communication.Shared / RUDP.Shared |
 | **DRPC.Client** | 클라 쪽 Hub·세션 | `ServerHub<T1,T2>`, `ServerSession` (`DRPC.Client.Network`) | Shared, Communication RUDP.Client, LiteNetLib |
 | **DRPC.Server** | 서버 쪽 Hub·세션 | `ClientHub<T1,T2>`, `ClientSession` (`DRPC.Server.Netwrok`) | Shared, Communication RUDP.Server, LiteNetLib |
-| **DRPC.CodeGenerator** | Hub stub·마샬·연결 코드 생성 | `RpcIncrementalGenerator` → `RpcHubEmitter`, `DiagnosticDescriptors` (DRPCGEN001–006) | Microsoft.CodeAnalysis.CSharp, MessageProtocol.CodeGenerator |
+| **DRPC.CodeGenerator** | Hub stub·마샬·연결 코드 생성 | `RpcIncrementalGenerator` → `RpcHubEmitter`, `DiagnosticDescriptors` (DRPCGEN001–006) | Microsoft.CodeAnalysis.CSharp 4.14; 형제 `MessageProtocol.CodeGenerator` (ProjectReference, analyzer 옆 DLL) |
 
 ## Hub 런타임 (`HubBase`)
 
-- `RequestRPC` / `SendRPC`(one-way): CallId(`Interlocked`/재사용) → 요청 전송; RequestRPC는 `RpcTimeout`+TCS
-- `OnReceiveRPCRequestMessage` → `ProcessRequestAsync`(논블로킹) → Response 또는 Error
-- `OnReceiveRPCResponseMessage` / `OnReceiveRPCErrorMessage`: TCS 완료
-- `CancelPendingCalls`: disconnect 시 pending 실패 처리 (`DRPCMessageHandler.OnDetectedDisconnection`)
+- `RequestRPC` / `SendRPC`(one-way CallId 0): CallId(`Interlocked`, 비재사용) → 전송; RequestRPC는 Hub Timer 타임아웃 스캔
+- `MaxConcurrentIncoming`, `MethodReliableTypes`, `Disconnected`, `Disconnect`/`IDisposable`
+- `OnReceiveRPCRequestMessage` → `ProcessRequestAsync` → Response/Error
+- `NotifyDisconnected` / `CancelPendingCalls`: disconnect 시 pending 실패
 
 ## 생성기 파이프라인
 
-1. `partial class` + `ServerHub<,>` / `ClientHub<,>` 탐지
-2. `[RemoteProcedure]`에서 MethodId(명시 또는 순서)·OneWay·ReliableType 수집
+1. `partial class` + `ServerHub`/`ClientToServerHub` / `ClientHub`/`ServerToClientHub` 탐지
+2. `[RemoteProcedure]`에서 MethodId·OneWay·ReliableType 수집
 3. **Outgoing**: Obsolete sync + Async → `RequestRPC` 또는 `SendRPC`
-4. **Incoming**: `Task<byte[]>` 디스패치 + `partial {Name}_Implementation`
-5. **Connection**: `ConnectAsync`/`ListenAsync` (CT 전달)
+4. **Incoming**: `async Task<byte[]>` 디스패치 + `partial Task`/`Task<T>` Implementation
+5. **Connection**: `ConnectAsync` / `ListenAsync` → `RpcListenHandle`
 6. nested 메시지 타입 + MessageProtocol 직렬화 소스
 
 서버 Hub 기준 Outgoing=ClientDecls·Incoming=ServerDecls, 클라 Hub는 반대.
@@ -57,4 +57,5 @@ updated: 2026-07-11
 - [[Overview]]
 - [[Packages]]
 - [[Data-Flow]]
+- [[Structure-Performance]]
 - [[Public-API]]

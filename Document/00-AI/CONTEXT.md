@@ -25,9 +25,10 @@ updated: 2026-07-11
 2. [[GLOSSARY]]
 3. [[Scope]]
 4. [[Overview]] (Architecture)
-5. [[Packages]]
-6. `05-Decisions/` ADR (있을 경우)
-7. [[CONVENTIONS]]
+5. [[Structure-Performance]] (구조·성능·병목 — 분석 시)
+6. [[Packages]]
+7. `05-Decisions/` ADR (있을 경우)
+8. [[CONVENTIONS]]
 
 ## 패키지 요약
 
@@ -51,4 +52,5 @@ updated: 2026-07-11
 
 - 사람용 시작: [[Home]]
 - 범위: [[Scope]]
+- 구조·성능: [[Structure-Performance]]
 - 규칙: [[CONVENTIONS]]

@@ -13,6 +13,7 @@ updated: 2026-07-11
 - .NET Standard 2.1을 지원하는 런타임 또는 Unity (해당 API 호환 버전)
 - 예제 실행: .NET 10 SDK (`Sandbox` / `TemplateSource`는 `net10.0`)
 - 형제 NuGet: MessageProtocol, Communication (버전은 `Directory.Build.props`)
+- 로컬에서 `DRPC.CodeGenerator` 빌드: 형제 저장소 `DS_MessageProtocol`이 `../DS_MessageProtocol`에 있어야 함 ([[Configuration]])
 
 ## 빠른 시작 (라이브러리)
 

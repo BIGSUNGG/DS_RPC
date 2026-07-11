@@ -36,20 +36,21 @@ flowchart LR
 | 패키지 | 프로젝트/패키지 참조 |
 |--------|----------------------|
 | Attribute | `Communication.Network.RUDP.Shared` |
-| Shared | Attribute; `MessageProtocol.Core` + CodeGenerator; `Communication.Shared`, RUDP.Shared |
+| Shared | Attribute; `MessageProtocol.Core` (+ 자체 CodeGenerator NuGet for Shared 메시지); `Communication.Shared`, RUDP.Shared |
 | Client | Shared; RUDP.Client + Shared; LiteNetLib 1.3.5 |
 | Server | Shared; RUDP.Server + Shared; LiteNetLib 1.3.5 |
-| CodeGenerator | Microsoft.CodeAnalysis.CSharp 4.8.0; MessageProtocol.CodeGenerator (analyzer DLL) |
+| CodeGenerator | Microsoft.CodeAnalysis.CSharp **4.14.0**; 형제 `DS_MessageProtocol`의 `MessageProtocol.CodeGenerator` **ProjectReference** (빌드 출력 옆에 DLL 복사; CodeAnalysis DLL은 출력에서 제거). NuGet `MessageProtocol.CodeGenerator` 단독 HintPath 참조는 사용하지 않음 |
 
 ## 비배포 프로젝트
 
 | 프로젝트 | 경로 | TFM | 역할 |
 |----------|------|-----|------|
-| Sandbox.Contracts | `Sandbox/Sandbox.Contracts/` | net10.0 | 계약·메시지 타입 |
-| Sandbox.Client | `Sandbox/Sandbox.Client/` | net10.0 Exe | 클라 Hub + Connect |
-| Sandbox.Server | `Sandbox/Sandbox.Server/` | net10.0 Exe | 서버 Hub + Listen |
-| TemplateSource | `TemplateSource/` | net10.0 | 최소 계약 |
+| Sandbox.Contracts | `Sandbox/Sandbox.Contracts/` | net10.0 | 계약·메시지 타입. `MessageProtocol.CodeGenerator`는 **Contracts 전용** analyzer (`IncludeAssets`에 `analyzers`, **`buildtransitive` 없음**) — Client/Server로 MP 생성기가 전파되지 않아 DRPC 생성기와 DLL 이중 로드를 피한다 |
+| Sandbox.Client | `Sandbox/Sandbox.Client/` | net10.0 Exe | 클라 Hub + Connect; Analyzer는 `DRPC.CodeGenerator` |
+| Sandbox.Server | `Sandbox/Sandbox.Server/` | net10.0 Exe | 서버 Hub + Listen; Analyzer는 `DRPC.CodeGenerator` |
+| TemplateSource | `TemplateSource/` | net10.0 | 최소 계약 (+ 필요 시 MP CodeGenerator) |
 | TemplateSource_Client / _Server | `TemplateSource/` | net10.0 Exe | Hub 구현 템플릿 |
+| DRPC.Shared.Tests | `Test/DRPC.Shared.Tests/` | net10.0 | HubBase 단위 테스트 (xUnit); `DRPC.slnx` `/Test/` |
 
 루트 `Directory.Build.props` 기본 `IsPackable=false`.
 

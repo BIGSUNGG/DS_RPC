@@ -401,8 +401,11 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+.idea/
 
 # Obsidian (Document vault) - keep shared config, ignore personal workspace
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
 Document/.obsidian/workspace.json
 Document/.obsidian/workspace-mobile.json
 Document/.obsidian/workspaces.json
@@ -410,3 +413,6 @@ Document/.obsidian/cache
 
 # Cursor hooks session state
 .cursor/hooks/.session-edits.json
+
+# Agent session state
+.pi-glla/

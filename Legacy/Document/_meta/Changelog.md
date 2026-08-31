@@ -3,15 +3,20 @@ project: DS_RPC
 type: overview
 status: draft
 tags: [changelog]
-updated: 2026-07-11
+updated: 2026-07-12
 ---
 
 # Changelog (Document)
 
 문서 vault 변경만 기록한다. 제품 릴리스 노트는 저장소 릴리스/태그를 따른다.
 
+## 2026-07-12
+
+- `Source/.gitignore`(Unity) 추가·루트 `*.meta`에서 `Source/**/*.meta` 예외; [[Packages]]에 Unity 소스 ignore 메모
+
 ## 2026-07-11
 
+- Sandbox.Contracts.csproj 재검증: [[Components]]에 Sandbox analyzer 분리 표 추가; [[Packages]] Contracts 행을 csproj(`PrivateAssets`·`IncludeAssets`)와 문구 정합; Scope·FAQ·Configuration·Getting-Started는 변경 없음
 - Sandbox.Contracts.csproj 훅 동기화: [[Getting-Started]] Sandbox 표에 Contracts-only MP CodeGenerator(`buildtransitive` 없음)·Client/Server DRPC Analyzer 비고 추가; Packages·Scope·FAQ·Configuration과 일치 재확인
 - 잔여 이슈 재점검 반영: NuGet CI에서 CodeGenerator↔형제 MP ProjectReference pack 위험, ListenTask 미관찰, MaxConcurrentIncoming setter Dispose; Sandbox.Contracts 참조·`buildtransitive` 없음 재확인; [[Known-Issues]]·[[Packages]]·[[Configuration]]·[[FAQ]]·[[Structure-Performance]] 동기화
 - Sandbox.Contracts·CodeGenerator 빌드 문서화: Contracts MP analyzer에서 `buildtransitive` 제거, DRPC.CodeGenerator→형제 MP CodeGenerator ProjectReference/옆 DLL 복사·CA 4.14; [[Packages]]·[[Configuration]]·[[Components]]·[[FAQ]]·[[Structure-Performance]] 동기화

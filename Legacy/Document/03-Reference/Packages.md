@@ -3,7 +3,7 @@ project: DS_RPC
 type: reference
 status: draft
 tags: [packages, nuget]
-updated: 2026-07-11
+updated: 2026-07-12
 ---
 
 # Packages
@@ -19,6 +19,8 @@ updated: 2026-07-11
 | **DRPC.CodeGenerator** | `Source/DRPC.CodeGenerator/` | netstandard2.1 | Roslyn Analyzer/소스 생성기 (`DevelopmentDependency`) |
 
 `Source/Directory.Build.props`에서 `IsPackable=true`, 기본 `Version=1.1.0`.
+
+`Source/`는 Unity 호환 라이브러리 소스다. `Source/.gitignore`로 Library/Temp/Obj 등 Unity 생성물을 제외하고, `.csproj`와 Unity `.meta`는 추적한다(루트 `*.meta` 예외: `!Source/**/*.meta`).
 
 ## 패키지 간 의존
 
@@ -45,7 +47,7 @@ flowchart LR
 
 | 프로젝트 | 경로 | TFM | 역할 |
 |----------|------|-----|------|
-| Sandbox.Contracts | `Sandbox/Sandbox.Contracts/` | net10.0 | 계약·메시지. 참조: `DRPC.Attribute`, `DRPC.Shared`, `Communication.Network.RUDP.Shared`. `MessageProtocol.CodeGenerator` NuGet은 **Contracts 전용** analyzer (`IncludeAssets`: runtime; build; native; contentfiles; analyzers — **`buildtransitive` 없음**) |
+| Sandbox.Contracts | `Sandbox/Sandbox.Contracts/` | net10.0 | 계약·메시지. ProjectRef: `DRPC.Attribute`, `DRPC.Shared`. Package: `Communication.Network.RUDP.Shared`; `MessageProtocol.CodeGenerator`(`PrivateAssets=all`, `IncludeAssets=runtime; build; native; contentfiles; analyzers` — **`buildtransitive` 없음**, Client/Server로 미전파) |
 | Sandbox.Client | `Sandbox/Sandbox.Client/` | net10.0 Exe | 클라 Hub + Connect; Analyzer는 `DRPC.CodeGenerator` |
 | Sandbox.Server | `Sandbox/Sandbox.Server/` | net10.0 Exe | 서버 Hub + Listen; Analyzer는 `DRPC.CodeGenerator` |
 | TemplateSource | `TemplateSource/` | net10.0 | 최소 계약 (+ 필요 시 MP CodeGenerator) |

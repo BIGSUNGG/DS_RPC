@@ -1,36 +1,17 @@
 # DS_RPC (DRPC)
 
-분산 RPC 및 RUDP 기반 통신을 위한 **.NET 라이브러리** 모음입니다. 라이브러리는 **.NET Standard 2.1**을 타깃으로 하여 **Unity** 등 다양한 클라이언트와 호환됩니다.
+RPC 라이브러리 재작성 준비 중입니다.
 
-## NuGet 패키지
+기존 분산 RPC / RUDP 기반 코드와 문서는 [`Legacy/`](Legacy/)에 아카이브되어 있습니다.
 
-| 패키지 | 설명 |
-|--------|------|
-| **DRPC.Attribute** | RPC 계약에 사용하는 특성(Attribute) |
-| **DRPC.Shared** | 공유 타입·직렬화·MessageProtocol 연동 |
-| **DRPC.Client** | 클라이언트 측 RPC 및 RUDP 클라이언트 연동 |
-| **DRPC.Server** | 서버 측 RPC 및 RUDP 서버 연동 |
-| **DRPC.CodeGenerator** | Roslyn 분석기/소스 생성기(DRPC·계약 코드 생성) |
+## 아카이브
 
-NuGet.org에서 패키지 ID로 검색해 설치할 수 있습니다. 서버/클라이언트 조합에 맞게 **Shared**와 **Attribute**를 기준으로 필요한 패키지를 선택하세요.
+| 경로 | 설명 |
+| ------ | ------ |
+| `Legacy/DRPC.slnx` | 기존 솔루션 |
+| `Legacy/Source` | DRPC.Attribute · Shared · Client · Server · CodeGenerator |
+| `Legacy/Sandbox` | 예제(Contracts · Server · Client) |
+| `Legacy/Test` | DRPC.Shared.Tests |
+| `Legacy/Document` | 기존 Obsidian vault |
 
-## 요구 의존성
-
-런타임 패키지는 **MessageProtocol**, **Communication**(RUDP) 등 외부 NuGet 패키지 버전을 사용합니다. 버전은 저장소 루트 [Directory.Build.props](Directory.Build.props)의 `MessageProtocolPackageVersion`, `CommunicationPackageVersion`에서 관리합니다.
-
-## 예제
-
-동작 예제는 `Sandbox/Sandbox.Contracts`, `Sandbox/Sandbox.Server`, `Sandbox/Sandbox.Client`를 참고하세요.
-
-## 빌드·패키징
-
-```bash
-dotnet build DRPC.slnx
-dotnet pack Source/DRPC.Shared/DRPC.Shared.csproj -c Release -p:Version=1.1.0 -o ./artifacts
-```
-
-태그 `v1.1.0` 푸시 시 GitHub Actions가 동일 버전(`1.1.0`)으로 라이브러리 패키지를 빌드·게시합니다. 저장소 시크릿 `NUGET_API_KEY`가 필요합니다.
-
-## 저장소
-
-https://github.com/BIGSUNGG/DS_RPC
+소스 및 샘플: [GitHub 저장소](https://github.com/BIGSUNGG/DS_RPC)

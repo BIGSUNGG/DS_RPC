@@ -52,6 +52,15 @@ updated: 2026-07-11
 - **ClientHub** = 서버 프로젝트에서 사용 (클라이언트 세션)
 - 서버 네임스페이스는 코드상 `DRPC.Server.Netwrok` (오타 고정)
 
+## Sandbox (비배포)
+
+| 프로젝트 | 역할 | Analyzer |
+|----------|------|----------|
+| `Sandbox.Contracts` | 계약·메시지. ProjectRef: Attribute·Shared. Package: RUDP.Shared + `MessageProtocol.CodeGenerator` (`PrivateAssets=all`, `IncludeAssets`에 **`buildtransitive` 없음**) | MP CodeGenerator만 |
+| `Sandbox.Client` / `Sandbox.Server` | Hub 실행. Contracts + Client/Server ProjectRef | `DRPC.CodeGenerator` (MP analyzer는 Contracts에서 전파되지 않음) |
+
+근거: `Sandbox/Sandbox.Contracts/Sandbox.Contracts.csproj`. [[Packages]]·[[Configuration]].
+
 ## 관련
 
 - [[Overview]]

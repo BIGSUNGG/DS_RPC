@@ -73,7 +73,9 @@ StyleCopReport.xml
 *_p.c
 *_h.h
 *.ilk
+# VS intermediate *.meta — but Unity asset GUID sidecars under Source/ must be tracked
 *.meta
+!Source/**/*.meta
 *.obj
 *.iobj
 *.pch

@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/Source/">
+    <Project Path="Source/DRPC.Attribute/DRPC.Attribute.csproj" />
+    <Project Path="Source/DRPC.Shared/DRPC.Shared.csproj" />
+    <Project Path="Source/DRPC.CodeGenerator/DRPC.CodeGenerator.csproj" />
+    <Project Path="Source/DRPC.Client/DRPC.Client.csproj" />
+    <Project Path="Source/DRPC.Server/DRPC.Server.csproj" />
+  </Folder>
+  <Folder Name="/Sandbox/">
+    <Project Path="Sandbox/Sandbox.Contracts/Sandbox.Contracts.csproj" />
+    <Project Path="Sandbox/Sandbox.Server/Sandbox.Server.csproj" />
+    <Project Path="Sandbox/Sandbox.Client/Sandbox.Client.csproj" />
+  </Folder>
+  <Folder Name="/Test/">
+    <Project Path="Test/DRPC.Shared.Tests/DRPC.Shared.Tests.csproj" />
+    <Project Path="Test/DRPC.CodeGenerator.Tests/DRPC.CodeGenerator.Tests.csproj" />
+    <Project Path="Test/DRPC.E2E.Tests/DRPC.E2E.Tests.csproj" />
+  </Folder>
+</Solution>

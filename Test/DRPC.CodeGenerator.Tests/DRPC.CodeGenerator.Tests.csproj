@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>DRPC.CodeGenerator.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 생성기를 일반 어셈블리로 참조(드라이버로 직접 구동)하고, 검사 대상 타입은 런타임 어셈블리에서 가져온다. -->
+    <ProjectReference Include="..\..\Source\DRPC.CodeGenerator\DRPC.CodeGenerator.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Attribute\DRPC.Attribute.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Shared\DRPC.Shared.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Client\DRPC.Client.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Server\DRPC.Server.csproj" />
+  </ItemGroup>
+
+</Project>

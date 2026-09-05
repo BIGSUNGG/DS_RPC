@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Sandbox.Contracts</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- DTO 직렬화 생성은 계약 프로젝트에서만 돈다(DRPC 로 전파하지 않는다). -->
+    <PackageReference Include="MessageProtocol" Version="$(MessageProtocolPackageVersion)" />
+    <ProjectReference Include="..\..\Source\DRPC.Attribute\DRPC.Attribute.csproj" />
+    <ProjectReference Include="..\..\Source\DRPC.Shared\DRPC.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

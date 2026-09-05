@@ -60,13 +60,25 @@ Roslyn 언어 서버(`CSharpLanguageServer`)가 `Source/DRPC.CodeGenerator/bin/D
 csproj 를 방금 만든 직후에는 restore 자산이 없어 LSP 진단이 "`Xunit`/`Microsoft.CodeAnalysis` 를 찾을 수 없음" 류의
 **가짜 오류**를 낸다. `dotnet restore DRPC.slnx` 후 실제 빌드/테스트 결과을 기준으로 판단한다.
 
-### 생성 산출물 보기
+### 생성 산출물 확인에 `EmitCompilerGeneratedFiles` 를 전역 플래그로 쓰지 말 것
+
+`dotnet build … -p:EmitCompilerGeneratedFiles=true -p:CompilerGeneratedFilesOutputPath=obj/genR` 는
+**참조 프로젝트까지 건드린다**(전역 프로퍼티로 전파). 발생 증상:
+
+- `DRPC.Shared` 등 형제 프로젝트의 obj 에 MessageProtocol 생성 코드가 덤프되고, 그 덤프가 기본 컴파일 글롭에 잡혀
+  `CS0102 (MessageId 이미 정의)`·`CS0111 (Serialize/Deserialize 이미 정의)` 이 쏟아진다.
+- 상대 경로 `obj/genR` 은 프로젝트 기준이 아니라 뒤섞인 위치에 생성되어 `Source/DRPC.Attribute/Sandbox/…` 같은 이상한 디렉터리를 만든다.
+
+**해결**: 이미 오염됐으면 `bin`·`obj` 를 전부 지우고 재빌드한다(재생성 산출물이라 안전).
 
 ```powershell
-dotnet build Sandbox/Sandbox.Server/Sandbox.Server.csproj -c Release `
-  -p:EmitCompilerGeneratedFiles=true -p:CompilerGeneratedFilesOutputPath=obj/genR
-# obj/genR/DRPC.CodeGenerator/DRPC.CodeGenerator.RpcIncrementalGenerator/GameServerHub.g.cs
+find Source Test Sandbox -type d \( -name bin -o -name obj \) -prune -exec rm -rf {} +
+dotnet build DRPC.slnx -c Release
 ```
+
+생성 코드 자체를 눈으로 봐야 하면 단일 프로젝트에 한해 절대 경로를 지정한다
+(`-p:CompilerGeneratedFilesOutputPath=C:\\tmp\\drpc-gen`). **항상 검사해야 하는 생성 형태**(Async 전용·sync 스텁 없음·접속/리스닝 시그니처·
+구현 후킹 배치)는 파일 grep 이 아니라 리플렉션 테스트로 본다 → `Test/DRPC.E2E.Tests/GeneratedShapeTests.cs`.
 
 ## 회귀 방지를 위해 남아 있는 테스트
 
@@ -76,7 +88,9 @@ dotnet build Sandbox/Sandbox.Server/Sandbox.Server.csproj -c Release `
 | one-way 신호(CallId 0) 후퇴 | `…Incoming_OneWay_IsNotAnswered`, E2E `OneWay_call_reaches_peer_without_response` |
 | 지연/중복 응답이 다른 호출을 오염 | `UnexpectedResponseOrError_IsIgnoredWithoutFaultingOthers` |
 | NonId 와 그룹 다형성의 직렬화 경로 뒤바뀜 | 생성기 `NonId_message_argument_uses_typed_serializer`, `Group_root_argument_keeps_runtime_type_over_the_wire`, E2E `Group_message_keeps_runtime_type_over_the_wire` |
-| sync 스텁 부활(회귀) | 생성기 `Outgoing_generates_async_only_stub`(`[global::System.Obsolete` 금지) |
+| sync 스텁 부활(회귀) | 생성기 `Outgoing_generates_async_only_stub`(`[global::System.Obsolete` 금지) + E2E `GeneratedShapeTests.Every_contract_method_has_an_async_stub_and_no_sync_stub`(실제 어셈블리 리플렉션) |
+| 접속/리스닝 팩토리 서명 후퇴 | E2E `GeneratedShapeTests.Connection_factories_are_generated_with_connectionkey_overloads` |
+| 구현 후킹이 반대 편에 생성됨 | E2E `GeneratedShapeTests.Incoming_contract_methods_get_implementation_hooks_on_the_owning_side` |
 
 ## 범위 밖 (이번 재구축에서 미구현)
 

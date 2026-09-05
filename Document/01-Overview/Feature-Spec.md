@@ -14,7 +14,7 @@ updated: 2026-09-05
 
 ## 구현 상태 (2026-09-05)
 
-F1–F7·F9·F11 **구현 완료**(`dotnet test DRPC.slnx -c Release` 53개 통과). F8(게시 CI)·F10(Template)은 이번 범위 밖.
+F1–F7·F9·F11 **구현 완료**(`dotnet test DRPC.slnx -c Release` 58개 통과). F8(게시 CI)·F10(Template)은 이번 범위 밖.
 형제 스택은 NuGet **2.0.0** 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 
 ## 원칙
@@ -158,7 +158,7 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 | ------ | ---------- | ------ | ------ |
 | 단위 (P0) | `Test/DRPC.Shared.Tests` | CallId·타임아웃·동시성 상한·오류 3종·one-way(CallId 0)·전송 매핑·핸들러 라우팅 | 19 통과 |
 | 생성기 (P1) | `Test/DRPC.CodeGenerator.Tests` | DRPCGEN001–006, 생성 형태(Async 전용·`[Obsolete]` 금지·페이로드 인코딩·NonId/Group 경로), 생성 결과 컴파일 | 22 통과 |
-| 루프백 E2E (P2) | `Test/DRPC.E2E.Tests` | 실제 RUDP(127.0.0.1) 왕복: 기본/오버라이드 전송·OneWay·DTO·양방향·UnknownMethod·Unhandled·타임아웃·ListenTask/끊김 | 12 통과 |
+| 루프백 E2E (P2) | `Test/DRPC.E2E.Tests` | 실제 RUDP(127.0.0.1) 왕복: 기본/오버라이드 전송·OneWay·DTO·양방향·UnknownMethod·Unhandled·타임아웃·ListenTask/끊김 + 생성 산출물 형태(리플렉션: Async 전용·접속 팩토리 서명·후킹 배치) | 17 통과 |
 
 ---
 

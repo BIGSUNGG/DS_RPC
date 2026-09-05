@@ -58,7 +58,7 @@ DTO(`[NonIdMessage]`)와 그룹 다형성를 지원한다.
 
 ```powershell
 dotnet build DRPC.slnx -c Release
-dotnet test  DRPC.slnx -c Release     # 단위 19 · 생성기 22 · RUDP 루프백 E2E 12
+dotnet test  DRPC.slnx -c Release     # 단위 19 · 생성기 22 · RUDP 루프백+생성 형태 17
 dotnet run --no-build -c Release --project Sandbox/Sandbox.Server
 dotnet run --no-build -c Release --project Sandbox/Sandbox.Client
 ```

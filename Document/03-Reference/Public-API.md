@@ -144,7 +144,7 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
 
 ```powershell
 dotnet build DRPC.slnx -c Release        # 5 라이브러리 + Sandbox 3 + Test 3
-dotnet test  DRPC.slnx -c Release        # 53개 통과 (19 단위 / 22 생성기 / 12 RUDP 루프백)
+dotnet test  DRPC.slnx -c Release        # 58개 통과 (19 단위 / 22 생성기 / 17 RUDP 루프백·생성 형태)
 ```
 
 `Debug` 로 CLI 빌드하면 Roslyn 언어 서버가 `DRPC.CodeGenerator.dll`(bin/Debug) 을 점유해 복사가 실패할 수 있다 —

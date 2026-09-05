@@ -277,7 +277,8 @@ public abstract class HubBase : IHubBase, IDisposable
     }
 
     /// <summary>
-    /// 와이어상의 one-way 신호는 CallId 0 고정이다(<see cref="SendRPC")는 0을 보내고 <see cref="RequestRPC")는 1부터 할당).
+    /// 와이어상의 one-way 신호는 CallId 0 고정이다. <see cref="SendRPC"/> 는 0 을 보내고
+    /// <see cref="RequestRPC"/> 는 1 부터 할당하므로 두 값은 겹치지 않는다.
     /// 수신 측 등록표로 판정하지 않는다 — 서버·클라이언트 계약이 같은 MethodId 를 서로 다르게 one-way 로
     /// 선언해도 어긋나지 않고, 미등록 MethodId 도 올바르게 취급된다.
     /// </summary>

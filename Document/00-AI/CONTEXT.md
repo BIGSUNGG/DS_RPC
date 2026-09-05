@@ -12,7 +12,7 @@ updated: 2026-09-05
 
 ## 현 상태 (2026-09-05)
 
-- **재구축 F1–F7·F9·F11 구현 완료.** `Source/` 5개 패키지(Attribute·Shared·CodeGenerator·Client·Server), `Sandbox/` 3개, `Test/` 3계층(53개 통과).
+- **재구축 F1–F7·F9·F11 구현 완료.** `Source/` 5개 패키지(Attribute·Shared·CodeGenerator·Client·Server), `Sandbox/` 3개, `Test/` 3계층(58개 통과).
 - 형제 스택은 **NuGet 2.0.0 안정판만** 참조한다(`MessageProtocol`, `Communication.Network.RUDP.*`) — 형제 저장소 프로젝트 참조·하드 경로 없음.
 - 저장소 루트 솔루션은 `DRPC.slnx`.
 - 빌드·테스트는 **`-c Release`** 를 쓴다. `Debug` 는 언어 서버가 생성기 DLL 을 점유해 복사가 실패할 수 있다([[../06-Troubleshooting/Known-Issues|Known-Issues]]).

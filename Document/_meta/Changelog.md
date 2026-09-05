@@ -17,10 +17,14 @@ updated: 2026-08-31
   `06-Troubleshooting/Known-Issues.md`.
 - `05-Decisions/0002-async-only-delivery-and-payload.md` 신규: Async 전용 스텁, DRPC 자체 `RpcDeliveryMode` + 매핑 경계,
   one-way = `CallId 0`, 메서드별 래퍼 타입 폐기(flat 페이로드). 4결정 기록.
-- `01-Overview/Feature-Spec.md` 갱신: 위 결정을 F1·F3·F5·F6·F7·F8·F9·F11 에 반영, 구현 상태 절 추가(테스트 53개),
+- `01-Overview/Feature-Spec.md` 갱신: 위 결정을 F1·F3·F5·F6·F7·F8·F9·F11 에 반영, 구현 상태 절 추가(테스트 58개),
   오픈 이슈 1 해소로 "없음", 스테일했던 전송 열거형 명세 제거, `MethodReliableTypes` → `MethodDeliveryModes` 개칭 반영.
 - `00-AI/CONTEXT.md` 현 상태 갱신(초기 스켈레톤 → 구현 완료, `-c Release` 사용 이유, 빌드·테스트·샌드박스 명령),
   `01-Overview/Home.md` MoC 확장.
+- `06-Troubleshooting/Known-Issues.md` 에 함정 두 개 추가: `EmitCompilerGeneratedFiles` 전역 플래그가 참조 프로젝트 obj 에
+  생성 코드를 덤프해 `CS0102`·`CS0111` 중복 정의 오류를 내는 문제(경험 기록)와, 새로 만든 프로젝트의 restore 전 LSP 가짜 오류.
+- `Test/DRPC.E2E.Tests/GeneratedShapeTests.cs` 신규: 생성 산출물 형태를 리플렉션으로 검증 (Async 전용·접속 팩토리 서명·
+  구현 후킹 배치) — 파일 grep 대신 어셈블리를 보아 테스트 횟수 53 → 58.
 
 ## 2026-08-31
 

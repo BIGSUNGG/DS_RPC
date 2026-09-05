@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DRPC.CodeGenerator</PackageId>
+    <Description>Roslyn 소스 생성기: [RemoteProcedure] 계약으로 허브 스텁·수신 디스패치·전송 보일러플레이트를 빌드 시 생성합니다. Analyzer 로 참조합니다.</Description>
+    <PackageTags>DRPC;Roslyn;SourceGenerator;Analyzer</PackageTags>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <IsPackable>true</IsPackable>
+    <!-- 생성기는 호스트(Roslyn)가 netstandard2.0 을 요구. 런타임 프로젝트와 TFM 이 다른 것은 정상. -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <NoWarn>$(NoWarn);RS1035;RS2008;RS1032;RS1041</NoWarn>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddAnalyzerAssembliesToPackage</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="AddAnalyzerAssembliesToPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="analyzers/dotnet/cs" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!--
+    DRPC 계약 타입·MessageProtocol 속성은 이름 문자열로 탐지한다(프로젝트 참조 없음).
+    직렬화 생성은 소비 프로젝트의 MessageProtocol 생성기가 담당하므로 이 생성기는 CodeAnalysis 만 필요하다.
+  -->
+
+</Project>

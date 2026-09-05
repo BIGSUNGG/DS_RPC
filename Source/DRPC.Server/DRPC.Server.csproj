@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DRPC.Server</PackageId>
+    <Description>DRPC 서버 측 RPC 허브와 RUDP 리스너. DRPC.Shared 와 함께 실시간 서비스 백엔드에 사용합니다.</Description>
+    <RootNamespace>DRPC</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Communication.Network.RUDP.Server" Version="$(CommunicationPackageVersion)" />
+    <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DRPC.Shared\DRPC.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

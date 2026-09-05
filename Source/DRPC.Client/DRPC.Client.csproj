@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DRPC.Client</PackageId>
+    <Description>DRPC 클라이언트 측 RPC 허브와 RUDP 접속. Unity(netstandard2.1) 사용을 고려했습니다.</Description>
+    <RootNamespace>DRPC</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Communication.Network.RUDP.Client" Version="$(CommunicationPackageVersion)" />
+    <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DRPC.Shared\DRPC.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

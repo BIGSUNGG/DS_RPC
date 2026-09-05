@@ -14,7 +14,7 @@ updated: 2026-09-05
 
 ## 구현 상태 (2026-09-05)
 
-F1–F7·F9·F11 **구현 완료**(`dotnet test DRPC.slnx -c Release` 58개 통과). F8(게시 CI)·F10(Template)은 이번 범위 밖.
+F1–F9·F11 **구현 완료**(`dotnet test DRPC.slnx -c Release` 58개 통과) — NuGet **2.0.0 게시 확인 완료**. F10(Template)만 범위 밖.
 형제 스택은 NuGet **2.0.0** 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 
 ## 원칙
@@ -131,11 +131,20 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - `ListenAsync` → `Task<RpcListenHandle>`(`IAsyncDisposable`): 리스너 Stop/Dispose + CT cancel, 등록 peer 정리.
 - `RpcListenHandle.ListenTask`는 **관찰 가능하게** 노출/완료 보장(레거시 미관찰 이슈 해소).
 
-## F8 — NuGet 패키징·게시 (부분: 게시 CI 는 범위 밖)
+## F8 — NuGet 패키징·게시 (완료)
 
 - `Source/` 5개 라이브러리, TFM `netstandard2.1`(CodeGenerator 는 netstandard2.0), `IsPackable=true` (CodeGenerator는 `DevelopmentDependency`).
 - 버전은 루트 `Directory.Build.props`(`MessageProtocolPackageVersion`·`CommunicationPackageVersion` 포함).
-- 태그 `v*` → GitHub Actions pack·publish.
+- 태그 `v*` → GitHub Actions pack·publish — 이미 존재하던 `.github/workflows/nuget-publish.yml`(런 이름 "NuGet Publish")가 그 동작이다.
+
+### 게시 상태 (2.0.0)
+
+- `v2.0.0` 태그 푸시 → run 33979153588 success (Require API key → Pack → Push, 모든 스텝 ✓).
+- 업로드된 5개 패키지: `DRPC.Attribute`·`DRPC.Shared`·`DRPC.Client`·`DRPC.Server`·`DRPC.CodeGenerator` 모두 2.0.0,
+  registration `upper=2.0.0` 이고 flatcontainer nupkg HTTP 200.
+- 워크플로는 태그에서 버전을 뽑아 `-p:Version`·`-p:PackageVersion` 으로 주입하므로 `Source/Directory.Build.props` 의
+  `<Version>` 은 로컬 기본값일 뿐이다(태그가 권위).
+- 유입(ingestion) 지연: 푸시 직후 몇 분간 flatcontainer·검색 API 가 구버전만 보여도 정상 — registration 으로 판정한다.
 
 ### 수용 기준
 
@@ -183,8 +192,8 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 
 - 저수준 소켓/전송 구현 (→ DS_Communication)
 - 범용 직렬화 엔진 (→ DS_MessageProtocol)
-- NuGet 게시 CI(F8 의 `v*` 워크플로)·TemplateSource(F10)
-- 이중 직렬화·버퍼 풀링 최적화 (측정 후, 형제 합의 필요)
+- TemplateSource(F10)
+- 페이로드 이중 직렬화·버퍼 풀링 최적화 (측정 후, 형제 합의 필요)
 - Communication 수신 핸들러 async 화 (형제 프로젝트 영역)
 - 페이로드 와이어 포맷의 버전 간 호환(단방향 인코딩만 보장)
 

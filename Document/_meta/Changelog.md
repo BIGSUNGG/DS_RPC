@@ -12,6 +12,10 @@ updated: 2026-08-31
 
 ## 2026-09-05
 
+- **F8 완료 · `v2.0.0` NuGet 게시**: 기존 `.github/workflows/nuget-publish.yml`(`v*` 트리거)에 태그를 붙여 푸시 →
+  run 33979153588 success, `DRPC.{Attribute,Shared,Client,Server,CodeGenerator}` 2.0.0 이 등록·다운로드까지 확인.
+  F8 을 "범위 밖/미구현"으로 적었던 문서(Feature-Spec·CONTEXT·Home·Known-Issues)를 실제에 맞게 정정하고,
+  NuGet 유입 지연·`NU5128` 정상 경고·워크플로 공백 실패 가드를 Known-Issues 에 추가.
 - 재구축 F1–F7·F9·F11 구현 완료에 맞춰 문서 신규: `02-Architecture/Overview.md`(패키지 그래프·호출 흐름·페이로드 인코딩),
   `03-Reference/Public-API.md`(표면·NuGet 2.0.0 고정·오류 코드·진단·빌드 명령), `04-Guides/Getting-Started.md`,
   `06-Troubleshooting/Known-Issues.md`.

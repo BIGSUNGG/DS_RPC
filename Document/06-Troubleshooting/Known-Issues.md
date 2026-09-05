@@ -92,9 +92,17 @@ dotnet build DRPC.slnx -c Release
 | 접속/리스닝 팩토리 서명 후퇴 | E2E `GeneratedShapeTests.Connection_factories_are_generated_with_connectionkey_overloads` |
 | 구현 후킹이 반대 편에 생성됨 | E2E `GeneratedShapeTests.Incoming_contract_methods_get_implementation_hooks_on_the_owning_side` |
 
+## 게시(NuGet)에서 알려진 것
+
+- **푸시 직후에는 검색이 안 된다.** `dotnet nuget push` 성공·run success 와 무관하게 flatcontainer·azuresearch 는 몇 분간 구버전을
+  보여준다(유입 지연). 판정은 `registration5-gz-semver2/<id>/index.json` 의 `upper` 또는 버전별 nupkg HTTP 200 으로 한다.
+- **`DRPC.CodeGenerator` pack 의 `NU5128` 경고는 정상**이다(analyzer 전용이라 `lib/netstandard2.0` 이 없음).
+  패키지 내용은 `analyzers/dotnet/cs/DRPC.CodeGenerator.dll` 하나면 맞다.
+- 워크플로는 `.nupkg` 가 하나도 없으면 명시적으로 실패한다(빈 푸시로 성공처럼 보이지 않음).
+
 ## 범위 밖 (이번 재구축에서 미구현)
 
-- F8 NuGet 게시 파이프라인(`v*` 태그 → pack/publish 워크플로) — 라이브러리는 pack 가능한 상태지만 게시 CI 는 없다.
+- TemplateSource(F10) 스캐폴드 템플릿.
 - F10 `TemplateSource/` 스캐폴드 템플릿.
 - 페이로드 이중 직렬화·버퍼 풀링 최적화(측정 후 결정, ADR-0001 Legacy 유지).
 

@@ -1,9 +1,9 @@
 ---
 project: DS_RPC
 type: overview
-status: draft
+status: stable
 tags: [moc, home]
-updated: 2026-08-31
+updated: 2026-09-05
 ---
 
 # DS_RPC (DRPC) — Home
@@ -20,11 +20,27 @@ updated: 2026-08-31
 
 ### Overview
 
-- [[Feature-Spec]] — 재구축 구현 기능 명세
+- [[Feature-Spec]] — 재구축 구현 기능 명세 (권위)
+
+### Architecture · Reference · Guides
+
+- [[../02-Architecture/Overview|Architecture Overview]] — 패키지 그래프·호출 흐름·페이로드 인코딩
+- [[../03-Reference/Public-API]] — 표면·패키지·진단·빌드 명령
+- [[../04-Guides/Getting-Started]] — RPC 선언하고 호출하기
+- [[../06-Troubleshooting/Known-Issues|Known-Issues]] — 함정·한계·빌드 이슈
+
+### Decisions (ADR)
+
+- [[../05-Decisions/0001-hub-naming-and-version-2|0001]] — Hub 명명 정렬·2.0.0 출발
+- [[../05-Decisions/0002-async-only-delivery-and-payload|0002]] — Async 전용 스텁·자체 전송 열거형·CallId 0 one-way·flat 페이로드
 
 ### Meta
 
 - [[../_meta/Changelog|Changelog]]
+
+## 상태
+
+F1–F7·F9·F11 구현 완료(테스트 53개 통과). F8 게시 CI·F10 Template 는 범위 밖.
 
 ## 아카이브
 

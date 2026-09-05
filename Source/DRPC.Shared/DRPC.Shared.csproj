@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DRPC.Shared</PackageId>
+    <Description>DRPC 공유 런타임: HubBase·와이어 메시지·오류 모델·수신 라우팅. 클라이언트/서버 패키지의 공통 기반입니다.</Description>
+    <RootNamespace>DRPC</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 직렬화 = DS_MessageProtocol (NuGet), 전송 = DS_Communication RUDP (NuGet). 형제 저장소 소스는 참조하지 않는다. -->
+    <PackageReference Include="MessageProtocol" Version="$(MessageProtocolPackageVersion)" />
+    <PackageReference Include="Communication.Shared" Version="$(CommunicationPackageVersion)" />
+    <PackageReference Include="Communication.Network.RUDP.Shared" Version="$(CommunicationPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DRPC.Attribute\DRPC.Attribute.csproj" />
+  </ItemGroup>
+
+</Project>

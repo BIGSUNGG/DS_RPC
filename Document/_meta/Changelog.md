@@ -15,6 +15,7 @@ updated: 2026-09-08
 - **형제 제안 노트 소비 + P3 채택 — `CreateRudpSession` 큐 옵션 통과** — DS_Communication `Proposals-Upstream.md`(신규) 확인: P1(TCP TLS·보류 질문으로 PENDING 등록), P2(CRC32c·v2.5.0 채택완료), P3(타임아웃 정책 통일 — ConnectTimeout 은 v2.2.0 완료, **FrameTimeout·MaxFrameLength 등 `MessageQueueOptions` 를 `CreateRudpSession` 선택 매개변수로 노출**), P4(운영 신호·후보 등록). E2E — 64바이트 상한 세션에서 소형 프레임 왕복 정상·초과 페이로드 송신 격리(2초 이내 실패)로 배관 실증. 테스트 103→104건.
 - **형제 태그 확인 — 버전 유지 결정**: Communication 2.3.1(테스트·문서·제안노트), MessageProtocol 2.3.3(생성기 리팩터·golden 검증) 은 기능 차이 없음 → 패키지 버전 유지(2.3.0/2.3.2). FrameTimeout 기본값(30초·첫 바이트 후 마감 — 완전 유휴 미적용) 확인으로 잠재 유휴 단절 결함 부재도 확인.
 - [[../03-Reference/Public-API|Public-API]] 팩토리 표, [[../00-AI/CONTEXT|CONTEXT]] 카운트, [[../00-AI/PENDING|PENDING]] P1/P4 등록.
+- **`v2.7.0` 릴리스** — 태그 푸시 → run success, 5개 패키지 flatcontainer HTTP 206 확인. 게시 상태·README 표기 갱신.
 
 ## 2026-09-08 (6차)
 

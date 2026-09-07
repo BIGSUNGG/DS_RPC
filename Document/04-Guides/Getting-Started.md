@@ -133,4 +133,5 @@ dotnet run --no-build -c Release --project Sandbox/Sandbox.Client
 ## 관련
 
 - [[../03-Reference/Public-API|Public-API]] — 표면 전체 · [[../02-Architecture/Overview|Architecture Overview]] — 내부 동작
+- [[Production-Hardening|Production-Hardening]] — 상용 투입 전 노브·권한·무결성 런북(v2.9.1)
 - [[../06-Troubleshooting/Known-Issues|Known-Issues]]

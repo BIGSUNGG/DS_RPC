@@ -16,7 +16,7 @@ updated: 2026-09-08
 - 형제 스택은 **NuGet 안정판만** 참조한다(`MessageProtocol` **2.3.4**, `Communication.Network.RUDP.*`·`Communication.Shared` **2.4.0** — CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 포함) — 형제 저장소 프로젝트 참조·하드 경로 없음.
 - 저장소 루트 솔루션은 `DRPC.slnx`.
 - 빌드·테스트는 **`-c Release`** 를 쓴다. `Debug` 는 언어 서버가 생성기 DLL 을 점유해 복사가 실패할 수 있다([[../06-Troubleshooting/Known-Issues|Known-Issues]]).
-- 구현 범위·수용 기준의 권위 문서는 [[../01-Overview/Feature-Spec|Feature-Spec]](F12 제네릭 프로시저 포함). 설계 결정은 [[../05-Decisions/0001-hub-naming-and-version-2|ADR-0001]], [[../05-Decisions/0002-async-only-delivery-and-payload|ADR-0002]].
+- 구현 범위·수용 기준의 권위 문서는 [[../01-Overview/Feature-Spec|Feature-Spec]](F12 제네릭 프로시저 포함). 설계 결정은 [[../05-Decisions/0001-hub-naming-and-version-2|ADR-0001]], [[../05-Decisions/0002-async-only-delivery-and-payload|ADR-0002]]. 상용 투입 런북은 [[../04-Guides/Production-Hardening|Production-Hardening]].
 - 미구현: F10 TemplateSource. (릴리스: … → `v2.9.0`(P4 운영 신호) → `v2.9.1`(핫패스 할당 제거·Comm 2.4.0, patch) — 5개 패키지 NuGet 게시 확인)
 - 레거시 코드·문서는 `Legacy/` 아카이브. 동작 근거가 필요하면 레거시를 참고하되 **구현 대상은 Feature-Spec** 이다.
 

@@ -10,6 +10,10 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-09 (13차)
+
+- **[[../04-Guides/Production-Hardening|Production-Hardening]] 런북 신규** — 스펙 목표(「실제 상용 서비스 투입 수준」)의 운영자 면 문서. 12개 노브·기능을 8절 런북으로 통합: 접속 예산(ConnectTimeout·RpcEndpointOptions)·고갈 방어 3종(연결/수신/대기 — 「상용 배포 시 명시적 상한 필수」 명시)·CRC32c 무결성(양단 일치·검출 전용 한계)·호출 권한(AuthorizeRequestAsync)·오류 위생(SendErrorDetails)·큐 정책(FrameTimeout·MaxFrameLength)·운영 신호(ActiveConnectionCount·FlowControl)·호출 취소. 모든 예시 v2.9.1 실제 API 기준. Getting-Started §관련·CONTEXT 에서 연결. 문서 전용 — 릴리스 없음.
+
 ## 2026-09-09 (12차)
 
 - **호출 취소 E2E 검증 추가(스펙 영역 2/F11)** — 4차(v2.4.0)의 취소 기능이 단위 테스트로만 끝났던 간극 메움. 실 RUDP 위에서: 토큰 예산(300ms)이 서버 구현 지연(2초)보다 먼저 대기를 끊는다·취소 후 동일 연결로 후속 호출 정상 왕복(세션 무오염)·서버 구현은 끝까지 실행. 테스트 109→110건. Source 변경 없음 — 릴리스 없음.

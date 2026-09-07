@@ -15,6 +15,7 @@ updated: 2026-09-08
 - **송신 핫패스 중간 배열 제거(스펙 영역 3 성능)** — `MessageProtocolConverter.Serialize` 이 메시지마다 `ToArray()` 중간 배열(직렬화→복사→재복사 이중 복사)을 내던 것을 `writer.Write(buffer.WrittenSpan)` 단일 복사로 교체 — 송신 호출당 GC 할당 1건 제거. 단위 계약 테스트(왕복 바이트 정합) 추가로 복사 전략 무관 정합 고정. 테스트 108→109건.
 - **형제 4차 채택 — Communication 2.4.0** — 늦은 구독자 끊김 전달 보장(래치·재생), 호스트 중지 시 생존 세션 `Local` 통지·사망 피어 송신 예외화. 채택 중 NU1102(유입 지연 약 5분) 재관측 — http-cache 클리어 해소(6차와 동일 패턴, 운영 지식으로 확립).
 - [[../00-AI/CONTEXT|CONTEXT]]·[[../01-Overview/Feature-Spec|Feature-Spec]] 상태 동기화.
+- **`v2.9.1` 릴리스(patch)** — 태그 푸시 → run success, 5개 패키지 flatcontainer HTTP 206 확인. 게시 상태·README 표기 갱신.
 
 ## 2026-09-09 (9차)
 

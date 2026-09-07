@@ -10,6 +10,11 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-08 (3차)
+
+- **`RpcHost.ListenAsync` `maxConnections` 오버로드** — 스펙 개선 영역 1(보안·리소스 고갈 「대량 호출·연결 고갈」) 처리. 동시 수락 연결 수 상한을 DRPC 리슨 경로에 노출(Communication 2.0.1 `RudpTransportOptions.MaxConnections` 채택 완결 — ConnectTimeout 에 이은 두 번째). 상한 도달 시 초과 접속은 즉시 거부되고 수락은 계속(연결 고갈 공격 방어), 0(기본)=무제한·동작 불변, 음수 거부. `HubSessionFactory.CreateTransportOptions` 세 번째 선택 매개변수 추가. E2E — 상한 1에서 첫 클라 정상 동작·초과 접속 즉시 거부 + 음수 거부, 팩토리 단위 4건. 테스트 87→91건 통과.
+- [[../03-Reference/Public-API|Public-API]] 헬퍼 표, [[../01-Overview/Feature-Spec|Feature-Spec]] F7 갱신.
+
 ## 2026-09-08 (2차)
 
 - **`HubBase.MaxPendingCalls` — outgoing 대기 테이블 상한** — 스펙 개선 영역 1(보안·리소스 고갈 「대기 호출 적체」) 처리. 응답 불능 피어에 대해 호출자가 무한정 쌓는 대기 CallId(메모리 고갈 표면)를 상한으로 끊는다. 기본 0(무제한·동작 불변), 도달 시 새 호출은 대기 없이 즉시 `InvalidOperationException`(fail-fast), 슬롯 해제(응답·오류·타임아웃·끊김) 후 재시도 가능, 음수 거부. 검사·등록 경쟁의 순간적 초과는 근사 강제로 문서화. 단위 테스트 3건(상한 fail-fast·슬롯 해제 재시도·기본 무제한·음수 거부). 테스트 84→87건 통과.

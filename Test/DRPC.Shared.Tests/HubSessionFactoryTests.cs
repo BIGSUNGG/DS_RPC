@@ -54,4 +54,21 @@ public class HubSessionFactoryTests
         Assert.Equal("game-key", options.ConnectionKey);
         Assert.Equal(1500, options.ConnectTimeout);
     }
+
+    [Fact]
+    public void Transport_options_max_connections_maps_and_defaults()
+    {
+        // 기본·명시적 0 은 무제한(null) — 상한은 양수만 설정한다.
+        Assert.Null(HubSessionFactory.CreateTransportOptions(null).MaxConnections);
+        Assert.Null(HubSessionFactory.CreateTransportOptions(null, 0, 0).MaxConnections);
+        Assert.Equal(1, HubSessionFactory.CreateTransportOptions(null, 0, 1).MaxConnections);
+        Assert.Equal(64, HubSessionFactory.CreateTransportOptions("game-key", 0, 64).MaxConnections);
+    }
+
+    [Fact]
+    public void Transport_options_negative_max_connections_is_rejected()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>("maxConnections",
+            () => HubSessionFactory.CreateTransportOptions(null, 0, -1));
+    }
 }

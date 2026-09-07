@@ -19,7 +19,28 @@ public static class RpcHost
         Func<THub, Task>? onConnected = null,
         CancellationToken cancellationToken = default)
         where THub : Shared.Network.HubBase
+        => ListenAsync(port, 0, connectionKey, hubFactory, onConnected, cancellationToken);
+
+    /// <summary>
+    /// <paramref name="maxConnections"/> 가 양수면 동시 수락 연결 수 상한(연결 고갈 공격 방어 — 상한 도달 시
+    /// 접속 요청은 즉시 거부되고 수락은 계속된다). 0이면(기본) 무제한.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxConnections"/> 가 음수.</exception>
+    /// <exception cref="InvalidOperationException">바인딩 실패·이미 시작된 리스너.</exception>
+    public static Task<RpcListenHandle> ListenAsync<THub>(
+        int port,
+        int maxConnections,
+        string? connectionKey,
+        Func<IMessageChannel, THub> hubFactory,
+        Func<THub, Task>? onConnected = null,
+        CancellationToken cancellationToken = default)
+        where THub : Shared.Network.HubBase
     {
+        if (maxConnections < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxConnections));
+        }
+
         var listener = new RudpListener(System.Net.IPAddress.Any, port);
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var stopped = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -66,7 +87,7 @@ public static class RpcHost
 
         try
         {
-            listener.Start(HubSessionFactory.CreateTransportOptions(connectionKey));
+            listener.Start(HubSessionFactory.CreateTransportOptions(connectionKey, 0, maxConnections));
         }
         catch
         {

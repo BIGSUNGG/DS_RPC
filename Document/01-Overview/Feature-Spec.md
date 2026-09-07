@@ -143,6 +143,7 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 ## F7 — 서버 Hub·리스너 수명 (`DRPC.Server`)
 
 - Hub 베이스 `ServerHub<TSPD, TCPD>`(`DRPC.Server.Network`) + `RpcHost.ListenAsync`(2.0.0 `RudpListener.Accepted`); peer마다 Hub 인스턴스 + `onConnected(hub)` 콜백(예외는 `Trace` 로 격리, 콘솔 의존 없음).
+- `RpcHost.ListenAsync` `maxConnections` 오버로드(2.2 이후) — 동시 수락 연결 상한(연결 고갈 공격 방어). 초과 접속은 즉시 거부되고 수락은 계속된다(Communication 2.0.1 `MaxConnections`).
 - `ListenAsync` → `Task<RpcListenHandle>`(`IAsyncDisposable`): 리스너 Stop/Dispose + CT cancel, 등록 peer 정리.
 - `RpcListenHandle.ListenTask`는 **관찰 가능하게** 노출/완료 보장(레거시 미관찰 이슈 해소).
 

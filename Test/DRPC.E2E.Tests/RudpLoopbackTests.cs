@@ -1,6 +1,7 @@
 using Communication.Shared.Sessions;
 using DRPC;
 using DRPC.Client.Network;
+using DRPC.Server.Network;
 using DRPC.Shared;
 using DRPC.Shared.Interface;
 using DRPC.Shared.Message;
@@ -138,6 +139,34 @@ public class RudpLoopbackTests
         stopwatch.Stop();
         Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(3),
             $"connect failure took {stopwatch.Elapsed} — timeout did not bound the silent host.");
+    }
+
+    [Fact]
+    public async Task Listener_max_connections_rejects_excess_peer()
+    {
+        int port = NextPort();
+
+        // 상한 1: 연결 고갈 공격 방어 — 초과 접속은 즉시 거부되고 수락은 계속된다.
+        await using var handle = await RpcHost.ListenAsync(port, 1, Key,
+            channel => new E2EServerHub(hub => HubSessionFactory.CreateRudpSession(channel, hub)),
+            _ => Task.CompletedTask);
+
+        using var first = await E2EClientHub.ConnectAsync("127.0.0.1", port, Key);
+        Assert.Equal(5, await Within(first.AddAsync(2, 3))); // 상한 이내 클라는 정상 동작
+
+        // 상한 초과 — 재시도 소진이 아니라 즉시 거부 통보로 ConnectAsync 가 실패한다.
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            RpcClient.ConnectAsync("127.0.0.1", port, Key,
+                channel => new RogueClientHub(hub => HubSessionFactory.CreateRudpSession(channel, hub))));
+    }
+
+    [Fact]
+    public async Task Listener_negative_max_connections_is_rejected()
+    {
+        int port = NextPort();
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => RpcHost.ListenAsync(port, -1, Key,
+            channel => new E2EServerHub(hub => HubSessionFactory.CreateRudpSession(channel, hub))));
     }
 
     [Fact]

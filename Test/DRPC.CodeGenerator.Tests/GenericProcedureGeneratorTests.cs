@@ -92,7 +92,7 @@ public class GenericProcedureGeneratorTests
         var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(contract));
 
         Assert.Contains("public async global::System.Threading.Tasks.Task LogAsync<T>(T value)", result.GeneratedSource);
-        Assert.Contains("__WriteParams_ITestServerProcedures_Log_1(((global::System.String)(object)value))", result.GeneratedSource);
+        Assert.Contains("__WriteParams_ITestServerProcedures_Log_1(((global::System.String)(object)value!))", result.GeneratedSource);
     }
 
     [Fact]

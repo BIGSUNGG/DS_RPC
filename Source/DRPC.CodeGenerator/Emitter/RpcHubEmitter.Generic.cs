@@ -22,7 +22,7 @@ internal static partial class RpcHubEmitter
     static string CastArgument(ITypeSymbol original, ITypeSymbol closed, string name)
         => Microsoft.CodeAnalysis.SymbolEqualityComparer.Default.Equals(original, closed)
             ? name
-            : $"(({closed.ToDisplayString(RpcPayload.Qualified)})(object){name})";
+            : $"(({closed.ToDisplayString(RpcPayload.Qualified)})(object){name}!)";
 
     static void EmitGenericOutgoing(StringBuilder sb, MethodMetadata method, string indent)
     {

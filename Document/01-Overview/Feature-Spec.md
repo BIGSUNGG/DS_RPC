@@ -96,6 +96,7 @@ RPC 호출의 실질 런타임 전부.
 
 - `[StandaloneMessage]` 등록, MessageProtocol 직렬화.
 - `RpcErrorCode`: `Unhandled` / `UnknownMethod` / `Timeout` / `Disconnected` / `Overloaded` / `PermissionDenied`.
+- `Unhandled` 응답의 상세 문구는 `SendErrorDetails`(기본 true)로 제어 — false면 고정 문구(정보유출 방어), 서버측 Trace 는 항상 기록.
 - 원격 오류는 호출측에서 `RpcFaultException`으로 관찰.
 - **응답·오류의 전송 방식은 요청 MethodId 에 등록된 방식(`MethodDeliveryModes`)을 따른다.**
 - **one-way 신호는 `CallId == 0`** — 수신 측 등록표로 판정하지 않는다(ADR-0002 결정 3).

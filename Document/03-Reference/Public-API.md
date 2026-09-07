@@ -92,6 +92,7 @@ public abstract class ServerHub<TSPD, TCPD> : HubBase<TSPD, TCPD> { /* 위와 �
 | ------ | ------ |
 | `TimeSpan RpcTimeout { get; set; }` | 기본 30초. `Timeout.InfiniteTimeSpan`·0 이하는 무제한. 만료는 `TimeoutException` |
 | `int MaxConcurrentIncoming { get; set; }` | 기본 0(무제한). 초과 시 non-one-way 는 `Overloaded` 오류, one-way 은 drop. **연결 직후·유휴 시에만 설정** |
+| `bool SendErrorDetails { get; set; } = true` | `Unhandled` 오류의 원격 응답에 예외 상세 실을지(기본 true·기존 동작). false면 고정 문구 전송 — 인터넷 노출 엔드포인트 권장. 서버측 Trace 기록은 항상 유지 |
 | `protected virtual Task<bool> AuthorizeRequestAsync(int methodId)` | 호출 권한 검증 훯(기본 전부 허용). 서버 허브 override 로 메서드별 권한 검사 — 거부 시 non-one-way 는 `PermissionDenied` 오류, one-way 는 drop. 등록표 조회 전에 판정(메서드 존재 노출 없음) |
 | `int MaxPendingCalls { get; set; }` | 기본 0(무제한). 응답 대기 중 outgoing 호출 상한 — 도달 시 새 호출은 즉시 `InvalidOperationException`(fail-fast). 검사·등록 경쟁으로 순간적 초과 가능(근사 강제) |
 | `event Action? Disconnected` | 끊김 1회(대기 호출은 이미 실패 처리된 뒤) |

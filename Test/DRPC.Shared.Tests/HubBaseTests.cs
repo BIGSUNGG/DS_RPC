@@ -287,6 +287,37 @@ public class HubBaseTests
     }
 
     [Fact]
+    public async Task Unhandled_error_sends_exception_detail_by_default()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session);
+        hub.Register(5, _ => throw new InvalidOperationException("boom-42"));
+
+        hub.OnReceiveRPCRequestMessage(new ProcedureCallRequestMessage(1u, 5, Payload));
+        await WaitUntilAsync(() => session.Sent.OfType<ProcedureCallErrorMessage>().Any());
+
+        ProcedureCallErrorMessage error = Assert.Single(session.Sent.OfType<ProcedureCallErrorMessage>());
+        Assert.Equal(RpcErrorCode.Unhandled, error.ErrorCode);
+        Assert.Contains("boom-42", error.Message); // 기본 동작 — 상세 전송(개발 편의)
+    }
+
+    [Fact]
+    public async Task SendErrorDetails_false_suppresses_remote_detail()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session) { SendErrorDetails = false };
+        hub.Register(5, _ => throw new InvalidOperationException("boom-42"));
+
+        hub.OnReceiveRPCRequestMessage(new ProcedureCallRequestMessage(1u, 5, Payload));
+        await WaitUntilAsync(() => session.Sent.OfType<ProcedureCallErrorMessage>().Any());
+
+        ProcedureCallErrorMessage error = Assert.Single(session.Sent.OfType<ProcedureCallErrorMessage>());
+        Assert.Equal(RpcErrorCode.Unhandled, error.ErrorCode);
+        Assert.DoesNotContain("boom-42", error.Message); // 내부 상세는 원격으로 새지 않는다
+        Assert.NotEmpty(error.Message);
+    }
+
+    [Fact]
     public void MaxPendingCalls_RejectsNegative()
     {
         using var hub = new TestHub(new FakeSession());

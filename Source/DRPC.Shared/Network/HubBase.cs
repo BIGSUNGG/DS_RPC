@@ -63,6 +63,13 @@ public abstract class HubBase : IHubBase, IDisposable
 
     int _maxPendingCalls;
 
+    /// <summary>
+    /// <see cref="RpcErrorCode.Unhandled"/> 오류의 원격 응답에 예외 상세 메시지(<c>ex.Message</c>)를 실을지.
+    /// 기본 <c>true</c>(기존 동작 — 신뢰 피어 간 개발 편의). <c>false</c> 면 내부 예외 문구(경로·내부 상태 노출 표면) 대신
+    /// 고정 문구를 보낸다 — 인터넷 노출 엔드포인트 권장. 서버 측 <c>Trace</c> 기록은 설정과 무관하게 항상 남는다.
+    /// </summary>
+    public bool SendErrorDetails { get; set; } = true;
+
     int _disconnectRaised;
     bool _disposed;
 
@@ -324,6 +331,9 @@ public abstract class HubBase : IHubBase, IDisposable
         }
         catch (Exception ex)
         {
+            // 서버 측 관측 — 원격 전송 여부·상세 여부와 무관하게 항상 기록한다(콘솔 의존 금지 — Trace 만).
+            System.Diagnostics.Trace.TraceError($"RPC method {message.MethodId} (call {message.CallId}) unhandled: {ex}");
+
             if (oneWay)
             {
                 return;
@@ -331,7 +341,10 @@ public abstract class HubBase : IHubBase, IDisposable
 
             try
             {
-                await SendErrorAsync(message.CallId, RpcErrorCode.Unhandled, ex.Message, ResolveMode(message.MethodId))
+                string detail = SendErrorDetails
+                    ? ex.Message
+                    : "An unhandled error occurred on the remote hub.";
+                await SendErrorAsync(message.CallId, RpcErrorCode.Unhandled, detail, ResolveMode(message.MethodId))
                     .ConfigureAwait(false);
             }
             catch

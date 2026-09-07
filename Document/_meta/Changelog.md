@@ -10,6 +10,11 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-09 (8차)
+
+- **`HubBase.SendErrorDetails` — Unhandled 오류 정보유출 방어 + 서버측 항상 Trace** — 식별된 마지막 영역 1/2 잔여 항목 처리. 기존: 구현 예외의 `ex.Message`(경로·내부 상태 포함 가능)가 원격 피어로 그대로 전송되는 반면 **서버 운영자에겐 아무 기록도 남지 않던 역전**. 이제 ① 노브(기본 true·기존 동작 유지 — 하위호환, false면 고정 문구 전송·인터넷 노출 엔드포인트 권장) ② 예외는 설정과 무관하게 항상 `Trace.TraceError`(콘솔 의존 금지 규약 준수). 단위 2건(기본 상세 전송·억제 시 미누출). E2E 기본 경로 단언("intentional failure") 유지 통과로 기본 동작 불변 실증. 테스트 104→106건.
+- [[../03-Reference/Public-API|Public-API]] HubBase 표, [[../01-Overview/Feature-Spec|Feature-Spec]] F3, [[../00-AI/CONTEXT|CONTEXT]] 카운트 동기화.
+
 ## 2026-09-09 (7차)
 
 - **형제 제안 노트 소비 + P3 채택 — `CreateRudpSession` 큐 옵션 통과** — DS_Communication `Proposals-Upstream.md`(신규) 확인: P1(TCP TLS·보류 질문으로 PENDING 등록), P2(CRC32c·v2.5.0 채택완료), P3(타임아웃 정책 통일 — ConnectTimeout 은 v2.2.0 완료, **FrameTimeout·MaxFrameLength 등 `MessageQueueOptions` 를 `CreateRudpSession` 선택 매개변수로 노출**), P4(운영 신호·후보 등록). E2E — 64바이트 상한 세션에서 소형 프레임 왕복 정상·초과 페이로드 송신 격리(2초 이내 실패)로 배관 실증. 테스트 103→104건.

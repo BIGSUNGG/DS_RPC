@@ -3,7 +3,7 @@ project: DS_RPC
 type: reference
 status: stable
 tags: [reference, api, packages, nuget]
-updated: 2026-09-05
+updated: 2026-09-07
 ---
 
 # Public-API — 재구축 2.0.0
@@ -16,7 +16,7 @@ updated: 2026-09-05
 
 | 프로퍼티 | 값 | 패키지 |
 | --------- | ----- | -------- |
-| `MessageProtocolPackageVersion` | `2.0.0` | `MessageProtocol`(런타임 + analyzers/dotnet/cs 생성기 포함) |
+| `MessageProtocolPackageVersion` | `2.1.0` | `MessageProtocol`(런타임 + analyzers/dotnet/cs 생성기 포함, GenericMessage 포함) |
 | `CommunicationPackageVersion` | `2.0.0` | `Communication.Shared`, `Communication.Network.RUDP.{Shared,Client,Server}` |
 
 저장소 자체는 어떤 형제 프로젝트 경로도 참조하지 않는다(`Source/Sandbox/Test`의 csproj에서 `ProjectReference` 가
@@ -40,11 +40,26 @@ public enum RpcDeliveryMode
 {
     Unreliable, ReliableUnordered, Sequenced, ReliableOrdered, ReliableSequenced,
 }
+
+/// 제네릭 프로시저(F12) — 타입 파라미터 슬롯별 허용 타입 사전 선언. AllowMultiple.
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+public sealed class GenericProcedureAttribute : Attribute
+{
+    public GenericProcedureAttribute(params Type[] types);             // 슬롯 0
+    public GenericProcedureAttribute(int slot, params Type[] types);   // 지정 슬롯
+    public int Slot { get; }
+    public Type[] Types { get; }
+}
 ```
 
 `[RemoteProcedure]` 인자 없이 붙이면 ReliableOrdered·MethodId 는 선언 순서(DRPCGEN004 경고).
 **주의**: 첫 positional 인자는 `mode` 다. `[RemoteProcedure(0)]` 은 methodId 0 이 아니라 `Unreliable` —
 methodId 만 지정할 때는 `[RemoteProcedure(methodId: 3)]` 을 쓴다(ADR-0002 결정 2).
+
+제네릭 프로시저: `[RemoteProcedure(methodId: 7)] [GenericProcedure(typeof(int), typeof(string))] T GetDefault<T>();` —
+타입 파라미터가 [GenericMessage] 파라미터(`void Unwrap<T>(GiftBox<T> box)`)로만 쓰이면 [GenericProcedure] 없이
+그 메시지의 구성 선언에서 T 집합을 상속한다. 미선언 타입 인자 호출은 컴파일(DRPCGEN008)·런타임(스텁 throw) 양쪽에서 에러.
+선언 결함은 DRPCGEN007(미선언 슬롯)·009(무효 선언·비-ID-헤더 [GenericMessage] 타입·제약·64구성 상한).
 
 ## 계약 인터페이스 (DRPC.Shared)
 
@@ -97,8 +112,13 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
     public Task<int> AddAsync(int value1, int value2);
     public Task NoteAsync(string text);                       // OneWay
 
+    // 제네릭 스텁(F12) — 일반 호출과 동일한 방법(T 추론 가능, 반환 전용은 명시)
+    public Task<T> GetConfigAsync<T>();                       // await hub.GetConfigAsync<int>()
+    public Task<string> DescribeAsync<T>(T value);            // await hub.DescribeAsync(42)
+
     // Incoming: 사용자가 이 partial 을 구현한다
     private partial Task<int> EchoSum_Implementation(List<float> values);
+    private partial Task<T> GetConfig_Implementation<T>();    // 제네릭은 타입 파라미터까지 동일하게
 }
 ```
 

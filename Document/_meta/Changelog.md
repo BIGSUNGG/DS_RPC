@@ -3,12 +3,19 @@ project: DS_RPC
 type: meta
 status: stable
 tags: [meta, changelog]
-updated: 2026-08-31
+updated: 2026-09-07
 ---
 
 # Changelog
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
+
+## 2026-09-07
+
+- **F12 제네릭 프로시저 구현** — `[GenericProcedure(params Type[]) / (int slot, params Type[])]` 속성 신규(DRPC.Attribute, AllowMultiple). 4가지 형태 지원: 반환 전용 `T Proc<T>()`·매개변수 `void Proc<T>(T v)`·복합 `T1 Proc<T1,T2,T3>(T2,T3)`(데카르트 곱, 64구성 상한)·`[GenericMessage]` 파라미터 `void Proc<T>(Package<T>)`(미선언 슬롯은 메시지 구성 선언에서 상속). 호출은 일반 프로시저와 동일(`hub.XxxAsync(42)` 추론 / `hub.XxxAsync<int>()` 명시), 서버 구현은 `Task<T> Xxx_Implementation<T>(...)` partial. 와이어: 페이로드 첫 4바이트 구성 인덱스(슬롯 0이 가장 느린 오도미터) — 포맷·HubBase 불변. 진단: DRPCGEN007(슬롯 미선언)·008(호출 지점 미선언 타입 인자 — 미해결 `{Method}Async` 호출 구조적 탐지, 추론 불가 슬롯은 런타임 백스톱에 위임)·009(무효 선언·[GenericMessage] 슬롯의 비-ID-헤더 타입·타입 파라미터 제약·상한). 런타임 백스톱: 스텁 `else` throw + 수신측 알 수 없는 구성 인덱스 → `RpcErrorCode.Unhandled`.
+- 형제 의존 승격: `MessageProtocol` 2.0.0 → **2.1.0**(GenericMessage 포함 안정판, 형제 저장소 태그 `v2.1.0` 게시 후 핀). Communication 2.0.0 유지.
+- 구현 중 발견·승격된 제약: MessageProtocol 제네릭 구성은 T 멤버를 런타임 메시지 디스패치로 직렬화 → `[GenericMessage]` 슬롯 타입은 ID 헤더 메시지(Standalone/Group)여야 하고 NonId·프리미티브는 런타임 크래시 대신 DRPCGEN009 로 컴파일 타임 거부.
+- 테스트 58→77(CodeGenerator 제네릭 18케이스 포함 36·E2E 루프백 5케이스 추가 22·Shared 19). Sandbox 데모에 4형태 호출 추가(GetConfig/Describe/Blend/Unwrap+GiftBox). `Feature-Spec` F12 절·F1·F5, `Public-API` 속성·스텁 서명·진단, `CONTEXT` 상태 갱신.
 
 ## 2026-09-05
 

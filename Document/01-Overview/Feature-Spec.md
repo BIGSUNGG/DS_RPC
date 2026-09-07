@@ -3,7 +3,7 @@ project: DS_RPC
 type: overview
 status: stable
 tags: [scope, spec, feature]
-updated: 2026-09-05
+updated: 2026-09-07
 ---
 
 # Feature Spec — 재구축 구현 기능 명세
@@ -12,9 +12,9 @@ updated: 2026-09-05
 이 문서는 **구현할 기능의 범위·동작·수용 기준**을 정의한다.
 레거시 동작 근거는 아카이브 문서: [[../../Legacy/Document/03-Reference/Public-API|Public-API (Legacy)]], [[../../Legacy/Document/02-Architecture/Data-Flow|Data-Flow (Legacy)]], [[../../Legacy/Document/06-Troubleshooting/Known-Issues|Known-Issues (Legacy)]].
 
-## 구현 상태 (2026-09-05)
+## 구현 상태 (2026-09-07)
 
-F1–F9·F11 **구현 완료**(`dotnet test DRPC.slnx -c Release` 58개 통과) — NuGet **2.0.0 게시 확인 완료**. F10(Template)만 범위 밖.
+F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotnet test DRPC.slnx -c Release` 77개 통과) — 형제 NuGet **MessageProtocol 2.1.0**(GenericMessage 포함), Communication 2.0.0. F10(Template)만 범위 밖.
 형제 스택은 NuGet **2.0.0** 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 
 ## 원칙
@@ -41,6 +41,7 @@ F1–F9·F11 **구현 완료**(`dotnet test DRPC.slnx -c Release` 58개 통과) 
 | F9 | Sandbox 데모 | Sandbox/* | P2 |
 | F10 | Template | TemplateSource/* | P2 |
 | F11 | 테스트 인프라 | Test/* | P0–P2 |
+| F12 | 제네릭 프로시저 호출 | DRPC.Attribute·CodeGenerator | P0 |
 
 ---
 
@@ -57,6 +58,16 @@ F1–F9·F11 **구현 완료**(`dotnet test DRPC.slnx -c Release` 58개 통과) 
 - Attribute·enum **두 타입만으로** 계약이 완결되고 `DRPC.Attribute` 의 패키지 의존은 0이다.
 - `methodId` 미지정 시 생성기가 DRPCGEN004 경고로 보완한다 (F5).
 - 함정: 첫 positional 인자는 `mode` 다. `[RemoteProcedure(0)]` 은 methodId 0 이 아니라 `Unreliable`.
+
+### 제네릭 프로시저 (F12)
+
+`[RemoteProcedure]` 제네릭 메서드의 타입 파라미터 슬롯별 허용 타입을 사전 선언한다.
+
+- `[GenericProcedure(params Type[] types)]` → 슬롯 0. `[GenericProcedure(int slot, params Type[] types)]` → 지정 슬롯. `AllowMultiple` — 슬롯마다 1회.
+- 지원 형태 4가지: ① 반환 제네릭 `T Proc<T>()`, ② 매개변수 제네릭 `void Proc<T>(T v)`, ③ 복합 `T1 Proc<T1,T2,T3>(T2 v1, T3 v2)`(슬롯별 목록 × 데카르트 곱, 상한 64구성), ④ `[GenericMessage]` 파라미터 `void Proc<T>(Package<T> v)` — 미선언 슬롯은 파라미터 메시지의 [GenericMessage] 구성 선언에서 T 집합을 상속(이때 T 는 ID 헤더 메시지여야 한다 — 구성 등록이 `(MessageId, ClassId)` 디스패치를 요구, NonId·프리미티브는 DRPCGEN009).
+- 호출·구현은 일반 프로시저와 동일 패턴: 클라 `await hub.XxxAsync(42)`(타입 추론) / `await hub.XxxAsync<int>()`(반환 전용 명시), 서버 `Task<T> Xxx_Implementation<T>(...)` partial.
+- 제약: 타입 파라미터 제약(`where`) 미지원(DRPCGEN009).
+- 함정: 와이어 구성 인덱스는 선언 순서(슬롯 0이 가장 느리게 도는 오도미터)로 결정적 산출 — 목록 순서를 바꾸면 기존 피어와 호환 깨짐(컴파일 타임 감지 불가, 문서로만 관리).
 
 ## F2 — Hub 런타임 (`HubBase`, DRPC.Shared)
 
@@ -112,6 +123,8 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
   ID 헤더 메시지(Standalone/Group/Generic)는 `SerializeToWriter`/`DeserializeFromReader`(그룹 다형성 보존).
 - **진단**: DRPCGEN001 partial / 002 Hub 베이스 / 003 지원 타입·오버로드·`Task` 반환 / 004 명시 methodId 권장(warning) / 005 중복 methodId(error) / 006 OneWay+non-void(error).
   DRPCGEN001 은 실제로 발화해야 하므로 생성기 파이프라인 전제조건에서 `partial` 을 빼고(베이스명에 `Hub` 포함만으로 후보 선별) 판정한다.
+- **제네릭 스텁(F12)**: 페이로드 첫 4바이트 = 구성 인덱스(와이어 포맷 불변, HubBase 불변). Outgoing 스텁은 제네릭 메서드 그대로 방출해 내부에서 `typeof(T)` 체인으로 구성별 닫힌 헬퍼에 캐스팅해 넘긴다(선언 밖 조합은 마지막 `else` throw — 런타임 백스톱). Incoming 은 구성 인덱스 `switch` 후 닫힌 타입으로 `_Implementation<T...>` 호출.
+- **제네릭 진단**: 007 타입 파라미터 미선언(error) / 008 호출 지점 미선언 타입 인자(error — 미해결 `{Method}Async` 호출을 구조적으로 탐지, 명시 인자·매개변수 추론 모두 검사, 추론 불가 슬롯은 런타임 백스톱에 맡김) / 009 [GenericProcedure] 선언 무효(비제네릭 메서드·슬롯 범위 밖·중복·타입 중복·제약·구성 상한·[GenericMessage] 슬롯에 비-ID-헤더 타입)(error).
 
 ### 수용 기준
 

@@ -3,7 +3,7 @@ project: DS_RPC
 type: architecture
 status: stable
 tags: [architecture, layers, data-flow, payload]
-updated: 2026-09-05
+updated: 2026-09-07
 ---
 
 # Architecture Overview — 재구축 2.0.0
@@ -15,7 +15,7 @@ RPC 계층만 구현한다. 전송은 DS_Communication(RUDP), 직렬화는 DS_Me
 
 | 패키지 | TFM | 의존 | 역할 |
 | -------- | ------- | ------ | ------ |
-| `DRPC.Attribute` | netstandard2.1 | 없음 | `[RemoteProcedure]`, `RpcDeliveryMode` — 계약 표면 |
+| `DRPC.Attribute` | netstandard2.1 | 없음 | `[RemoteProcedure]`, `[GenericProcedure]`, `RpcDeliveryMode` — 계약 표면 |
 | `DRPC.Shared` | netstandard2.1 | Attribute, MessageProtocol, Communication.Shared, Communication.Network.RUDP.Shared | `HubBase` 런타임, 와이어 메시지, 오류 모델, 수신 라우팅, 전송 매핑 |
 | `DRPC.Client` | netstandard2.1 | Shared, Communication.Network.RUDP.Client | `ClientHub<,>` 베이스, `RpcClient` 접속 |
 | `DRPC.Server` | netstandard2.1 | Shared, Communication.Network.RUDP.Server | `ServerHub<,>` 베이스, `RpcHost` 리스닝 |
@@ -71,7 +71,7 @@ DRPC.Shared  HubBase ── ISession.SendAsync(msg, RudpSendOptions) ──▶ C
 | Standalone/Group/Generic 메시지 | `MessageSerializer.SerializeToWriter(v, ref buf)` — 런타임 타입 기준 dispatch, **그룹 다형성 보존** |
 
 읽기는 `MessageBufferReader` 로 같은 순서를 거꾸로 밟는다(`DeserializeFromReader` 는 헤더의 ID 로 라우팅).
-미지원: `ref/out` 매개변수, 제네릭 메서드, 사전류, `Task`/`Task<T>` 반환(계약은 plain 반환 타입 — DRPCGEN003).
+미지원: `ref/out` 매개변수, 사전류, `Task`/`Task<T>` 반환(계약은 plain 반환 타입 — DRPCGEN003), 제약 있는 타입 파라미터(DRPCGEN009). 제네릭 메서드는 [GenericProcedure] 선언 슬롯으로 지원(F12) — 미선언 타입 인자는 DRPCGEN007/008/009·런타임 백스톱.
 
 ## 수명
 

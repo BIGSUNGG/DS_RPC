@@ -24,13 +24,25 @@ public static class HubSessionFactory
 
     /// <summary>
     /// 접속 옵션. <paramref name="connectionKey"/> 가 null/빈 문자열이면 전송 스택 기본 키를 쓴다.
+    /// <paramref name="connectTimeoutMs"/> 가 양수면 침묵 호스트(블랙홀) 연결 실패를 그 시간 이내로 확정한다
+    /// (Communication 2.0.1 <c>RudpTransportOptions.ConnectTimeout</c>). 0이면(기본) 전송 스택 기본값을 유지하고 음수는 거부한다.
     /// </summary>
-    public static RudpTransportOptions CreateTransportOptions(string? connectionKey)
+    public static RudpTransportOptions CreateTransportOptions(string? connectionKey, int connectTimeoutMs = 0)
     {
+        if (connectTimeoutMs < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(connectTimeoutMs));
+        }
+
         var options = new RudpTransportOptions();
         if (!string.IsNullOrEmpty(connectionKey))
         {
             options.ConnectionKey = connectionKey;
+        }
+
+        if (connectTimeoutMs > 0)
+        {
+            options.ConnectTimeout = connectTimeoutMs;
         }
 
         return options;

@@ -3,12 +3,19 @@ project: DS_RPC
 type: meta
 status: stable
 tags: [meta, changelog]
-updated: 2026-09-07
+updated: 2026-09-08
 ---
 
 # Changelog
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
+
+## 2026-09-08
+
+- **형제 스택 채택 — Communication 2.0.1·MessageProtocol 2.3.0** — 하위 신기능 채택 절차(스펙 § 하위 프로젝트 채택) 최초 실행. `CommunicationPackageVersion` 2.0.0→2.0.1(RUDP 메시지 채널 흐름제어 실패폐쇄·MaxFrameLength 수신 적용·peer id 재사용 채널 오염 수정·폴링 오류 추적 스로틀·`ConnectTimeout` 신설), `MessageProtocolPackageVersion` 2.1.0→2.3.0(공유 참조 동일성·중복 (MessageId, ClassId) 컴파일 타임 거부·백레퍼런스 가이드 예외·등록 순서 검증).
+- **`RpcClient.ConnectAsync` 연결 타임아웃 오버로드** — 신설 `connectTimeoutMs` 로 침묵 호스트(패킷 블랙홄) 연결 실패를 상한 이내로 확정. 기존 시그니처는 그대로(기본값 유지·하위호환), `HubSessionFactory.CreateTransportOptions` 도 `connectTimeoutMs` 선택 매개변수 추가(0=미설정, 음수 거부). E2E 회귀 — 침묵 포트 300ms 상한 실패(3초 미만 완료) + 팩토리 계약 단위 5건.
+- **E2E 포트 할당 임시 포트 전환** — 고정 시드(9600+7n)가 Windows 예약 포트 범위·선행 실행 잔여 리스너와 충돌해 "RUDP 리스너 바인딩 실패" 플레이크(9607·9621·9705 관측) — OS 배정 임시 포트(UdpClient(0) 확보)로 교체. 테스트 77→84건 통과.
+- [[../00-AI/CONTEXT|CONTEXT]]·[[../01-Overview/Feature-Spec|Feature-Spec]] 상태·버전 동기화, [[../03-Reference/Public-API|Public-API]] 헬퍼 표 갱신.
 
 ## 2026-09-07
 

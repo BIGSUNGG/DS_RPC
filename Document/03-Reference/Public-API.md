@@ -128,9 +128,9 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
 
 | 타입 | 멤버 |
 | ------ | ------ |
-| `DRPC.Client.Network.RpcClient` | `Task<THub> ConnectAsync<THub>(string host, int port, string? connectionKey, Func<IMessageChannel, THub> hubFactory, CancellationToken ct = default)` |
+| `DRPC.Client.Network.RpcClient` | `Task<THub> ConnectAsync<THub>(string host, int port, string? connectionKey, Func<IMessageChannel, THub> hubFactory, CancellationToken ct = default)`, 오버로드 `ConnectAsync<THub>(host, port, connectionKey, int connectTimeoutMs, hubFactory, ct = default)` — 침묵 호스트 연결 실패를 상한 이내로 확정(Communication 2.0.1 `ConnectTimeout` 채택, 0=기본 약 5초, 음수는 `ArgumentOutOfRangeException`) |
 | `DRPC.Server.Network.RpcHost` | `Task<RpcListenHandle> ListenAsync<THub>(int port, string? connectionKey, Func<IMessageChannel, THub> hubFactory, Func<THub, Task>? onConnected, CancellationToken ct = default)` |
-| `DRPC.Shared.Network.HubSessionFactory` | `IMessageConverter Converter`, `ISession CreateRudpSession(IMessageChannel, IHubBase)`, `RudpTransportOptions CreateTransportOptions(string?)` |
+| `DRPC.Shared.Network.HubSessionFactory` | `IMessageConverter Converter`, `ISession CreateRudpSession(IMessageChannel, IHubBase)`, `RudpTransportOptions CreateTransportOptions(string? connectionKey, int connectTimeoutMs = 0)`(0=미설정·음수 거부) |
 | `DRPC.Shared.Network.RpcDeliveryMap` | `RudpSendOptions ToSendOptions(this RpcDeliveryMode)` — DRPC↔RUDP 열거형 유일한 대응 지점 |
 
 ## 오류 모델

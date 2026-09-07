@@ -11,17 +11,39 @@ public static class RpcClient
 {
     /// <exception cref="InvalidOperationException">접속 거부·호스트 해석 실패·재시도 소진.</exception>
     /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> 취소.</exception>
-    public static async Task<THub> ConnectAsync<THub>(
+    public static Task<THub> ConnectAsync<THub>(
         string host,
         int port,
         string? connectionKey,
         Func<IMessageChannel, THub> hubFactory,
         CancellationToken cancellationToken = default)
         where THub : Shared.Network.HubBase
+        => ConnectAsync(host, port, connectionKey, 0, hubFactory, cancellationToken);
+
+    /// <summary>
+    /// <paramref name="connectTimeoutMs"/> 를 지정하면 침묵 호스트(패킷 블랙홀)에 대한 연결 실패를
+    /// 그 시간 이내로 확정한다. 0 이하면 전송 스택 기본값(약 5초)을 유지한다.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="connectTimeoutMs"/> 가 음수.</exception>
+    /// <exception cref="InvalidOperationException">접속 거부·호스트 해석 실패·재시도 소진.</exception>
+    /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> 취소.</exception>
+    public static async Task<THub> ConnectAsync<THub>(
+        string host,
+        int port,
+        string? connectionKey,
+        int connectTimeoutMs,
+        Func<IMessageChannel, THub> hubFactory,
+        CancellationToken cancellationToken = default)
+        where THub : Shared.Network.HubBase
     {
+        if (connectTimeoutMs < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(connectTimeoutMs));
+        }
+
         var connector = new RudpConnector();
 
-        if (!await connector.ConnectAsync(host, port, HubSessionFactory.CreateTransportOptions(connectionKey),
+        if (!await connector.ConnectAsync(host, port, HubSessionFactory.CreateTransportOptions(connectionKey, connectTimeoutMs),
                 cancellationToken).ConfigureAwait(false) || connector.Channel is null)
         {
             throw new InvalidOperationException("Failed to connect to server.");

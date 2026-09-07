@@ -16,9 +16,14 @@ namespace DRPC.E2E.Tests;
 public class RudpLoopbackTests
 {
     const string Key = "e2e-key";
-    static int _portSeed = 9600;
 
-    static int NextPort() => Interlocked.Add(ref _portSeed, 7);
+    static int NextPort()
+    {
+        // OS 가 배정한 임시 포트를 쓴다 — 고정 시드(9600…)는 Windows 예약 포트 범위·선행 실행 잔여 리스너와 충돌해
+        // "리스너 바인딩 실패" 플레이크를 일으켰다. 확보-해제-재바인드 사이 미세 경쟁은 감수한다.
+        using var probe = new System.Net.Sockets.UdpClient(0);
+        return ((System.Net.IPEndPoint)probe.Client.LocalEndPoint!).Port;
+    }
 
     [Fact]
     public async Task Default_mode_is_reliable_ordered_and_roundtrips()
@@ -111,6 +116,28 @@ public class RudpLoopbackTests
 
         await WaitUntilAsync(() => E2EClientHub.ReceivedLines.Any(line => line.EndsWith(":" + text, StringComparison.Ordinal)
             && line.StartsWith("ShoutChatLine:", StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public async Task Connect_timeout_bounds_silent_host_failure()
+    {
+        // 아무도 듣지 않는 포트(블랙홄): 임시 포트를 확보한 뒤 닫아 만든다.
+        int silentPort;
+        using (var probe = new System.Net.Sockets.UdpClient(0))
+        {
+            silentPort = ((System.Net.IPEndPoint)probe.Client.LocalEndPoint!).Port;
+        }
+
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+        // 300ms 상한: LiteNetLib 기본(약 5초)이 아니라 그 이내로 실패가 확정돼야 한다.
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            RpcClient.ConnectAsync("127.0.0.1", silentPort, Key, 300,
+                channel => new RogueClientHub(hub => HubSessionFactory.CreateRudpSession(channel, hub))));
+
+        stopwatch.Stop();
+        Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(3),
+            $"connect failure took {stopwatch.Elapsed} — timeout did not bound the silent host.");
     }
 
     [Fact]

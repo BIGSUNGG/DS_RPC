@@ -12,11 +12,11 @@ updated: 2026-09-07
 이 문서는 **구현할 기능의 범위·동작·수용 기준**을 정의한다.
 레거시 동작 근거는 아카이브 문서: [[../../Legacy/Document/03-Reference/Public-API|Public-API (Legacy)]], [[../../Legacy/Document/02-Architecture/Data-Flow|Data-Flow (Legacy)]], [[../../Legacy/Document/06-Troubleshooting/Known-Issues|Known-Issues (Legacy)]].
 
-## 구현 상태 (2026-09-07)
+## 구현 상태 (2026-09-08)
 
-F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotnet test DRPC.slnx -c Release` 77개 통과) — 형제 NuGet **MessageProtocol 2.1.0**(GenericMessage 포함), Communication 2.0.0. F10(Template)만 범위 밖.
+F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotnet test DRPC.slnx -c Release` 84개 통과) — 형제 NuGet **MessageProtocol 2.3.0**(GenericMessage 포함, 생성기 강화 반영), **Communication 2.0.1**(RUDP 흐름제어 실패폐쇄·프레임 상한 적용·ConnectTimeout 채택). F10(Template)만 범위 밖.
 **`v2.1.0` 릴리스** — 태그 푸시 → run 34136624883 success, 5개 패키지 2.1.0 NuGet 업로드 확인.
-형제 스택은 NuGet **2.0.0** 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
+형제 스택은 NuGet 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 
 ## 원칙
 

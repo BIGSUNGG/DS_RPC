@@ -240,6 +240,60 @@ public class HubBaseTests
     }
 
     [Fact]
+    public async Task MaxPendingCalls_FailsFastWhenWaitTableIsFull()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session) { MaxPendingCalls = 2 };
+
+        Task<byte[]> first = hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered);
+        Task<byte[]> second = hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered);
+
+        // 상한 도달 시 새 호출은 대기하지 않고 즉시 실패한다(fail-fast).
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered));
+
+        // 슬롯이 해제되면(응답 도착) 재시도할 수 있다.
+        hub.OnReceiveRPCResponseMessage(new ProcedureCallResponseMessage(1u, Payload));
+        Assert.Equal(Payload, await first);
+
+        Task<byte[]> third = hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered);
+        hub.OnReceiveRPCResponseMessage(new ProcedureCallResponseMessage(3u, Payload));
+        Assert.Equal(Payload, await third);
+
+        hub.OnReceiveRPCResponseMessage(new ProcedureCallResponseMessage(2u, Payload));
+        Assert.Equal(Payload, await second);
+    }
+
+    [Fact]
+    public async Task MaxPendingCalls_DefaultIsUnlimited()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session);
+
+        // 기본값(0=무제한)은 대기 테이블 크기와 무관하게 호출을 수용한다.
+        Task<byte[]>[] calls = Enumerable.Range(0, 8)
+            .Select(_ => hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered))
+            .ToArray();
+
+        for (uint callId = 1; callId <= 8; callId++)
+        {
+            hub.OnReceiveRPCResponseMessage(new ProcedureCallResponseMessage(callId, Payload));
+        }
+
+        foreach (Task<byte[]> call in calls)
+        {
+            Assert.Equal(Payload, await call);
+        }
+    }
+
+    [Fact]
+    public void MaxPendingCalls_RejectsNegative()
+    {
+        using var hub = new TestHub(new FakeSession());
+        Assert.Throws<ArgumentOutOfRangeException>(() => hub.MaxPendingCalls = -1);
+    }
+
+    [Fact]
     public async Task Disconnect_CancelsPending_RaisesOnce_AndDisconnectsSession()
     {
         var session = new FakeSession();

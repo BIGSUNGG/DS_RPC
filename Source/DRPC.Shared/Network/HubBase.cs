@@ -61,6 +61,8 @@ public abstract class HubBase : IHubBase, IDisposable
     int _maxConcurrentIncoming;
     readonly object _incomingGateLock = new();
 
+    int _maxPendingCalls;
+
     int _disconnectRaised;
     bool _disposed;
 
@@ -94,6 +96,26 @@ public abstract class HubBase : IHubBase, IDisposable
         }
     }
 
+    /// <summary>
+    /// 동시 대기 중인 outgoing RPC(응답 대기 CallId) 상한. 0(기본)이면 무제한.
+    /// 상한 도달 시 새 호출은 대기하지 않고 즉시 <see cref="InvalidOperationException"/> 으로 실패한다(fail-fast) —
+    /// 응답 불능 피어에 대한 대기 테이블 무한 적체(메모리 고갈)를 끊는다.
+    /// 검사·등록 사이 경쟁으로 순간적으로 상한을 약간 넘을 수 있다(근사 강제).
+    /// </summary>
+    public int MaxPendingCalls
+    {
+        get => _maxPendingCalls;
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+
+            _maxPendingCalls = value;
+        }
+    }
+
     /// <summary>연결이 끊겼을 때 발생(세션당 1회). 대기 중 호출은 이미 실패 처리된 뒤다.</summary>
     public event Action? Disconnected;
 
@@ -123,6 +145,13 @@ public abstract class HubBase : IHubBase, IDisposable
     /// </summary>
     protected async Task<byte[]> RequestRPC(int methodId, byte[] parameterData, RpcDeliveryMode mode)
     {
+        int pendingCap = Volatile.Read(ref _maxPendingCalls);
+        if (pendingCap > 0 && _pendingCalls.Count >= pendingCap)
+        {
+            throw new InvalidOperationException(
+                $"Outgoing RPC pending-call capacity ({pendingCap}) reached — the peer is not answering fast enough.");
+        }
+
         uint callId = AllocateCallId();
         var waitResponse = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         long deadline = ComputeDeadlineUtcTicks();

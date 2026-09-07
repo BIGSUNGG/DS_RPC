@@ -92,6 +92,7 @@ public abstract class ServerHub<TSPD, TCPD> : HubBase<TSPD, TCPD> { /* 위와 �
 | ------ | ------ |
 | `TimeSpan RpcTimeout { get; set; }` | 기본 30초. `Timeout.InfiniteTimeSpan`·0 이하는 무제한. 만료는 `TimeoutException` |
 | `int MaxConcurrentIncoming { get; set; }` | 기본 0(무제한). 초과 시 non-one-way 는 `Overloaded` 오류, one-way 은 drop. **연결 직후·유휴 시에만 설정** |
+| `int MaxPendingCalls { get; set; }` | 기본 0(무제한). 응답 대기 중 outgoing 호출 상한 — 도달 시 새 호출은 즉시 `InvalidOperationException`(fail-fast). 검사·등록 경쟁으로 순간적 초과 가능(근사 강제) |
 | `event Action? Disconnected` | 끊김 1회(대기 호출은 이미 실패 처리된 뒤) |
 | `void Disconnect()` | 대기 취소 + 세션 끊김 + 이벤트 |
 | `void Dispose()` | `Disconnect()` + 타이머·세마포어 정리 |

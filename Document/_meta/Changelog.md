@@ -10,6 +10,12 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-08 (2차)
+
+- **`HubBase.MaxPendingCalls` — outgoing 대기 테이블 상한** — 스펙 개선 영역 1(보안·리소스 고갈 「대기 호출 적체」) 처리. 응답 불능 피어에 대해 호출자가 무한정 쌓는 대기 CallId(메모리 고갈 표면)를 상한으로 끊는다. 기본 0(무제한·동작 불변), 도달 시 새 호출은 대기 없이 즉시 `InvalidOperationException`(fail-fast), 슬롯 해제(응답·오류·타임아웃·끊김) 후 재시도 가능, 음수 거부. 검사·등록 경쟁의 순간적 초과는 근사 강제로 문서화. 단위 테스트 3건(상한 fail-fast·슬롯 해제 재시도·기본 무제한·음수 거부). 테스트 84→87건 통과.
+- **PENDING 해소·정리** — v2.2.0 nupkg blob 5개 패키지 전부 확인(예전 404는 URL 형식 오류 — `{id}.{version}.nupkg` 로 206). LSP 캐시 아티팩트 진단 7건 `lens_diagnostic_mark` false-positive 처리, [[../00-AI/PENDING|PENDING]] 항목 정리.
+- [[../03-Reference/Public-API|Public-API]] HubBase 멤버 표, [[../01-Overview/Feature-Spec|Feature-Spec]] F2 outgoing·수용 기준 갱신.
+
 ## 2026-09-08
 
 - **형제 스택 채택 — Communication 2.0.1·MessageProtocol 2.3.0** — 하위 신기능 채택 절차(스펙 § 하위 프로젝트 채택) 최초 실행. `CommunicationPackageVersion` 2.0.0→2.0.1(RUDP 메시지 채널 흐름제어 실패폐쇄·MaxFrameLength 수신 적용·peer id 재사용 채널 오염 수정·폴링 오류 추적 스로틀·`ConnectTimeout` 신설), `MessageProtocolPackageVersion` 2.1.0→2.3.0(공유 참조 동일성·중복 (MessageId, ClassId) 컴파일 타임 거부·백레퍼런스 가이드 예외·등록 순서 검증).

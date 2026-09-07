@@ -74,7 +74,7 @@ F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotn
 
 RPC 호출의 실질 런타임 전부.
 
-- **Outgoing**: `RequestRPC`(응답 대기, TCS) / `SendRPC`(one-way, **CallId 고정 0**).
+- **Outgoing**: `RequestRPC`(응답 대기, TCS) / `SendRPC`(one-way, **CallId 고정 0**). `MaxPendingCalls`(0=무제한) 상한 도달 시 새 호출은 fail-fast `InvalidOperationException` — 응답 불능 피어에 대한 대기 테이블 무한 적체(메모리 고갈) 방어.
 - **CallId**: `Interlocked` 단조 증가, **비재사용**. 0은 one-way 예약.
 - **타임아웃**: `RpcTimeout`(기본 30s, `<= Zero`/Infinite면 무제한), Hub 공용 타이머 스캔(per-call CTS 없음).
 - **Incoming**: 수신 → 비블로킹 처리 → 응답. `MaxConcurrentIncoming`(0=무제한) 세마포어; 초과 시 요청은 `Overloaded` 오류, one-way는 drop.
@@ -84,6 +84,7 @@ RPC 호출의 실질 런타임 전부.
 
 - 응답 지연·중복 CallId는 대기 Task 없으면 무시(잘못된 완료가 없어야 함).
 - `MaxConcurrentIncoming`은 **연결 직후·유휴 시에만** 설정하도록 문서화(사용 중 변경은 미지원).
+- `MaxPendingCalls` 도달 시 즉시 예외로 실패(대기하지 않음); 슬롯 해제(응답·오류·타임아웃·끊김) 후 재시도 가능. 검사·등록 경쟁으로 순간적 초과 허용(근사 강제).
 
 ## F3 — 와이어 메시지·오류 모델 (DRPC.Shared)
 

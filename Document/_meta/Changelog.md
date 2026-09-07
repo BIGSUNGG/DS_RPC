@@ -13,6 +13,7 @@ updated: 2026-09-09
 ## 2026-09-09 (15차 — 신규 루프 재개)
 
 - **MessageProtocol 2.3.4 → 2.3.7 채택** — 하위 저장소 누적 수정 중 DRPC 와이어 신뢰 경계에 직접 닿는 것: ①KI-41(2.3.7) 불신 헤더가 다른 등록 타입으로 라우팅되던 디스패치 복원의 블라인드 캐스트를 안내형 `InvalidDataException`(원인·상대 타입 명시)으로 교정 + 플래그 비트 불법 프레임 거부 예외를 `InvalidCastException` → `InvalidDataException` 으로 재분류, ②2.3.5 생성기 힌트 이름의 `+` 보존(중첩 타입 AD0001 크래시 방지), ③2.3.6 오류형 ClassId 엔트리 스킵. DRPC 소스는 예외 형식에 의존하지 않아(HubBase 전달이 catch-all) 코드 변경 불필요 — 채택을 고정하는 신뢰 경계 회귀 테스트 신규(`HubSessionFactory.Converter` 가 불법 플래그 프레임을 `InvalidDataException` 으로 거부 — 이빨 확인: 2.3.4 로 되돌리면 실패). Communication 2.4.1 은 평가 후 미채택(유일 코드 수정이 TCP/TLS 리스너 — DRPC 는 RUDP 단일). 테스트 110 → 111.
+- **v2.9.2 릴리스** — 태그 → Actions run success → 5개 패키지 NuGet 게시 확인. README 버전 표기 동기화.
 
 ## 2026-09-09 (14차 — 루프 종료)
 

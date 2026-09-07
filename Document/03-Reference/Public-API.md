@@ -92,6 +92,7 @@ public abstract class ServerHub<TSPD, TCPD> : HubBase<TSPD, TCPD> { /* 위와 �
 | ------ | ------ |
 | `TimeSpan RpcTimeout { get; set; }` | 기본 30초. `Timeout.InfiniteTimeSpan`·0 이하는 무제한. 만료는 `TimeoutException` |
 | `int MaxConcurrentIncoming { get; set; }` | 기본 0(무제한). 초과 시 non-one-way 는 `Overloaded` 오류, one-way 은 drop. **연결 직후·유휴 시에만 설정** |
+| `DisconnectReason? LastDisconnectReason { get; }` | 관측된 마지막 끊김 사유(끊김 전 null) — `Disconnected` 핸들러 안에서 읽는다. `FlowControl` = 수신 미처리 상한 단결(백프레셔 신호, 형제 제안 P4) |
 | `bool SendErrorDetails { get; set; } = true` | `Unhandled` 오류의 원격 응답에 예외 상세 실을지(기본 true·기존 동작). false면 고정 문구 전송 — 인터넷 노출 엔드포인트 권장. 서버측 Trace 기록은 항상 유지 |
 | `protected virtual Task<bool> AuthorizeRequestAsync(int methodId)` | 호출 권한 검증 훯(기본 전부 허용). 서버 허브 override 로 메서드별 권한 검사 — 거부 시 non-one-way 는 `PermissionDenied` 오류, one-way 는 drop. 등록표 조회 전에 판정(메서드 존재 노출 없음) |
 | `int MaxPendingCalls { get; set; }` | 기본 0(무제한). 응답 대기 중 outgoing 호출 상한 — 도달 시 새 호출은 즉시 `InvalidOperationException`(fail-fast). 검사·등록 경쟁으로 순간적 초과 가능(근사 강제) |
@@ -125,7 +126,7 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
 }
 ```
 
-`RpcListenHandle` : `IAsyncDisposable`/`IDisposable`, `Task? ListenTask` (중지·취소 시 반드시 완료).
+`RpcListenHandle` : `IAsyncDisposable`/`IDisposable`, `Task? ListenTask` (중지·취소 시 반드시 완료), `int ActiveConnectionCount`(수락된 peer 허브 수 — 형제 제안 P4 운영 신호).
 
 ## 헬퍼 (보일러플레이트 대체, 직접 호출할 일은 거의 없음)
 

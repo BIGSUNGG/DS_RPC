@@ -18,4 +18,11 @@ public interface IHubBase
 
     /// <summary>세션 끊김 통지. pending 취소 후 <c>Disconnected</c> 이벤트를 (1회) 발생시킨다.</summary>
     void NotifyDisconnected(Exception? reason);
+
+    /// <summary>
+    /// 끊김 사유를 함께 전달하는 통지(형제 제안 P4 — <c>FlowControl</c> 백프레셔 신호 등).
+    /// 기본 구현은 사유 없는 버전에 위임한다(기존 구현 호환).
+    /// </summary>
+    void NotifyDisconnected(Exception? reason, Communication.Shared.Connection.DisconnectReason disconnectReason)
+        => NotifyDisconnected(reason);
 }

@@ -10,6 +10,12 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-09 (9차)
+
+- **형제 제안 P4 채택 — 운영 신호 노출** — ① `RpcListenHandle.ActiveConnectionCount`(수락된 peer 허브 수 — 포화·연결 상한 근사 지표), ② `HubBase.LastDisconnectReason`(끊김 전 null, `Disconnected` 핸들러 안에서 판독 — 이벤트 시그니처 불변 유지). 사유 전달은 `NotifyDisconnected` 2인자 오버로드(인터페이스는 C# DIM 기본 구현으로 기존 구현 호환)·`DRPCMessageHandler` 가 세션 이벤트에서 `e.Reason` 전달. `FlowControl`(수신 미처리 상한 단결)로 백프레셔 식별 가능. 단위 1건(FlowControl 관측)·E2E 1건(카운트 0→1→0). 테스트 106→108건.
+- **형제 채택 — MessageProtocol 2.3.4** — 직렬화기 캐시 volatile 화(ARM 메모리 모델 정합)·동시 중복 등록 경쟁 수정·진입점 계약 테스트. Communication 2.3.1 재확인(변화 없음 유지).
+- [[../03-Reference/Public-API|Public-API]] HubBase 표·RpcListenHandle 행, [[../00-AI/PENDING|PENDING]] P4 채택완료 처리, [[../00-AI/CONTEXT|CONTEXT]] 갱신.
+
 ## 2026-09-09 (8차)
 
 - **`HubBase.SendErrorDetails` — Unhandled 오류 정보유출 방어 + 서버측 항상 Trace** — 식별된 마지막 영역 1/2 잔여 항목 처리. 기존: 구현 예외의 `ex.Message`(경로·내부 상태 포함 가능)가 원격 피어로 그대로 전송되는 반면 **서버 운영자에겐 아무 기록도 남지 않던 역전**. 이제 ① 노브(기본 true·기존 동작 유지 — 하위호환, false면 고정 문구 전송·인터넷 노출 엔드포인트 권장) ② 예외는 설정과 무관하게 항상 `Trace.TraceError`(콘솔 의존 금지 규약 준수). 단위 2건(기본 상세 전송·억제 시 미누출). E2E 기본 경로 단언("intentional failure") 유지 통과로 기본 동작 불변 실증. 테스트 104→106건.

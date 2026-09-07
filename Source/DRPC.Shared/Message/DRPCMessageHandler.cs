@@ -27,5 +27,7 @@ public sealed class DRPCMessageHandler : MessageHandler
     }
 
     void OnSessionDisconnected(object? sender, Communication.Shared.Connection.DisconnectedEventArgs e)
-        => _hub.NotifyDisconnected(new InvalidOperationException($"RPC session disconnected ({e.Reason})."));
+        => _hub.NotifyDisconnected(
+            new InvalidOperationException($"RPC session disconnected ({e.Reason})."),
+            e.Reason);
 }

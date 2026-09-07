@@ -131,7 +131,7 @@ public static class RpcHost
             throw;
         }
 
-        var handle = new RpcListenHandle(Stop, linkedCts) { ListenTask = stopped.Task };
+        var handle = new RpcListenHandle(Stop, linkedCts, () => peers.Count) { ListenTask = stopped.Task };
 
         // 취소로도 중지가 관찰돼야 한다(ListenTask 가 영구 미완료로 남지 않도록).
         linkedCts.Token.Register(static state => ((Action)state!).Invoke(), new Action(Stop), useSynchronizationContext: false);

@@ -287,6 +287,25 @@ public class HubBaseTests
     }
 
     [Fact]
+    public void Disconnect_reason_is_observable_and_defaults_null()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session);
+        Communication.Shared.Connection.DisconnectReason? observedInHandler = null;
+        hub.Disconnected += () => observedInHandler = hub.LastDisconnectReason;
+
+        Assert.Null(hub.LastDisconnectReason); // 끊김 전에는 null
+
+        // 수신 경로(DRPCMessageHandler)가 세션 이벤트에서 호출하는 통지 — 사유를 남기고 이벤트를 숭긴다.
+        hub.NotifyDisconnected(new InvalidOperationException("flow"),
+            Communication.Shared.Connection.DisconnectReason.FlowControl);
+
+        // Disconnected 핸들러 안에서 끊김 사유를 읽을 수 있다(형제 제안 P4 — FlowControl 백프레셔 식별).
+        Assert.Equal(Communication.Shared.Connection.DisconnectReason.FlowControl, observedInHandler);
+        Assert.Equal(Communication.Shared.Connection.DisconnectReason.FlowControl, hub.LastDisconnectReason);
+    }
+
+    [Fact]
     public async Task Unhandled_error_sends_exception_detail_by_default()
     {
         var session = new FakeSession();

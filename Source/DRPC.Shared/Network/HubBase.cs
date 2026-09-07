@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Communication.Shared.Connection;
 using Communication.Shared.Sessions;
 using DRPC.Shared.Interface;
 using DRPC.Shared.Message;
@@ -125,6 +126,12 @@ public abstract class HubBase : IHubBase, IDisposable
 
     /// <summary>연결이 끊겼을 때 발생(세션당 1회). 대기 중 호출은 이미 실패 처리된 뒤다.</summary>
     public event Action? Disconnected;
+
+    /// <summary>
+    /// 관측된 마지막 끊김 사유(형제 제안 P4 운영 신호 — <see cref="DisconnectReason.FlowControl"/> 백프레셔 식별 등).
+    /// 끊김 전에는 <c>null</c>. <see cref="Disconnected"/> 핸들러 안에서 읽는다(이벤트 인자 확장 대신 — 시그니처 불변 유지).
+    /// </summary>
+    public DisconnectReason? LastDisconnectReason { get; private set; }
 
     protected HubBase(Func<HubBase, ISession> sessionFactory)
     {
@@ -421,7 +428,16 @@ public abstract class HubBase : IHubBase, IDisposable
 
     /// <summary>수신 경로(세션 이벤트)에서 끊김을 통지할 때 사용한다.</summary>
     public void NotifyDisconnected(Exception? reason)
+        => NotifyDisconnected(reason, null);
+
+    /// <summary>끊김 사유를 함께 남기고 통지한다(사유 없으면 <see cref="LastDisconnectReason"/> 은 이전값 유지).</summary>
+    public void NotifyDisconnected(Exception? reason, DisconnectReason? disconnectReason)
     {
+        if (disconnectReason is { } observed)
+        {
+            LastDisconnectReason = observed;
+        }
+
         CancelPendingCalls(reason ?? new InvalidOperationException("RPC session disconnected."));
         RaiseDisconnected();
     }

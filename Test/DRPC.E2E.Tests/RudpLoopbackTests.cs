@@ -195,6 +195,22 @@ public class RudpLoopbackTests
     }
 
     [Fact]
+    public async Task ListenHandle_exposes_active_connection_count()
+    {
+        int port = NextPort();
+        await using var handle = await E2EServerHub.ListenAsync(port, Key, _ => Task.CompletedTask);
+
+        Assert.Equal(0, handle.ActiveConnectionCount); // 수락 전
+
+        using var client = await E2EClientHub.ConnectAsync("127.0.0.1", port, Key);
+        await Within(client.AddAsync(2, 3));
+        await WaitUntilAsync(() => handle.ActiveConnectionCount == 1);
+
+        client.Dispose();
+        await WaitUntilAsync(() => handle.ActiveConnectionCount == 0); // 끊김 회수(형제 제안 P4 운영 신호)
+    }
+
+    [Fact]
     public async Task Queue_options_flow_through_session_factory()
     {
         int port = NextPort();

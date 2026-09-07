@@ -12,8 +12,8 @@ updated: 2026-09-08
 
 ## 현 상태 (2026-09-07)
 
-- **재구축 F1–F7·F9·F11·F12 구현 완료.** `Source/` 5개 패키지(Attribute·Shared·CodeGenerator·Client·Server), `Sandbox/` 3개, `Test/` 3계층(106개 통과).
-- 형제 스택은 **NuGet 안정판만** 참조한다(`MessageProtocol` **2.3.2**, `Communication.Network.RUDP.*`·`Communication.Shared` **2.3.0** — CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·기본 키 경고 포함) — 형제 저장소 프로젝트 참조·하드 경로 없음.
+- **재구축 F1–F7·F9·F11·F12 구현 완료.** `Source/` 5개 패키지(Attribute·Shared·CodeGenerator·Client·Server), `Sandbox/` 3개, `Test/` 3계층(108개 통과).
+- 형제 스택은 **NuGet 안정판만** 참조한다(`MessageProtocol` **2.3.4**, `Communication.Network.RUDP.*`·`Communication.Shared` **2.3.0** — CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·기본 키 경고 포함) — 형제 저장소 프로젝트 참조·하드 경로 없음.
 - 저장소 루트 솔루션은 `DRPC.slnx`.
 - 빌드·테스트는 **`-c Release`** 를 쓴다. `Debug` 는 언어 서버가 생성기 DLL 을 점유해 복사가 실패할 수 있다([[../06-Troubleshooting/Known-Issues|Known-Issues]]).
 - 구현 범위·수용 기준의 권위 문서는 [[../01-Overview/Feature-Spec|Feature-Spec]](F12 제네릭 프로시저 포함). 설계 결정은 [[../05-Decisions/0001-hub-naming-and-version-2|ADR-0001]], [[../05-Decisions/0002-async-only-delivery-and-payload|ADR-0002]].

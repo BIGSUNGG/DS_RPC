@@ -18,8 +18,8 @@ updated: 2026-09-08
 
 ## [후보] 운영 신호 소비 — 형제 제안 P4 (2026-09-09)
 
-- **무엇**: `ActiveConnectionCount`(TCP·RUDP)·`DisconnectReason.FlowControl` 노출해 앱이 백프레셔·포화 지표로 쓰게 한다.
-- **임시 조치**: 미채택 — 후속 반복 후보(P3는 2026-09-09 채택 완료, P2 CRC32c는 v2.5.0 채택 완료).
+- ~~**무엇**: `ActiveConnectionCount`(TCP·RUDP)·`DisconnectReason.FlowControl` 노출해 앱이 백프레셔·포화 지표로 쓰게 한다.~~
+- **채택 완료 (2026-09-09, v2.9.0)**: `RpcListenHandle.ActiveConnectionCount` + `HubBase.LastDisconnectReason`(사유 전달 `NotifyDisconnected` 오버로드 — 인터페이스는 DIM 기본 구현으로 호환 유지).
 
 ## [관측] pi-lens LSP CS1061·CS0117·CS1503 — 패키지 버전업 후 메타데이터 캐시 (2026-09-08)
 

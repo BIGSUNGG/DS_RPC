@@ -66,6 +66,12 @@ internal sealed class TestHub : HubBase
         MethodDeliveryModes[methodId] = mode;
     }
 
+    /// <summary>권한 검증 훅 주입 — 미설정이면 기본(전부 허용)을 따른다.</summary>
+    public Func<int, Task<bool>>? AuthorizeHandler { get; set; }
+
+    protected override Task<bool> AuthorizeRequestAsync(int methodId)
+        => AuthorizeHandler?.Invoke(methodId) ?? Task.FromResult(true);
+
     public new Task SendRPC(int methodId, byte[] parameterData, RpcDeliveryMode mode)
         => base.SendRPC(methodId, parameterData, mode);
 

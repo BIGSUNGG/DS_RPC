@@ -257,6 +257,15 @@ public abstract class HubBase : IHubBase, IDisposable
         _ = ProcessRequestAsync(message);
     }
 
+    /// <summary>
+    /// Incoming RPC 호출 권한 검증 훅. 기본은 전부 허용(true).
+    /// 서버 허브에서 override 해 메서드별 호출 권한(예: 관리자 전용 프로시저)을 검사한다.
+    /// 거부 시 non-one-way 호출은 <see cref="RpcErrorCode.PermissionDenied"/> 오류를 받고 one-way 는 폐기된다.
+    /// 메서드 등록표 조회보다 먼저 판정하므로 미등록 MethodId 의 존재 여부도 노출하지 않는다.
+    /// 처리 동시 상한(MaxConcurrentIncoming) 슬롯 안에서 호출됨 — 긴 검사는 상한 소진에 유의.
+    /// </summary>
+    protected virtual Task<bool> AuthorizeRequestAsync(int methodId) => Task.FromResult(true);
+
     async Task ProcessRequestAsync(ProcedureCallRequestMessage message)
     {
         bool oneWay = IsOneWay(message);
@@ -280,6 +289,19 @@ public abstract class HubBase : IHubBase, IDisposable
 
         try
         {
+            // 호출 권한 검증 — lookup 전에 판정해 거부된 메서드의 존재 여부도 노출하지 않는다.
+            if (!await AuthorizeRequestAsync(message.MethodId).ConfigureAwait(false))
+            {
+                if (!oneWay)
+                {
+                    await SendErrorAsync(message.CallId, RpcErrorCode.PermissionDenied,
+                        $"The call to method {message.MethodId} is not authorized for this peer.",
+                        ResolveMode(message.MethodId)).ConfigureAwait(false);
+                }
+
+                return;
+            }
+
             if (!MethodCallActions.TryGetValue(message.MethodId, out Func<byte[], Task<byte[]>>? action) || action is null)
             {
                 if (!oneWay)

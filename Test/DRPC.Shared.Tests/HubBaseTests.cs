@@ -294,6 +294,69 @@ public class HubBaseTests
     }
 
     [Fact]
+    public async Task Authorization_default_allows_requests()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session);
+        hub.Register(7, _ => Task.FromResult(Payload));
+
+        hub.OnReceiveRPCRequestMessage(new ProcedureCallRequestMessage(1u, 7, Payload));
+        await WaitUntilAsync(() => session.Sent.OfType<ProcedureCallResponseMessage>().Any());
+
+        ProcedureCallResponseMessage response = Assert.Single(session.Sent.OfType<ProcedureCallResponseMessage>());
+        Assert.Equal(1u, response.CallId);
+    }
+
+    [Fact]
+    public async Task Authorization_denial_returns_permission_denied_and_skips_invocation()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session) { AuthorizeHandler = _ => Task.FromResult(false) };
+        bool invoked = false;
+        hub.Register(7, _ => { invoked = true; return Task.FromResult(Payload); });
+
+        hub.OnReceiveRPCRequestMessage(new ProcedureCallRequestMessage(1u, 7, Payload));
+        await WaitUntilAsync(() => session.Sent.OfType<ProcedureCallErrorMessage>().Any());
+
+        ProcedureCallErrorMessage error = Assert.Single(session.Sent.OfType<ProcedureCallErrorMessage>());
+        Assert.Equal(1u, error.CallId);
+        Assert.Equal(RpcErrorCode.PermissionDenied, error.ErrorCode);
+        Assert.False(invoked); // 거부된 호출은 구현을 실행하지 않는다
+    }
+
+    [Fact]
+    public async Task Authorization_denial_drops_one_way_silently()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session) { AuthorizeHandler = _ => Task.FromResult(false) };
+        bool invoked = false;
+        hub.Register(7, _ => { invoked = true; return Task.FromResult(Payload); });
+
+        hub.OnReceiveRPCRequestMessage(new ProcedureCallRequestMessage(0u, 7, Payload)); // one-way(CallId 0)
+        await Task.Delay(100);
+
+        Assert.Empty(session.Sent);
+        Assert.False(invoked);
+    }
+
+    [Fact]
+    public async Task Authorization_hook_receives_requested_method_id()
+    {
+        int? observed = null;
+        var session = new FakeSession();
+        using var hub = new TestHub(session)
+        {
+            AuthorizeHandler = id => { observed = id; return Task.FromResult(true); },
+        };
+        hub.Register(7, _ => Task.FromResult(Payload));
+
+        hub.OnReceiveRPCRequestMessage(new ProcedureCallRequestMessage(1u, 7, Payload));
+        await WaitUntilAsync(() => session.Sent.OfType<ProcedureCallResponseMessage>().Any());
+
+        Assert.Equal(7, observed);
+    }
+
+    [Fact]
     public async Task RequestRPC_precanceled_token_never_sends()
     {
         var session = new FakeSession();

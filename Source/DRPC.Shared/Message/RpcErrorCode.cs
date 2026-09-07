@@ -17,4 +17,7 @@ public static class RpcErrorCode
 
     /// <summary>Incoming 처리가 <c>MaxConcurrentIncoming</c> 상한을 초과함.</summary>
     public const int Overloaded = 5;
+
+    /// <summary><c>HubBase.AuthorizeRequestAsync</c> 가 요청을 거부함(호출 권한 없음).</summary>
+    public const int PermissionDenied = 6;
 }

@@ -10,6 +10,12 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-08 (6차)
+
+- **`HubBase.AuthorizeRequestAsync` RPC 호출 권한 검증 훅** — 스펙 개선 영역 1(보안 「RPC 호출 권한 검증」) 처리. `protected virtual Task<bool>`(기본 전부 허용 — 하위호환), 서버 허브 override 로 메서드별 권한 검사(예: 관리자 전용 프로시저). 거부 시 non-one-way 는 신규 오류 코드 `RpcErrorCode.PermissionDenied`(6) 반환, one-way 는 폐기. **등록표 조회 전 판정** — 거부된 MethodId 의 존재 여부도 노출하지 않음. 단위 4건(기본 허용·거부 시 오류+미실행·one-way 조용한 폐기·훅 인자 검증).
+- **형제 3차 채택 — Communication 2.3.0·MessageProtocol 2.3.2** — Communication: 파이프라인 검증 통일·**기본 공개 접속 키로 리슨 시작 시 경고**(DRPC null-키 리스너에 즉시 적용), MessageProtocol: 역직렬화 진입 와이어 헤더-MessageId 검증·컨텍스트 사전 사전크기 성능개선. 채택 중 NuGet 유입 지연(NU1102) 관측 — http-cache 클리어로 해소(약 1분 지연). 테스트 99→103건 통과.
+- [[../03-Reference/Public-API|Public-API]] 오류 코드 표·HubBase 훅, [[../01-Overview/Feature-Spec|Feature-Spec]] F2·F3·상태, [[../00-AI/CONTEXT|CONTEXT]] 동기화.
+
 ## 2026-09-08 (5차)
 
 - **형제 스택 2차 채택 — Communication 2.2.1·MessageProtocol 2.3.1** — Communication 2.1.0(TCP TLS — DRPC 미사용) 건너뙄고 2.2.0 **RUDP CRC32c 패킷 무결성 레이어**(옵트인, 프로토콜 처리 전 위반 패킷 폐기 — IPv4 UDP 체크섬 비활성 우회 방어) + 2.2.1 프레이밍 버퍼 압축 개선, MessageProtocol 2.3.1(PooledBuffer 이중 반납 수정·생성기 파싱 강화) 채택.

@@ -14,7 +14,7 @@ updated: 2026-09-07
 
 ## 구현 상태 (2026-09-08)
 
-F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotnet test DRPC.slnx -c Release` 99개 통과) — 형제 NuGet **MessageProtocol 2.3.1**, **Communication 2.2.1**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout 채택). F10(Template)만 범위 밖.
+F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotnet test DRPC.slnx -c Release` 103개 통과) — 형제 NuGet **MessageProtocol 2.3.2**, **Communication 2.3.0**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·기본 키 경고 채택). F10(Template)만 범위 밖.
 **`v2.1.0` 릴리스** — 태그 푸시 → run 34136624883 success, 5개 패키지 2.1.0 NuGet 업로드 확인.
 형제 스택은 NuGet 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 
@@ -77,7 +77,7 @@ RPC 호출의 실질 런타임 전부.
 - **Outgoing**: `RequestRPC`(응답 대기, TCS) / `SendRPC`(one-way, **CallId 고정 0**). `MaxPendingCalls`(0=무제한) 상한 도달 시 새 호출은 fail-fast `InvalidOperationException` — 응답 불능 피어에 대한 대기 테이블 무한 적체(메모리 고갈) 방어.
 - **CallId**: `Interlocked` 단조 증가, **비재사용**. 0은 one-way 예약.
 - **타임아웃·취소**: `RpcTimeout`(기본 30s, `<= Zero`/Infinite면 무제한), Hub 공용 타이머 스캔(per-call CTS 없음). 왕복 호출은 선택 `CancellationToken` 수용 — 취소 시 대기 즉시 취소 완료·슬롯 반납, 늦은 응답·오류는 무시, 송신된 요청은 회수 안 함(수신측 구현은 끝까지 실행됨).
-- **Incoming**: 수신 → 비블로킹 처리 → 응답. `MaxConcurrentIncoming`(0=무제한) 세마포어; 초과 시 요청은 `Overloaded` 오류, one-way는 drop.
+- **Incoming**: 수신 → 비블로킹 처리 → 응답. `MaxConcurrentIncoming`(0=무제한) 세마포어; 초과 시 요청은 `Overloaded` 오류, one-way는 drop. 호출 권한은 `AuthorizeRequestAsync` 훅(기본 전부 허용) — 거부 시 non-one-way 는 `PermissionDenied`, one-way 는 drop, 등록표 조회 전 판정으로 메서드 존재 미노출.
 - **수명**: `Disconnected` 이벤트, `Disconnect()`, `IDisposable`; 끊김 시 `CancelPendingCalls`로 pending TCS 예외 완료.
 
 ### 수용 기준
@@ -95,7 +95,7 @@ RPC 호출의 실질 런타임 전부.
 | 2 | `ProcedureCallErrorMessage` | `CallId`, `ErrorCode`, `Message` |
 
 - `[StandaloneMessage]` 등록, MessageProtocol 직렬화.
-- `RpcErrorCode`: `Unhandled` / `UnknownMethod` / `Timeout` / `Disconnected` / `Overloaded`.
+- `RpcErrorCode`: `Unhandled` / `UnknownMethod` / `Timeout` / `Disconnected` / `Overloaded` / `PermissionDenied`.
 - 원격 오류는 호출측에서 `RpcFaultException`으로 관찰.
 - **응답·오류의 전송 방식은 요청 MethodId 에 등록된 방식(`MethodDeliveryModes`)을 따른다.**
 - **one-way 신호는 `CallId == 0`** — 수신 측 등록표로 판정하지 않는다(ADR-0002 결정 3).

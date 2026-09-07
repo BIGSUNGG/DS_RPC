@@ -40,7 +40,7 @@ int result = await hub.AddAsync(2, 3);
 
 생성기(`DRPC.CodeGenerator` 를 analyzer 로 참조)가 `{Method}Async` 스텁·수신 디스패치·접속/리스닝·페이로드 인코딩을 만든다.
 양방향 호출, OneWay, 메서드별 전송 방식(`Unreliable`·`ReliableUnordered`·`Sequenced`·`ReliableOrdered`·`ReliableSequenced`),
-DTO(`[NonIdMessage]`), 그룹 다형성, 제네릭 프로시저(`[GenericProcedure]`, 2.1.0)를 지원한다.
+DTO(`[NonIdMessage]`), 그룹 다형성, 제네릭 프로시저(`[GenericProcedure]`, 2.1.0), 연결 타임아웃 오버로드(2.2.0)를 지원한다.
 
 ## 패키지
 
@@ -53,7 +53,7 @@ DTO(`[NonIdMessage]`), 그룹 다형성, 제네릭 프로시저(`[GenericProcedu
 
 모두 `netstandard2.1`(생성기는 netstandard2.0) — Unity 포함 .NET 프레임워크에서 사용 가능하다.
 의존 버전은 `Directory.Build.props` 의 `MessageProtocolPackageVersion` · `CommunicationPackageVersion` 이 단일 사실원이다.
-DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **2.1.0**.
+DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **2.2.0**.
 
 ## 빌드·예제·테스트
 

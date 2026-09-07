@@ -16,6 +16,7 @@ updated: 2026-09-08
 - **`RpcClient.ConnectAsync` 연결 타임아웃 오버로드** — 신설 `connectTimeoutMs` 로 침묵 호스트(패킷 블랙홄) 연결 실패를 상한 이내로 확정. 기존 시그니처는 그대로(기본값 유지·하위호환), `HubSessionFactory.CreateTransportOptions` 도 `connectTimeoutMs` 선택 매개변수 추가(0=미설정, 음수 거부). E2E 회귀 — 침묵 포트 300ms 상한 실패(3초 미만 완료) + 팩토리 계약 단위 5건.
 - **E2E 포트 할당 임시 포트 전환** — 고정 시드(9600+7n)가 Windows 예약 포트 범위·선행 실행 잔여 리스너와 충돌해 "RUDP 리스너 바인딩 실패" 플레이크(9607·9621·9705 관측) — OS 배정 임시 포트(UdpClient(0) 확보)로 교체. 테스트 77→84건 통과.
 - [[../00-AI/CONTEXT|CONTEXT]]·[[../01-Overview/Feature-Spec|Feature-Spec]] 상태·버전 동기화, [[../03-Reference/Public-API|Public-API]] 헬퍼 표 갱신.
+- **`v2.2.0` 릴리스** — 태그 푸시 → run 34148443218 success, 5개 패키지 flatcontainer 인덱스 2.2.0 등재 확인. 게시 상태·README 버전 표기 갱신, [[../00-AI/PENDING|PENDING]] 신규(LSP 캐시 아티팩트·nupkg blob 유입 지연 관측).
 
 ## 2026-09-07
 

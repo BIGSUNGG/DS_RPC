@@ -151,6 +151,14 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - 버전은 루트 `Directory.Build.props`(`MessageProtocolPackageVersion`·`CommunicationPackageVersion` 포함).
 - 태그 `v*` → GitHub Actions pack·publish — 이미 존재하던 `.github/workflows/nuget-publish.yml`(런 이름 "NuGet Publish")가 그 동작이다.
 
+### 게시 상태 (2.2.0)
+
+- `v2.2.0` 태그 푸시 → run 34148443218 success (Require API key → Pack → Push, 5개 nupkg 푸시 로그 확인).
+- 업로드된 5개 패키지: `DRPC.Attribute`·`DRPC.Shared`·`DRPC.Client`·`DRPC.Server`·`DRPC.CodeGenerator` 모두 2.2.0,
+  flatcontainer 인덱스 전부 2.2.0 등재 확인(nupkg blob 유입은 지연 관측 — [[../00-AI/PENDING|PENDING]]).
+- 내용: 형제 스택 채택(Communication 2.0.1 — RUDP 흐름제어·프레임 상한·ConnectTimeout, MessageProtocol 2.3.0) + `RpcClient.ConnectAsync` 연결 타임아웃 오버로드.
+- `Source/Directory.Build.props` `<Version>` 도 2.2.0 으로 갱신(릴리스 커밋 `046a9a0`) — 태그가 권위이나 기본값도 일치.
+
 ### 게시 상태 (2.1.0)
 
 - `v2.1.0` 태그 푸시 → run 34136624883 success (Require API key → Pack → Push, 모든 스텝 ✓).

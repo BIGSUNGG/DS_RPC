@@ -31,6 +31,14 @@ public sealed class RemoteProcedure : System.Attribute
     /// <summary>true이면 요청만 보내고 응답을 기다리지/보내지 않는다. 반환 타입은 void 여야 한다.</summary>
     public bool OneWay { get; set; }
 
+    /// <summary>
+    /// 이 호출의 응답 대기 상한(밀리초). 기본 -1이면 허브 기본값(<c>HubBase.RpcTimeout</c>)을 따른다.
+    /// 양수면 이 호출에만 그 예산이 적용된다 — 느린 배치 호출에만 넉넉한 상한을 주고 나머지는 허브 기본으로
+    /// 지키게 하는 용도(호출별 타임아웃 정책). one-way 호출은 응답을 기다리지 않으므로 무의미하다(DRPCGEN011 경고).
+    /// 0 이하(-1 제외)는 생성기 진단 DRPCGEN010 으로 거부된다.
+    /// </summary>
+    public int TimeoutMs { get; set; } = -1;
+
     public RemoteProcedure(
         RpcDeliveryMode mode = RpcDeliveryMode.ReliableOrdered,
         int methodId = -1)

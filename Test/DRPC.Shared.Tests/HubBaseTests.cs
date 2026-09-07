@@ -70,6 +70,32 @@ public class HubBaseTests
     }
 
     [Fact]
+    public async Task RequestRPC_PerCallTimeout_OverridesHubDefault()
+    {
+        // 허브 기본 30초라도 호출별 50ms 예산이면 TimeoutException — 전역 상한을 희생하지 않고 이 호출만 빨리 끊는다.
+        var session = new FakeSession();
+        using var hub = new TestHub(session) { RpcTimeout = TimeSpan.FromSeconds(30) };
+
+        await Assert.ThrowsAsync<TimeoutException>(() =>
+            hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered, TimeSpan.FromMilliseconds(50)));
+    }
+
+    [Fact]
+    public async Task RequestRPC_PerCallInfinite_OverridesFiniteHubDefault()
+    {
+        // 반대 방향: 허브 기본 50ms(≈1초 스캔 틱에 만료)라도 이 호출이 무제한을 고르면 대기 유지 — 뒤늦은 응답 수용.
+        var session = new FakeSession();
+        using var hub = new TestHub(session) { RpcTimeout = TimeSpan.FromMilliseconds(50) };
+
+        Task<byte[]> pending = hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered, Timeout.InfiniteTimeSpan);
+        await Task.Delay(1500);
+        Assert.False(pending.IsCompleted);
+
+        hub.OnReceiveRPCResponseMessage(new ProcedureCallResponseMessage(1u, Payload));
+        Assert.Equal(Payload, await pending);
+    }
+
+    [Fact]
     public async Task RequestRPC_ZeroTimeout_WaitsIndefinitely()
     {
         var session = new FakeSession();

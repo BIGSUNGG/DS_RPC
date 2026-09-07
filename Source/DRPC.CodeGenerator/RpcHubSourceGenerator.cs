@@ -92,6 +92,19 @@ internal static class RpcHubSourceGenerator
                 return false;
             }
 
+            // 호출별 타임아웃 검증: -1(상속) 아니면 양수여야 한다. 0/-N 은 조용한 무시 대신 컴파일 거부.
+            if (method.TimeoutMs != -1 && method.TimeoutMs <= 0)
+            {
+                report(Diagnostic.Create(DiagnosticDescriptors.InvalidTimeoutMs, location, symbol.Name,
+                    method.TimeoutMs));
+                return false;
+            }
+
+            if (method.OneWay && method.TimeoutMs > 0)
+            {
+                report(Diagnostic.Create(DiagnosticDescriptors.TimeoutOnOneWay, location, symbol.Name));
+            }
+
             if (symbol.IsGenericMethod)
             {
                 foreach (ITypeParameterSymbol typeParameter in symbol.TypeParameters)

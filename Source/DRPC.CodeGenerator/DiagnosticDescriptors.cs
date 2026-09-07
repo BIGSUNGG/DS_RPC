@@ -77,4 +77,20 @@ internal static class DiagnosticDescriptors
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor InvalidTimeoutMs = new(
+        id: "DRPCGEN010",
+        title: "DRPC TimeoutMs is invalid",
+        messageFormat: "Method '{0}' sets TimeoutMs={1}; use a positive millisecond budget or omit it (-1) to inherit the hub default (HubBase.RpcTimeout).",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor TimeoutOnOneWay = new(
+        id: "DRPCGEN011",
+        title: "DRPC TimeoutMs has no effect on OneWay",
+        messageFormat: "Method '{0}' sets TimeoutMs but OneWay=true never waits for a response; the timeout is ignored.",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 }

@@ -39,6 +39,10 @@ public interface IServerProcedures : IServerProcedureDeclarations
     [RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 6)]
     int Slow(int delayMs);
 
+    /// <summary>호출별 타임아웃(TimeoutMs=400): 허브 기본(30초)과 무관하게 이 호출만 빠르게 만료한다.</summary>
+    [RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 11, TimeoutMs = 400)]
+    int SlowWithPerCallTimeout(int delayMs);
+
     /// <summary>제네릭 ①: 반환 전용 제네릭. 허용 T = int/string(메시지 타입 반환은 ③④ 가 담당).</summary>
     [RemoteProcedure(methodId: 7)]
     [GenericProcedure(typeof(int), typeof(string))]
@@ -144,6 +148,12 @@ public partial class E2EServerHub : ServerHub<IServerProcedures, IClientProcedur
     private partial Task<int> AlwaysFails_Implementation() => throw new InvalidOperationException("intentional failure");
 
     private partial async Task<int> Slow_Implementation(int delayMs)
+    {
+        await Task.Delay(delayMs).ConfigureAwait(false);
+        return delayMs;
+    }
+
+    private partial async Task<int> SlowWithPerCallTimeout_Implementation(int delayMs)
     {
         await Task.Delay(delayMs).ConfigureAwait(false);
         return delayMs;

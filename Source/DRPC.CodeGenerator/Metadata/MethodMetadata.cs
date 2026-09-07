@@ -20,6 +20,9 @@ internal sealed class MethodMetadata
     public bool HasExplicitMethodId { get; }
     public bool OneWay { get; }
 
+    /// <summary>호출별 응답 대기 상한(밀리초). -1(기본) = 허브 기본 상속, 양수 = 이 호출 전용 예산.</summary>
+    public int TimeoutMs { get; }
+
     /// <summary>예: <c>global::DRPC.RpcDeliveryMode.Unreliable</c></summary>
     public string ModeExpression { get; }
 
@@ -62,6 +65,7 @@ internal sealed class MethodMetadata
         ModeExpression = BuildModeExpression(attribute, references);
         (MethodId, HasExplicitMethodId) = ResolveMethodId(attribute, ordinalMethodId);
         OneWay = ResolveNamedFlag(attribute, nameof(OneWay));
+        TimeoutMs = ResolveNamedInt(attribute, nameof(TimeoutMs), -1);
         Generic = methodSymbol.IsGenericMethod ? GenericMethodMetadata.Build(methodSymbol, references) : null;
     }
 
@@ -107,6 +111,24 @@ internal sealed class MethodMetadata
         }
 
         return false;
+    }
+
+    static int ResolveNamedInt(AttributeData? attribute, string key, int fallback)
+    {
+        if (attribute == null)
+        {
+            return fallback;
+        }
+
+        foreach (var named in attribute.NamedArguments)
+        {
+            if (named.Key == key && named.Value.Value is int value)
+            {
+                return value;
+            }
+        }
+
+        return fallback;
     }
 
     static string BuildModeExpression(AttributeData? attribute, AttributeReferences references)

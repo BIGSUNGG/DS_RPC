@@ -160,6 +160,15 @@ public abstract class HubBase : IHubBase, IDisposable
     /// </summary>
     protected async Task<byte[]> RequestRPC(int methodId, byte[] parameterData, RpcDeliveryMode mode,
         CancellationToken cancellationToken = default)
+        => await RequestRPC(methodId, parameterData, mode, null, cancellationToken).ConfigureAwait(false);
+
+    /// <summary>
+    /// 호출별 타임아웃 지정 버전. <paramref name="timeout"/> 이 null 이면 허브 기본(<see cref="RpcTimeout"/>)을 따르고,
+    /// 값이 있으면 이 호출에만 그 예산이 적용된다(느린 배치 호출에만 넉넉한 상한을 주고 나머지는 허브 기본을 지키게 하는 용도).
+    /// 해석은 허브 노브와 동일 — <see cref="Timeout.InfiniteTimeSpan"/> 또는 0 이하이면 이 호출은 무제한 대기한다.
+    /// </summary>
+    protected async Task<byte[]> RequestRPC(int methodId, byte[] parameterData, RpcDeliveryMode mode,
+        TimeSpan? timeout, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -172,7 +181,7 @@ public abstract class HubBase : IHubBase, IDisposable
 
         uint callId = AllocateCallId();
         var waitResponse = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
-        long deadline = ComputeDeadlineUtcTicks();
+        long deadline = ComputeDeadlineUtcTicks(timeout);
 
         if (!_pendingCalls.TryAdd(callId, new PendingCall(waitResponse, deadline)))
         {
@@ -210,14 +219,15 @@ public abstract class HubBase : IHubBase, IDisposable
         }
     }
 
-    long ComputeDeadlineUtcTicks()
+    long ComputeDeadlineUtcTicks(TimeSpan? timeout)
     {
-        if (RpcTimeout == Timeout.InfiniteTimeSpan || RpcTimeout <= TimeSpan.Zero)
+        TimeSpan effective = timeout ?? RpcTimeout;
+        if (effective == Timeout.InfiniteTimeSpan || effective <= TimeSpan.Zero)
         {
             return 0;
         }
 
-        return DateTime.UtcNow.Add(RpcTimeout).Ticks;
+        return DateTime.UtcNow.Add(effective).Ticks;
     }
 
     /// <summary>호버 공용 타이머 1개(1초 스캔). 호출당 CTS 는 만들지 않는다.</summary>

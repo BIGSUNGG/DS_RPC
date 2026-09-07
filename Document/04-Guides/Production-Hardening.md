@@ -102,6 +102,24 @@ int result = await client.MatchMakeAsync(request, cts.Token);
 // 취소는 대기만 끊는다: 송신된 요청은 회수 안 됨(서버 구현은 완주), 늦은 응답은 무시, 세션은 재사용 가능.
 ```
 
+## 9. 호출별 타임아웃 — 혼합 부하 예산 (v2.10.0)
+
+허브 기본 `RpcTimeout`(30s) 하나로 섞인 부하를 다스리면 — 느린 배치 호출에 맞춰 상한을 올리는 순간
+나머지 전부의 보호가 약해진다. 호출에만 예산을 건다:
+
+```csharp
+[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 42, TimeoutMs = 400)]   // 이 호출만 400ms
+int FastProbe();
+
+[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 43, TimeoutMs = 120_000)] // 느린 배치는 2분
+async Task<Snapshot> BuildSnapshotAsync();
+```
+
+- 미지정(-1)이면 허브 기본 상속 — 기존 계약의 생성 코드는 바이트 단위 불변.
+- 런타임 직접 호출은 `RequestRPC(…, TimeSpan? timeout, …)` 오버로드(null=허브 기본).
+- `TimeoutMs = 0`·음수는 컴파일 거부(DRPCGEN010), OneWay+TimeoutMs 는 경고(DRPCGEN011 — 대기가 없어 무의미).
+- 만료는 `TimeoutException`, 취소와 동일하게 세션을 오염시키지 않는다(뒤늦은 응답 무시·재사용 가능 — §8 참조).
+
 ## 관련
 
 - [[../03-Reference/Public-API|Public-API]] — 노브 전체 표 · [[../03-Reference/Performance|Performance]] — 핫패스 기준선

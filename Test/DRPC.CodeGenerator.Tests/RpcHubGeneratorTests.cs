@@ -313,4 +313,48 @@ public class RpcHubGeneratorTests
         // 진단으로 중단된 허브는 스텁을 남기지 않는다.
         Assert.DoesNotContain("MethodCallActions.Add", result.GeneratedSource);
     }
+    [Fact]
+    public void Per_call_timeout_is_emitted_into_request_calls()
+    {
+        var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(
+            "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 9, TimeoutMs = 1500)] int Slow();"));
+
+        Assert.Contains(
+            "RequestRPC(9, __payload, global::DRPC.RpcDeliveryMode.ReliableOrdered, global::System.TimeSpan.FromMilliseconds(1500), cancellationToken)",
+            result.GeneratedSource);
+        Assert.False(result.HasDiagnostic("DRPCGEN010"));
+        Assert.False(result.HasDiagnostic("DRPCGEN011"));
+    }
+
+    [Fact]
+    public void Omitted_timeout_keeps_call_shape_byte_identical()
+    {
+        // TimeoutMs 미지정(-1)이면 호출 인수에 아무것도 끼워 넣지 않는다 — 기존 소비자 생성 텍스트 불변.
+        var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(AddContract));
+
+        Assert.Contains("RequestRPC(3, __payload, global::DRPC.RpcDeliveryMode.ReliableOrdered, cancellationToken)",
+            result.GeneratedSource);
+        Assert.DoesNotContain("TimeSpan.FromMilliseconds", result.GeneratedSource);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-7)]
+    public void Invalid_timeout_value_is_rejected(int timeoutMs)
+    {
+        var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(
+            $"[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 2, TimeoutMs = {timeoutMs})] int Bad();"));
+
+        Assert.True(result.HasDiagnostic("DRPCGEN010"));
+    }
+
+    [Fact]
+    public void Timeout_on_one_way_warns_but_still_generates()
+    {
+        var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(
+            "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 4, OneWay = true, TimeoutMs = 100)] void N();"));
+
+        Assert.True(result.HasDiagnostic("DRPCGEN011"));
+        Assert.Contains("await SendRPC(4, __payload, global::DRPC.RpcDeliveryMode.ReliableOrdered)", result.GeneratedSource);
+    }
 }

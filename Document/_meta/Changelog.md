@@ -10,6 +10,10 @@ updated: 2026-09-09
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-09 (16차)
+
+- **호출별 타임아웃 정책 구현(기능 영역 — 스펙 명시 후보)** — 허브 전역 `RpcTimeout` 하나로 혼합 부하(빠른 조회 + 느린 배치)를 다스리면 어느 한쪽 보호를 희생해야 했다. `[RemoteProcedure(TimeoutMs = N)]`(양수 ms) 로 호출 단위 예산: 미지정(-1)이면 허브 기본 상속 — 기존 계약의 생성 텍스트는 바이트 단위 불변(오버로드 추가만으로 공개 표면 순수 가산, `RequestRPC(…, TimeSpan?, …)`). 검증 강제: 0/음수는 DRPCGEN010 컴파일 거부(조용한 무시 차단 — MP KI-8 계열 원칙), OneWay+TimeoutMs 는 DRPCGEN011 경고. 테스트 111 → 119(생성기 5: 인수 방출·미지정 불변·무효값 2·경고, 런타임 2: 단축/무제한 방향 오버라이드, E2E 1: 실제 RUDP 위 400ms 예산 만료 — 취소 e2e 와 동일 스타일). Feature-Spec 타임아웃 절·런북 §9 신설. 형제 확인: MP v2.3.8(CI/test/docs 전용 — 채택 불필요), Comm HEAD=v2.4.1 변동 없음.
+
 ## 2026-09-09 (15차 — 신규 루프 재개)
 
 - **MessageProtocol 2.3.4 → 2.3.7 채택** — 하위 저장소 누적 수정 중 DRPC 와이어 신뢰 경계에 직접 닿는 것: ①KI-41(2.3.7) 불신 헤더가 다른 등록 타입으로 라우팅되던 디스패치 복원의 블라인드 캐스트를 안내형 `InvalidDataException`(원인·상대 타입 명시)으로 교정 + 플래그 비트 불법 프레임 거부 예외를 `InvalidCastException` → `InvalidDataException` 으로 재분류, ②2.3.5 생성기 힌트 이름의 `+` 보존(중첩 타입 AD0001 크래시 방지), ③2.3.6 오류형 ClassId 엔트리 스킵. DRPC 소스는 예외 형식에 의존하지 않아(HubBase 전달이 catch-all) 코드 변경 불필요 — 채택을 고정하는 신뢰 경계 회귀 테스트 신규(`HubSessionFactory.Converter` 가 불법 플래그 프레임을 `InvalidDataException` 으로 거부 — 이빨 확인: 2.3.4 로 되돌리면 실패). Communication 2.4.1 은 평가 후 미채택(유일 코드 수정이 TCP/TLS 리스너 — DRPC 는 RUDP 단일). 테스트 110 → 111.

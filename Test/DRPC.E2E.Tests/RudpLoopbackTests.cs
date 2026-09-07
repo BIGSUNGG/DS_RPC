@@ -164,6 +164,27 @@ public class RudpLoopbackTests
     }
 
     [Fact]
+    public async Task Per_call_timeout_ends_wait_and_session_stays_usable()
+    {
+        int port = NextPort();
+        await using var handle = await E2EServerHub.ListenAsync(port, Key, _ => Task.CompletedTask);
+
+        using var client = await E2EClientHub.ConnectAsync("127.0.0.1", port, Key);
+
+        // 서버 구현은 3초 지연 — 호출별 예산 400ms(타임아웃 스캔 틱 1초 포함 ≲2초)가 허브 기본(30초) 대신 대기를 끊는다.
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        await Assert.ThrowsAsync<TimeoutException>(
+            () => Within(client.SlowWithPerCallTimeoutAsync(3000), 5000));
+        stopwatch.Stop();
+
+        Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(2),
+            $"per-call timeout took {stopwatch.Elapsed} — budget did not bound the wait");
+
+        // 만료는 세션을 오염시키지 않는다 — 같은 연결로 후속 호출이 정상 왕복한다(뒤늦은 응답은 버려진다).
+        Assert.Equal(5, await Within(client.AddAsync(2, 3)));
+    }
+
+    [Fact]
     public async Task Listener_max_connections_rejects_excess_peer()
     {
         int port = NextPort();

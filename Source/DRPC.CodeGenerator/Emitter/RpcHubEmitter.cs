@@ -174,11 +174,11 @@ internal static partial class RpcHubEmitter
         }
         else if (method.IsVoidReturn)
         {
-            sb.AppendLine($"{indent}    await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}, cancellationToken).ConfigureAwait(false);");
+            sb.AppendLine($"{indent}    await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}{TimeoutArg(method)}, cancellationToken).ConfigureAwait(false);");
         }
         else
         {
-            sb.AppendLine($"{indent}    byte[] __response = await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}, cancellationToken).ConfigureAwait(false);");
+            sb.AppendLine($"{indent}    byte[] __response = await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}{TimeoutArg(method)}, cancellationToken).ConfigureAwait(false);");
             sb.AppendLine($"{indent}    return {ReadReturn(method)}(__response);");
         }
 
@@ -190,6 +190,15 @@ internal static partial class RpcHubEmitter
     static string CancellationTokenParam(MethodMetadata method)
         => (method.Parameters.Length == 0 ? "" : ", ")
             + "global::System.Threading.CancellationToken cancellationToken = default";
+
+    /// <summary>
+    /// 호출별 타임아웃 인수(쉼표 포함). TimeoutMs 미지정(-1)이면 빈 문자열 — 기존 생성 텍스트와 바이트 단위 동일.
+    /// 양수면 <c>TimeSpan.FromMilliseconds(N)</c> 을 전송 방식 뒤에 끼워 넣는다(일반·제네릭 이미터 공용).
+    /// </summary>
+    internal static string TimeoutArg(MethodMetadata method)
+        => method.TimeoutMs > 0
+            ? $", global::System.TimeSpan.FromMilliseconds({method.TimeoutMs})"
+            : "";
 
     static void EmitIncoming(StringBuilder sb, MethodMetadata method, string indent)
     {

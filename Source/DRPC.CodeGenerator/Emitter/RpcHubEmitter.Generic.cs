@@ -58,11 +58,11 @@ internal static partial class RpcHubEmitter
             }
             else if (method.IsVoidReturn)
             {
-                sb.AppendLine($"{indent}        await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}, cancellationToken).ConfigureAwait(false);");
+                sb.AppendLine($"{indent}        await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}{TimeoutArg(method)}, cancellationToken).ConfigureAwait(false);");
             }
             else
             {
-                sb.AppendLine($"{indent}        byte[] __response = await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}, cancellationToken).ConfigureAwait(false);");
+                sb.AppendLine($"{indent}        byte[] __response = await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}{TimeoutArg(method)}, cancellationToken).ConfigureAwait(false);");
                 sb.AppendLine($"{indent}        return ({method.ReturnTypeDisplay})(object){ReadReturn(method)}_{i}(__response);");
             }
 

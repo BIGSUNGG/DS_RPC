@@ -14,6 +14,7 @@ updated: 2026-09-08
 
 - **왕복 RPC 호출자 취소 지원** — 스펙 개선 영역 2(정확성 「호출 타임아웃·취소 누수」) 처리. `HubBase.RequestRPC` 가 선택 `CancellationToken` 수용(사전 취소 → 미송신·`OperationCanceledException`, 대기 중 취소 → 즉시 취소 완료·슬롯 반납·늦은 응답 무시, 송신된 요청 회수 안 함). 생성 스텁(일반·제네릭) 왕복 호출 전부 맨 끝 선택 토큰 매개변수 획득(매개변수 없는 스텁 포함, 무득수 앞 쉼표 없음), OneWay 는 대기 부재로 제외. 기존 호출 전부 소스 호환(선택 매개변수). 단위 — 사전 취소 미송신·취소 슬롯 반납(MaxPendingCalls 상한 1에서 재수용)·늦은 응답 무시, 생성기 — 스텁 서명 ct 핀 3건·one-way 무토큰 핀. 테스트 91→94건 통과.
 - [[../03-Reference/Public-API|Public-API]] 스텁 예시, [[../01-Overview/Feature-Spec|Feature-Spec]] F2(타임아웃→타임아웃·취소)·F5 갱신.
+- **`v2.4.0` 릴리스** — 태그 푸시 → run 34151310315 success, 5개 패키지 flatcontainer HTTP 206 확인. 게시 상태·README 표기 갱신.
 
 ## 2026-09-08 (3차)
 

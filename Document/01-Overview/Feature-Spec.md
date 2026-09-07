@@ -153,6 +153,12 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - 버전은 루트 `Directory.Build.props`(`MessageProtocolPackageVersion`·`CommunicationPackageVersion` 포함).
 - 태그 `v*` → GitHub Actions pack·publish — 이미 존재하던 `.github/workflows/nuget-publish.yml`(런 이름 "NuGet Publish")가 그 동작이다.
 
+### 게시 상태 (2.4.0)
+
+- `v2.4.0` 태그 푸시 → run 34151310315 success, 5개 패키지 flatcontainer 확인(전부 HTTP 206).
+- 내용: 왕복 RPC 호출자 취소 — 스텁 전부(일반·제네릭) 맨 끝 선택 `CancellationToken`, `RequestRPC` 취소 시 즉시 취소 완료·슬롯 반납·늦은 응답 무시.
+- `Source/Directory.Build.props` `<Version>` 2.4.0(릴리스 커밋 `74569f3`).
+
 ### 게시 상태 (2.3.0)
 
 - `v2.3.0` 태그 푸시 → run 34150180755 success (Require API key → Pack → Push, 5개 nupkg 푸시).

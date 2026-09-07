@@ -6,7 +6,25 @@ on:
       - "v*"
 
 jobs:
+  # 게시 전 검증 — 태그 커밋이 로컬 게이트와 동일한 빌드+테스트를 CI 상에서 통과했는지 확인한 뒤에만
+  # 패키지가 나간다(형제 저장소와 동일 원칙: 배포 게이트가 개발 게이트보다 느슨하면 안 된다).
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.x"
+
+      - name: Build (Release)
+        run: dotnet build DRPC.slnx -c Release
+
+      - name: Test
+        run: dotnet test DRPC.slnx -c Release --no-build
+
   publish:
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main, feature/improvement]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.x"
+
+      - name: Build (Release)
+        run: dotnet build DRPC.slnx -c Release
+
+      - name: Test
+        run: dotnet test DRPC.slnx -c Release --no-build

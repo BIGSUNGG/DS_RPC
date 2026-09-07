@@ -16,6 +16,7 @@ updated: 2026-09-08
 - **`RpcEndpointOptions` + `ConnectWithOptionsAsync`/`ListenWithOptionsAsync`** — 전송 옵션 일괄 지정 묶음 타입(`ConnectionKey`·`ConnectTimeoutMs`·`MaxConnections`·`EnableCrc32c`, `ToTransportOptions()`). 기존 매개변수 오버로드에 `string?` 와 같은 위치 null-리터럴 모호성(CS0121·런타임 미스바인딩)을 만들지 않도록 **별명 메서드**로 추가 — 기존 호출 전부 무영향. CRC32c 는 양단 일치 필수(와이어 비호환)·검출 전용 문서화.
 - E2E — 양단 CRC32c 왕복 정상 + 미스매치(끄고 접속) 연결 수립 불가 확인, 단위 4건(매핑·기본값·음수 거부). 테스트 94→99건 통과.
 - [[../03-Reference/Public-API|Public-API]] 헬퍼 표·신규 타입, [[../01-Overview/Feature-Spec|Feature-Spec]]·[[../00-AI/CONTEXT|CONTEXT]] 상태 동기화.
+- **`v2.5.0` 릴리스** — 태그 푸시 → run 34152401923 success, 5개 패키지 flatcontainer HTTP 206 확인. 게시 상태·README 표기 갱신.
 
 ## 2026-09-08 (4차)
 

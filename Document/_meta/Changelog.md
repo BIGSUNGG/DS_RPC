@@ -15,6 +15,7 @@ updated: 2026-09-08
 - **형제 제안 P4 채택 — 운영 신호 노출** — ① `RpcListenHandle.ActiveConnectionCount`(수락된 peer 허브 수 — 포화·연결 상한 근사 지표), ② `HubBase.LastDisconnectReason`(끊김 전 null, `Disconnected` 핸들러 안에서 판독 — 이벤트 시그니처 불변 유지). 사유 전달은 `NotifyDisconnected` 2인자 오버로드(인터페이스는 C# DIM 기본 구현으로 기존 구현 호환)·`DRPCMessageHandler` 가 세션 이벤트에서 `e.Reason` 전달. `FlowControl`(수신 미처리 상한 단결)로 백프레셔 식별 가능. 단위 1건(FlowControl 관측)·E2E 1건(카운트 0→1→0). 테스트 106→108건.
 - **형제 채택 — MessageProtocol 2.3.4** — 직렬화기 캐시 volatile 화(ARM 메모리 모델 정합)·동시 중복 등록 경쟁 수정·진입점 계약 테스트. Communication 2.3.1 재확인(변화 없음 유지).
 - [[../03-Reference/Public-API|Public-API]] HubBase 표·RpcListenHandle 행, [[../00-AI/PENDING|PENDING]] P4 채택완료 처리, [[../00-AI/CONTEXT|CONTEXT]] 갱신.
+- **`v2.9.0` 릴리스** — 태그 푸시 → run success, 5개 패키지 flatcontainer HTTP 206 확인. 게시 상태·README 표기 갱신.
 
 ## 2026-09-09 (8차)
 

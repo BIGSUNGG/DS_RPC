@@ -53,7 +53,7 @@ DTO(`[NonIdMessage]`), 그룹 다형성, 제네릭 프로시저(`[GenericProcedu
 
 모두 `netstandard2.1`(생성기는 netstandard2.0) — Unity 포함 .NET 프레임워크에서 사용 가능하다.
 의존 버전은 `Directory.Build.props` 의 `MessageProtocolPackageVersion` · `CommunicationPackageVersion` 이 단일 사실원이다.
-DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **2.8.0**.
+DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **2.9.0**.
 
 ## 빌드·예제·테스트
 

@@ -154,6 +154,12 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - 버전은 루트 `Directory.Build.props`(`MessageProtocolPackageVersion`·`CommunicationPackageVersion` 포함).
 - 태그 `v*` → GitHub Actions pack·publish — 이미 존재하던 `.github/workflows/nuget-publish.yml`(런 이름 "NuGet Publish")가 그 동작이다.
 
+### 게시 상태 (2.9.0)
+
+- `v2.9.0` 태그 푸시 → run success, 5개 패키지 flatcontainer 확인(전부 HTTP 206).
+- 내용: 형제 제안 P4 운영 신호(`ActiveConnectionCount`·`LastDisconnectReason`) + MessageProtocol 2.3.4 채택.
+- `Source/Directory.Build.props` `<Version>` 2.9.0(릴리스 커밋 `ca98c88`).
+
 ### 게시 상태 (2.8.0)
 
 - `v2.8.0` 태그 푸시 → run success, 5개 패키지 flatcontainer 확인(전부 HTTP 206).

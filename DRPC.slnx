@@ -15,5 +15,6 @@
     <Project Path="Test/DRPC.Shared.Tests/DRPC.Shared.Tests.csproj" />
     <Project Path="Test/DRPC.CodeGenerator.Tests/DRPC.CodeGenerator.Tests.csproj" />
     <Project Path="Test/DRPC.E2E.Tests/DRPC.E2E.Tests.csproj" />
+    <Project Path="Test/DRPC.Benchmarks/DRPC.Benchmarks.csproj" />
   </Folder>
 </Solution>

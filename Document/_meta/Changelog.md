@@ -10,6 +10,12 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-09 (10차)
+
+- **송신 핫패스 중간 배열 제거(스펙 영역 3 성능)** — `MessageProtocolConverter.Serialize` 이 메시지마다 `ToArray()` 중간 배열(직렬화→복사→재복사 이중 복사)을 내던 것을 `writer.Write(buffer.WrittenSpan)` 단일 복사로 교체 — 송신 호출당 GC 할당 1건 제거. 단위 계약 테스트(왕복 바이트 정합) 추가로 복사 전략 무관 정합 고정. 테스트 108→109건.
+- **형제 4차 채택 — Communication 2.4.0** — 늦은 구독자 끊김 전달 보장(래치·재생), 호스트 중지 시 생존 세션 `Local` 통지·사망 피어 송신 예외화. 채택 중 NU1102(유입 지연 약 5분) 재관측 — http-cache 클리어 해소(6차와 동일 패턴, 운영 지식으로 확립).
+- [[../00-AI/CONTEXT|CONTEXT]]·[[../01-Overview/Feature-Spec|Feature-Spec]] 상태 동기화.
+
 ## 2026-09-09 (9차)
 
 - **형제 제안 P4 채택 — 운영 신호 노출** — ① `RpcListenHandle.ActiveConnectionCount`(수락된 peer 허브 수 — 포화·연결 상한 근사 지표), ② `HubBase.LastDisconnectReason`(끊김 전 null, `Disconnected` 핸들러 안에서 판독 — 이벤트 시그니처 불변 유지). 사유 전달은 `NotifyDisconnected` 2인자 오버로드(인터페이스는 C# DIM 기본 구현으로 기존 구현 호환)·`DRPCMessageHandler` 가 세션 이벤트에서 `e.Reason` 전달. `FlowControl`(수신 미처리 상한 단결)로 백프레셔 식별 가능. 단위 1건(FlowControl 관측)·E2E 1건(카운트 0→1→0). 테스트 106→108건.

@@ -87,9 +87,8 @@ public static class HubSessionFactory
             try
             {
                 MessageSerializer.SerializeToWriter(message, ref buffer);
-                byte[] bytes = buffer.ToArray();
-                bytes.AsSpan().CopyTo(writer.GetSpan(bytes.Length));
-                writer.Advance(bytes.Length);
+                // 핫패스 — 중간 배열(ToArray) 없이 WrittenSpan 을 단일 복사한다(IBufferWriter.Write 확장).
+                writer.Write(buffer.WrittenSpan);
             }
             finally
             {

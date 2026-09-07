@@ -142,6 +142,28 @@ public class RudpLoopbackTests
     }
 
     [Fact]
+    public async Task Cancellation_ends_wait_quickly_and_session_stays_usable()
+    {
+        int port = NextPort();
+        await using var handle = await E2EServerHub.ListenAsync(port, Key, _ => Task.CompletedTask);
+
+        using var client = await E2EClientHub.ConnectAsync("127.0.0.1", port, Key);
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(300));
+
+        // 서버 구현은 2초 지연(Slow) — 토큰 예산(300ms)이 대기를 먼저 끊는다(와이어 위 취소 검증).
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => Within(client.SlowAsync(2000, cts.Token), 5000));
+        stopwatch.Stop();
+
+        Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(2),
+            $"cancellation took {stopwatch.Elapsed} — token budget did not bound the wait");
+
+        // 취소는 세션을 오염시키지 않는다 — 같은 연결로 후속 호출이 정상 왕복한다.
+        Assert.Equal(5, await Within(client.AddAsync(2, 3)));
+    }
+
+    [Fact]
     public async Task Listener_max_connections_rejects_excess_peer()
     {
         int port = NextPort();

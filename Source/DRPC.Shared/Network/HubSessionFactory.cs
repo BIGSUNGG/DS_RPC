@@ -20,7 +20,17 @@ public static class HubSessionFactory
     /// RUDP 채널 위에 RPC 세션을 만든다. 세션은 채널을 소유하므로 Dispose 시 채널까지 정리된다.
     /// </summary>
     public static ISession CreateRudpSession(IMessageChannel channel, IHubBase hub)
-        => new RudpSession(channel, Converter, session => new DRPCMessageHandler(session, hub));
+        => CreateRudpSession(channel, hub, null);
+
+    /// <summary>
+    /// 큐·디스패치 옵션 지정 버전 — 앱이 <see cref="Communication.Shared.Messages.MessageQueueOptions"/> 로
+    /// <c>FrameTimeout</c>(슬로로리스 방어, 기본 30초 — 첫 바이트 도착 후 프레임 완성 마감),
+    /// <c>MaxFrameLength</c>(기본 4MB) 등 세션 수준 정책을 통합 관리한다(형제 제안 P3).
+    /// 커스텀 옵션 사용 시 커스텀 허브 팩토리(<c>channel => new GameHub(h => HubSessionFactory.CreateRudpSession(channel, h, opts))</c>)로 조합한다.
+    /// </summary>
+    public static ISession CreateRudpSession(IMessageChannel channel, IHubBase hub,
+        Communication.Shared.Messages.MessageQueueOptions? queueOptions)
+        => new RudpSession(channel, Converter, session => new DRPCMessageHandler(session, hub), queueOptions);
 
     /// <summary>
     /// 접속 옵션. <paramref name="connectionKey"/> 가 null/빈 문자열이면 전송 스택 기본 키를 쓴다.

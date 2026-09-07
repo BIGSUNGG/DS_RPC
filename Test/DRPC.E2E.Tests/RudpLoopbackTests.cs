@@ -195,6 +195,26 @@ public class RudpLoopbackTests
     }
 
     [Fact]
+    public async Task Queue_options_flow_through_session_factory()
+    {
+        int port = NextPort();
+        await using var handle = await E2EServerHub.ListenAsync(port, Key, _ => Task.CompletedTask);
+
+        // 세션 팩토리에 큐 옵션 통과 — 송신 프레임 상한 64바이트로 좁힌다(형제 제안 P3: FrameTimeout·MaxFrameLength 통합 관리).
+        var queueOptions = new Communication.Shared.Messages.MessageQueueOptions { MaxFrameLength = 64 };
+        using var client = await RpcClient.ConnectAsync("127.0.0.1", port, Key,
+            channel => new E2EClientHub(hub => HubSessionFactory.CreateRudpSession(channel, hub, queueOptions)));
+        client.RpcTimeout = TimeSpan.FromSeconds(2);
+
+        // 상한 이내 프레임은 정상 왕복한다.
+        Assert.Equal(5, await Within(client.AddAsync(2, 3)));
+
+        // 상한 초과 페이로드는 송신 격리되어 응답 없음 — 타임아웃(또는 격리 예외)으로 2초 이내 실패한다.
+        string big = new string('x', 200);
+        await Assert.ThrowsAnyAsync<Exception>(() => Within(client.EchoAsync(big)));
+    }
+
+    [Fact]
     public async Task Unknown_method_id_yields_unknown_method_fault()
     {
         int port = NextPort();

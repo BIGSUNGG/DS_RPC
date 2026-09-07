@@ -170,6 +170,31 @@ public class RudpLoopbackTests
     }
 
     [Fact]
+    public async Task Crc32c_both_endpoints_roundtrip_and_mismatch_cannot_connect()
+    {
+        int port = NextPort();
+
+        // 서버·클라 모두 CRC32c 켠 설정 — 무결성 레이어 위에서 정상 왕복한다.
+        var serverOptions = new RpcEndpointOptions { ConnectionKey = Key, EnableCrc32c = true };
+        await using var handle = await RpcHost.ListenWithOptionsAsync(port, serverOptions,
+            channel => new E2EServerHub(hub => HubSessionFactory.CreateRudpSession(channel, hub)),
+            _ => Task.CompletedTask);
+
+        var clientOptions = new RpcEndpointOptions { ConnectionKey = Key, EnableCrc32c = true, ConnectTimeoutMs = 3000 };
+        using var client = await RpcClient.ConnectWithOptionsAsync("127.0.0.1", port, clientOptions,
+            channel => new E2EClientHub(hub => HubSessionFactory.CreateRudpSession(channel, hub)));
+
+        Assert.Equal(5, await Within(client.AddAsync(2, 3)));
+        client.Dispose();
+
+        // 와이어 비호환 확인 — CRC 를 끈 클라이언트는 체크섬 위반 패킷으로 취급돼 연결 수립 불가(300ms 상한으로 빠르게 실패).
+        var plainOptions = new RpcEndpointOptions { ConnectionKey = Key, ConnectTimeoutMs = 300 };
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            RpcClient.ConnectWithOptionsAsync("127.0.0.1", port, plainOptions,
+                channel => new E2EClientHub(hub => HubSessionFactory.CreateRudpSession(channel, hub))));
+    }
+
+    [Fact]
     public async Task Unknown_method_id_yields_unknown_method_fault()
     {
         int port = NextPort();

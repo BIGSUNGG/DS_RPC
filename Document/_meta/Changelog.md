@@ -10,6 +10,13 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-08 (5차)
+
+- **형제 스택 2차 채택 — Communication 2.2.1·MessageProtocol 2.3.1** — Communication 2.1.0(TCP TLS — DRPC 미사용) 건너뙄고 2.2.0 **RUDP CRC32c 패킷 무결성 레이어**(옵트인, 프로토콜 처리 전 위반 패킷 폐기 — IPv4 UDP 체크섬 비활성 우회 방어) + 2.2.1 프레이밍 버퍼 압축 개선, MessageProtocol 2.3.1(PooledBuffer 이중 반납 수정·생성기 파싱 강화) 채택.
+- **`RpcEndpointOptions` + `ConnectWithOptionsAsync`/`ListenWithOptionsAsync`** — 전송 옵션 일괄 지정 묶음 타입(`ConnectionKey`·`ConnectTimeoutMs`·`MaxConnections`·`EnableCrc32c`, `ToTransportOptions()`). 기존 매개변수 오버로드에 `string?` 와 같은 위치 null-리터럴 모호성(CS0121·런타임 미스바인딩)을 만들지 않도록 **별명 메서드**로 추가 — 기존 호출 전부 무영향. CRC32c 는 양단 일치 필수(와이어 비호환)·검출 전용 문서화.
+- E2E — 양단 CRC32c 왕복 정상 + 미스매치(끄고 접속) 연결 수립 불가 확인, 단위 4건(매핑·기본값·음수 거부). 테스트 94→99건 통과.
+- [[../03-Reference/Public-API|Public-API]] 헬퍼 표·신규 타입, [[../01-Overview/Feature-Spec|Feature-Spec]]·[[../00-AI/CONTEXT|CONTEXT]] 상태 동기화.
+
 ## 2026-09-08 (4차)
 
 - **왕복 RPC 호출자 취소 지원** — 스펙 개선 영역 2(정확성 「호출 타임아웃·취소 누수」) 처리. `HubBase.RequestRPC` 가 선택 `CancellationToken` 수용(사전 취소 → 미송신·`OperationCanceledException`, 대기 중 취소 → 즉시 취소 완료·슬롯 반납·늦은 응답 무시, 송신된 요청 회수 안 함). 생성 스텁(일반·제네릭) 왕복 호출 전부 맨 끝 선택 토큰 매개변수 획득(매개변수 없는 스텁 포함, 무득수 앞 쉼표 없음), OneWay 는 대기 부재로 제외. 기존 호출 전부 소스 호환(선택 매개변수). 단위 — 사전 취소 미송신·취소 슬롯 반납(MaxPendingCalls 상한 1에서 재수용)·늦은 응답 무시, 생성기 — 스텁 서명 ct 핀 3건·one-way 무토큰 핀. 테스트 91→94건 통과.

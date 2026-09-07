@@ -32,7 +32,8 @@ public static class HubSessionFactory
     public static RudpTransportOptions CreateTransportOptions(
         string? connectionKey,
         int connectTimeoutMs = 0,
-        int maxConnections = 0)
+        int maxConnections = 0,
+        bool enableCrc32c = false)
     {
         if (connectTimeoutMs < 0)
         {
@@ -58,6 +59,11 @@ public static class HubSessionFactory
         if (maxConnections > 0)
         {
             options.MaxConnections = maxConnections;
+        }
+
+        if (enableCrc32c)
+        {
+            options.Crc32cEnabled = true;
         }
 
         return options;

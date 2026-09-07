@@ -41,6 +41,41 @@ public static class RpcHost
             throw new ArgumentOutOfRangeException(nameof(maxConnections));
         }
 
+        return ListenCoreAsync(port, HubSessionFactory.CreateTransportOptions(connectionKey, 0, maxConnections),
+            hubFactory, onConnected, cancellationToken);
+    }
+
+    /// <summary>
+    /// <see cref="RpcEndpointOptions"/> 로 전송 옵션(키·연결 상한·CRC32c 무결성 등)을 일괄 지정한다.
+    /// CRC32c 는 양단 모두 같은 설정이어야 한다(와이어 비호환).
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="endpointOptions"/> 가 null.</exception>
+    /// <exception cref="InvalidOperationException">바인딩 실퍽·이미 시작된 리스너.</exception>
+    public static Task<RpcListenHandle> ListenWithOptionsAsync<THub>(
+        int port,
+        RpcEndpointOptions endpointOptions,
+        Func<IMessageChannel, THub> hubFactory,
+        Func<THub, Task>? onConnected = null,
+        CancellationToken cancellationToken = default)
+        where THub : Shared.Network.HubBase
+    {
+        if (endpointOptions is null)
+        {
+            throw new ArgumentNullException(nameof(endpointOptions));
+        }
+
+        return ListenCoreAsync(port, endpointOptions.ToTransportOptions(),
+            hubFactory, onConnected, cancellationToken);
+    }
+
+    static Task<RpcListenHandle> ListenCoreAsync<THub>(
+        int port,
+        RudpTransportOptions transportOptions,
+        Func<IMessageChannel, THub> hubFactory,
+        Func<THub, Task>? onConnected,
+        CancellationToken cancellationToken)
+        where THub : Shared.Network.HubBase
+    {
         var listener = new RudpListener(System.Net.IPAddress.Any, port);
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var stopped = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -87,7 +122,7 @@ public static class RpcHost
 
         try
         {
-            listener.Start(HubSessionFactory.CreateTransportOptions(connectionKey, 0, maxConnections));
+            listener.Start(transportOptions);
         }
         catch
         {

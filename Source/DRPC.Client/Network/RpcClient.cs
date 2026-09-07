@@ -52,4 +52,35 @@ public static class RpcClient
         IMessageChannel channel = connector.Channel;
         return hubFactory(channel);
     }
+
+    /// <summary>
+    /// <see cref="RpcEndpointOptions"/> 로 전송 옵션(키·연결 타임아웃·CRC32c 무결성 등)을 일괄 지정한다.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="endpointOptions"/> 가 null.</exception>
+    /// <exception cref="InvalidOperationException">접속 거부·호스트 해석 실패·재시도 소진.</exception>
+    /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> 취소.</exception>
+    public static async Task<THub> ConnectWithOptionsAsync<THub>(
+        string host,
+        int port,
+        RpcEndpointOptions endpointOptions,
+        Func<IMessageChannel, THub> hubFactory,
+        CancellationToken cancellationToken = default)
+        where THub : Shared.Network.HubBase
+    {
+        if (endpointOptions is null)
+        {
+            throw new ArgumentNullException(nameof(endpointOptions));
+        }
+
+        var connector = new RudpConnector();
+
+        if (!await connector.ConnectAsync(host, port, endpointOptions.ToTransportOptions(),
+                cancellationToken).ConfigureAwait(false) || connector.Channel is null)
+        {
+            throw new InvalidOperationException("Failed to connect to server.");
+        }
+
+        IMessageChannel channel = connector.Channel;
+        return hubFactory(channel);
+    }
 }

@@ -14,6 +14,7 @@ updated: 2026-09-08
 
 - **`HubBase.SendErrorDetails` — Unhandled 오류 정보유출 방어 + 서버측 항상 Trace** — 식별된 마지막 영역 1/2 잔여 항목 처리. 기존: 구현 예외의 `ex.Message`(경로·내부 상태 포함 가능)가 원격 피어로 그대로 전송되는 반면 **서버 운영자에겐 아무 기록도 남지 않던 역전**. 이제 ① 노브(기본 true·기존 동작 유지 — 하위호환, false면 고정 문구 전송·인터넷 노출 엔드포인트 권장) ② 예외는 설정과 무관하게 항상 `Trace.TraceError`(콘솔 의존 금지 규약 준수). 단위 2건(기본 상세 전송·억제 시 미누출). E2E 기본 경로 단언("intentional failure") 유지 통과로 기본 동작 불변 실증. 테스트 104→106건.
 - [[../03-Reference/Public-API|Public-API]] HubBase 표, [[../01-Overview/Feature-Spec|Feature-Spec]] F3, [[../00-AI/CONTEXT|CONTEXT]] 카운트 동기화.
+- **`v2.8.0` 릴리스** — 태그 푸시 → run success, 5개 패키지 flatcontainer HTTP 206 확인. 게시 상태·README 표기 갱신.
 
 ## 2026-09-09 (7차)
 

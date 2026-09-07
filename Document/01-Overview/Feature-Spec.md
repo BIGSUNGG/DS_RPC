@@ -153,6 +153,12 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - 버전은 루트 `Directory.Build.props`(`MessageProtocolPackageVersion`·`CommunicationPackageVersion` 포함).
 - 태그 `v*` → GitHub Actions pack·publish — 이미 존재하던 `.github/workflows/nuget-publish.yml`(런 이름 "NuGet Publish")가 그 동작이다.
 
+### 게시 상태 (2.6.0)
+
+- `v2.6.0` 태그 푸시 → run success, 5개 패키지 flatcontainer 확인(전부 HTTP 206).
+- 내용: `AuthorizeRequestAsync` 호출 권한 훅 + `RpcErrorCode.PermissionDenied`(6) + 형제 3차 채택(Communication 2.3.0·MessageProtocol 2.3.2).
+- `Source/Directory.Build.props` `<Version>` 2.6.0(릴리스 커밋 `f8e613d`).
+
 ### 게시 상태 (2.5.0)
 
 - `v2.5.0` 태그 푸시 → run 34152401923 success, 5개 패키지 flatcontainer 확인(전부 HTTP 206).

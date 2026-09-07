@@ -161,7 +161,10 @@ internal static partial class RpcHubEmitter
             ? "global::System.Threading.Tasks.Task"
             : $"global::System.Threading.Tasks.Task<{method.ReturnTypeDisplay}>";
 
-        sb.AppendLine($"{indent}public async {asyncReturn} {method.MethodName}Async({method.ParameterDeclarationList()})");
+        // 왕복 호출은 호출자 취소를 받는다(맨 끝 선택 매개변수). one-way 송신은 대기가 없어 제외한다.
+        string ctParam = method.OneWay ? "" : CancellationTokenParam(method);
+
+        sb.AppendLine($"{indent}public async {asyncReturn} {method.MethodName}Async({method.ParameterDeclarationList()}{ctParam})");
         sb.AppendLine($"{indent}{{");
         EmitPayloadWrite(sb, indent + "    ", method, args, "__payload");
 
@@ -171,17 +174,22 @@ internal static partial class RpcHubEmitter
         }
         else if (method.IsVoidReturn)
         {
-            sb.AppendLine($"{indent}    await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}).ConfigureAwait(false);");
+            sb.AppendLine($"{indent}    await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}, cancellationToken).ConfigureAwait(false);");
         }
         else
         {
-            sb.AppendLine($"{indent}    byte[] __response = await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}).ConfigureAwait(false);");
+            sb.AppendLine($"{indent}    byte[] __response = await RequestRPC({method.MethodId}, __payload, {method.ModeExpression}, cancellationToken).ConfigureAwait(false);");
             sb.AppendLine($"{indent}    return {ReadReturn(method)}(__response);");
         }
 
         sb.AppendLine($"{indent}}}");
         sb.AppendLine();
     }
+
+    /// <summary>왕복 스텁 맨 끄트에 붙는 선택 취소 토큰 매개변수(무득수 메서드면 앞 쉼표 없이).</summary>
+    static string CancellationTokenParam(MethodMetadata method)
+        => (method.Parameters.Length == 0 ? "" : ", ")
+            + "global::System.Threading.CancellationToken cancellationToken = default";
 
     static void EmitIncoming(StringBuilder sb, MethodMetadata method, string indent)
     {

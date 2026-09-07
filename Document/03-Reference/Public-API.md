@@ -109,13 +109,13 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
     // 리스닝 (서버 측) — ListenAsync(port, onConnected, ct) / (port, connectionKey, onConnected, ct) / (port, ct)
     public static Task<RpcListenHandle> ListenAsync(int port, string? connectionKey, Func<GameServerHub, Task> onConnected, CancellationToken ct = default);
 
-    // Outgoing 스텁 (Async 전용 — sync 스텁은 없다)
-    public Task<int> AddAsync(int value1, int value2);
-    public Task NoteAsync(string text);                       // OneWay
+    // Outgoing 스텁 (Async 전용 — sync 스텁은 없다). 왕복 호출은 맨 끝 선택 CancellationToken 을 받는다.
+    public Task<int> AddAsync(int value1, int value2, CancellationToken cancellationToken = default);
+    public Task NoteAsync(string text);                       // OneWay — 대기가 없어 취소 토큰 없음
 
     // 제네릭 스텁(F12) — 일반 호출과 동일한 방법(T 추론 가능, 반환 전용은 명시)
-    public Task<T> GetConfigAsync<T>();                       // await hub.GetConfigAsync<int>()
-    public Task<string> DescribeAsync<T>(T value);            // await hub.DescribeAsync(42)
+    public Task<T> GetConfigAsync<T>(CancellationToken cancellationToken = default);   // await hub.GetConfigAsync<int>()
+    public Task<string> DescribeAsync<T>(T value, CancellationToken cancellationToken = default);  // await hub.DescribeAsync(42)
 
     // Incoming: 사용자가 이 partial 을 구현한다
     private partial Task<int> EchoSum_Implementation(List<float> values);

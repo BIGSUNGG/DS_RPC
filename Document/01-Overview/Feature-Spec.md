@@ -76,7 +76,7 @@ RPC 호출의 실질 런타임 전부.
 
 - **Outgoing**: `RequestRPC`(응답 대기, TCS) / `SendRPC`(one-way, **CallId 고정 0**). `MaxPendingCalls`(0=무제한) 상한 도달 시 새 호출은 fail-fast `InvalidOperationException` — 응답 불능 피어에 대한 대기 테이블 무한 적체(메모리 고갈) 방어.
 - **CallId**: `Interlocked` 단조 증가, **비재사용**. 0은 one-way 예약.
-- **타임아웃**: `RpcTimeout`(기본 30s, `<= Zero`/Infinite면 무제한), Hub 공용 타이머 스캔(per-call CTS 없음).
+- **타임아웃·취소**: `RpcTimeout`(기본 30s, `<= Zero`/Infinite면 무제한), Hub 공용 타이머 스캔(per-call CTS 없음). 왕복 호출은 선택 `CancellationToken` 수용 — 취소 시 대기 즉시 취소 완료·슬롯 반납, 늦은 응답·오류는 무시, 송신된 요청은 회수 안 함(수신측 구현은 끝까지 실행됨).
 - **Incoming**: 수신 → 비블로킹 처리 → 응답. `MaxConcurrentIncoming`(0=무제한) 세마포어; 초과 시 요청은 `Overloaded` 오류, one-way는 drop.
 - **수명**: `Disconnected` 이벤트, `Disconnect()`, `IDisposable`; 끊김 시 `CancelPendingCalls`로 pending TCS 예외 완료.
 
@@ -117,7 +117,7 @@ RPC 호출의 실질 런타임 전부.
 Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 스텁 생성.
 
 - **탐지**: 클라 `ClientHub`, 서버 `ServerHub` 상속 partial class (명명 정렬 — [[../05-Decisions/0001-hub-naming-and-version-2|ADR-0001]]).
-- **Outgoing**: `{Method}Async` **만** 생성(sync `[Obsolete]` 스텁 없음 — ADR-0002 결정 1). OneWay → `SendRPC`, 아니면 `RequestRPC`.
+- **Outgoing**: `{Method}Async` **만** 생성(sync `[Obsolete]` 스텁 없음 — ADR-0002 결정 1). OneWay → `SendRPC`, 아니면 `RequestRPC`. 왕복 스텁은 맨 끝 선택 `CancellationToken`(기본 `default`)을 받아 `RequestRPC` 에 전달 — 취소는 대기만 즉시 종료(슬롯 반납·늦은 응답 무시)하고 송신된 요청은 회수하지 않는다. OneWay 는 대기가 없어 토큰을 받지 않는다. 매개변수 없는 스텁도 앞 쉼표 없이 토큰을 받는다.
 - **Incoming**: `async Task<byte[]>` 디스패치(`{Name}_Requested`) + 사용자 `partial Task` / `Task<T>` `{Name}_Implementation`.
 - **연결**: 클라 `ConnectAsync(host, port, connectionKey?, ct)`, 서버 `ListenAsync(port, connectionKey?, onConnected, ct)` → `RpcListenHandle`.
 - **페이로드**: 메서드별 래퍼 메시지 타입 없이, 매개변수·반환을 `MessageBufferWriter` 에 선언 순서로 이어 붙인다(ADR-0002 결정 4).

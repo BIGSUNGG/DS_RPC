@@ -10,6 +10,11 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-08 (4차)
+
+- **왕복 RPC 호출자 취소 지원** — 스펙 개선 영역 2(정확성 「호출 타임아웃·취소 누수」) 처리. `HubBase.RequestRPC` 가 선택 `CancellationToken` 수용(사전 취소 → 미송신·`OperationCanceledException`, 대기 중 취소 → 즉시 취소 완료·슬롯 반납·늦은 응답 무시, 송신된 요청 회수 안 함). 생성 스텁(일반·제네릭) 왕복 호출 전부 맨 끝 선택 토큰 매개변수 획득(매개변수 없는 스텁 포함, 무득수 앞 쉼표 없음), OneWay 는 대기 부재로 제외. 기존 호출 전부 소스 호환(선택 매개변수). 단위 — 사전 취소 미송신·취소 슬롯 반납(MaxPendingCalls 상한 1에서 재수용)·늦은 응답 무시, 생성기 — 스텁 서명 ct 핀 3건·one-way 무토큰 핀. 테스트 91→94건 통과.
+- [[../03-Reference/Public-API|Public-API]] 스텁 예시, [[../01-Overview/Feature-Spec|Feature-Spec]] F2(타임아웃→타임아웃·취소)·F5 갱신.
+
 ## 2026-09-08 (3차)
 
 - **`RpcHost.ListenAsync` `maxConnections` 오버로드** — 스펙 개선 영역 1(보안·리소스 고갈 「대량 호출·연결 고갈」) 처리. 동시 수락 연결 수 상한을 DRPC 리슨 경로에 노출(Communication 2.0.1 `RudpTransportOptions.MaxConnections` 채택 완결 — ConnectTimeout 에 이은 두 번째). 상한 도달 시 초과 접속은 즉시 거부되고 수락은 계속(연결 고갈 공격 방어), 0(기본)=무제한·동작 불변, 음수 거부. `HubSessionFactory.CreateTransportOptions` 세 번째 선택 매개변수 추가. E2E — 상한 1에서 첫 클라 정상 동작·초과 접속 즉시 거부 + 음수 거부, 팩토리 단위 4건. 테스트 87→91건 통과.

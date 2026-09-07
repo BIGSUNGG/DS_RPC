@@ -17,8 +17,8 @@ public class RpcHubGeneratorTests
     {
         var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(AddContract));
 
-        Assert.Contains("public async global::System.Threading.Tasks.Task<global::System.Int32> AddAsync(global::System.Int32 value1, global::System.Int32 value2)", result.GeneratedSource);
-        Assert.Contains("RequestRPC(3, __payload, global::DRPC.RpcDeliveryMode.ReliableOrdered)", result.GeneratedSource);
+        Assert.Contains("public async global::System.Threading.Tasks.Task<global::System.Int32> AddAsync(global::System.Int32 value1, global::System.Int32 value2, global::System.Threading.CancellationToken cancellationToken = default)", result.GeneratedSource);
+        Assert.Contains("RequestRPC(3, __payload, global::DRPC.RpcDeliveryMode.ReliableOrdered, cancellationToken)", result.GeneratedSource);
         Assert.DoesNotContain("[global::System.Obsolete", result.GeneratedSource);
         Assert.DoesNotContain("public int Add(", result.GeneratedSource);
         Assert.Empty(result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error));
@@ -30,7 +30,7 @@ public class RpcHubGeneratorTests
         // 인자 없는 [RemoteProcedure] = 기본 ReliableOrdered (MethodId 는 선언 순서 → DRPCGEN004 경고).
         var result = GeneratorHarness.Run(GeneratorHarness.ClientHub("[RemoteProcedure] int A();"));
 
-        Assert.Contains("RequestRPC(0, __payload, global::DRPC.RpcDeliveryMode.ReliableOrdered)", result.GeneratedSource);
+        Assert.Contains("RequestRPC(0, __payload, global::DRPC.RpcDeliveryMode.ReliableOrdered, cancellationToken)", result.GeneratedSource);
         Assert.True(result.HasDiagnostic("DRPCGEN004"));
     }
 
@@ -40,7 +40,7 @@ public class RpcHubGeneratorTests
         var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(
             "[RemoteProcedure(RpcDeliveryMode.Unreliable, 4)] void Ping(int seq);"));
 
-        Assert.Contains("RequestRPC(4, __payload, global::DRPC.RpcDeliveryMode.Unreliable)", result.GeneratedSource);
+        Assert.Contains("RequestRPC(4, __payload, global::DRPC.RpcDeliveryMode.Unreliable, cancellationToken)", result.GeneratedSource);
     }
 
     [Fact]
@@ -51,6 +51,22 @@ public class RpcHubGeneratorTests
 
         Assert.Contains("await SendRPC(5, __payload, global::DRPC.RpcDeliveryMode.ReliableUnordered)", result.GeneratedSource);
         Assert.DoesNotContain("OneWayMethodIds", result.GeneratedSource);
+    }
+
+    [Fact]
+    public void Roundtrip_stubs_accept_cancellation_token_but_oneway_does_not()
+    {
+        var roundtrip = GeneratorHarness.Run(GeneratorHarness.ClientHub(
+            "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 7)] int Q();"));
+
+        // 무득수 왕복 스텁은 앞 쉼표 없이 취소 토큰을 받는다.
+        Assert.Contains("QAsync(global::System.Threading.CancellationToken cancellationToken = default)", roundtrip.GeneratedSource);
+
+        var oneWay = GeneratorHarness.Run(GeneratorHarness.ClientHub(
+            "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 8, OneWay = true)] void N();"));
+
+        Assert.DoesNotContain("NAsync(global::System.Threading.CancellationToken", oneWay.GeneratedSource);
+        Assert.Contains("await SendRPC(8, __payload", oneWay.GeneratedSource);
     }
 
     [Fact]
@@ -99,7 +115,7 @@ public class RpcHubGeneratorTests
 
         Assert.Contains("MethodCallActions.Add(1, In_Requested);", result.GeneratedSource);
         Assert.DoesNotContain("Out_Requested", result.GeneratedSource);
-        Assert.Contains("Task<global::System.Int32> OutAsync()", result.GeneratedSource);
+        Assert.Contains("Task<global::System.Int32> OutAsync(global::System.Threading.CancellationToken cancellationToken = default)", result.GeneratedSource);
     }
 
     [Fact]

@@ -22,7 +22,7 @@ public class GenericProcedureGeneratorTests
         var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(ReturnOnlyContract));
 
         Assert.Empty(result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error));
-        Assert.Contains("public async global::System.Threading.Tasks.Task<T> GetDefaultAsync<T>()", result.GeneratedSource);
+        Assert.Contains("public async global::System.Threading.Tasks.Task<T> GetDefaultAsync<T>(global::System.Threading.CancellationToken cancellationToken = default)", result.GeneratedSource);
         Assert.Contains("if (typeof(T) == typeof(global::System.Int32))", result.GeneratedSource);
         Assert.Contains("if (typeof(T) == typeof(global::System.String))", result.GeneratedSource);
         Assert.Contains("byte[] __payload = __WriteParams_ITestServerProcedures_GetDefault_0();", result.GeneratedSource);
@@ -91,7 +91,7 @@ public class GenericProcedureGeneratorTests
 
         var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(contract));
 
-        Assert.Contains("public async global::System.Threading.Tasks.Task LogAsync<T>(T value)", result.GeneratedSource);
+        Assert.Contains("public async global::System.Threading.Tasks.Task LogAsync<T>(T value, global::System.Threading.CancellationToken cancellationToken = default)", result.GeneratedSource);
         Assert.Contains("__WriteParams_ITestServerProcedures_Log_1(((global::System.String)(object)value!))", result.GeneratedSource);
     }
 

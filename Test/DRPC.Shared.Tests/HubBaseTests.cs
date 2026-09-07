@@ -294,6 +294,42 @@ public class HubBaseTests
     }
 
     [Fact]
+    public async Task RequestRPC_precanceled_token_never_sends()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session);
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered, cts.Token));
+
+        Assert.Empty(session.Sent);
+    }
+
+    [Fact]
+    public async Task RequestRPC_cancellation_frees_slot_and_ignores_late_response()
+    {
+        var session = new FakeSession();
+        using var hub = new TestHub(session) { MaxPendingCalls = 1 };
+        using var cts = new CancellationTokenSource();
+
+        Task<byte[]> pending = hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered, cts.Token);
+        Assert.False(pending.IsCompleted);
+
+        cts.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => pending);
+
+        // 취소된 CallId 로 뒤늦은 응답이 도착해도 아무 완료를 만들지 않는다.
+        hub.OnReceiveRPCResponseMessage(new ProcedureCallResponseMessage(1u, Payload));
+
+        // 슬롯 반납 확인 — 상한 1에서도 새 호출이 수용된다.
+        Task<byte[]> next = hub.RequestRPC(1, Payload, RpcDeliveryMode.ReliableOrdered);
+        hub.OnReceiveRPCResponseMessage(new ProcedureCallResponseMessage(2u, Payload));
+        Assert.Equal(Payload, await next);
+    }
+
+    [Fact]
     public async Task Disconnect_CancelsPending_RaisesOnce_AndDisconnectsSession()
     {
         var session = new FakeSession();

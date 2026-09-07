@@ -141,10 +141,14 @@ public abstract class HubBase : IHubBase, IDisposable
     }
 
     /// <summary>
-    /// 요청을 보내고 응답·오류·타임아웃·끊김 중 하나로 완료되는 응답 바이트를 기다린다.
+    /// 요청을 보내고 응답·오류·타임아웃·취소·끊김 중 하나로 완료되는 응답 바이트를 기다린다.
+    /// <paramref name="cancellationToken"/> 이 취소되면 대기가 즉시 취소 완료되고 슬롯이 반납된다(이미 송신된 요청은 회수되지 않고, 뒤늦은 응답은 도착해도 무시된다).
     /// </summary>
-    protected async Task<byte[]> RequestRPC(int methodId, byte[] parameterData, RpcDeliveryMode mode)
+    protected async Task<byte[]> RequestRPC(int methodId, byte[] parameterData, RpcDeliveryMode mode,
+        CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         int pendingCap = Volatile.Read(ref _maxPendingCalls);
         if (pendingCap > 0 && _pendingCalls.Count >= pendingCap)
         {
@@ -161,19 +165,33 @@ public abstract class HubBase : IHubBase, IDisposable
             throw new InvalidOperationException($"The call id {callId} is already in use.");
         }
 
-        if (deadline > 0)
-        {
-            EnsureTimeoutTimer();
-        }
-
+        CancellationTokenRegistration cancellation = default;
         try
         {
+            if (cancellationToken.CanBeCanceled)
+            {
+                // 취소는 대기만 끝낸다 — 송신된 요청을 회수하지 않는다. 늦은 응답은 대기표가 없어 무시된다.
+                cancellation = cancellationToken.Register(() =>
+                {
+                    if (_pendingCalls.TryRemove(callId, out var cancelled))
+                    {
+                        cancelled.Tcs.TrySetCanceled(cancellationToken);
+                    }
+                });
+            }
+
+            if (deadline > 0)
+            {
+                EnsureTimeoutTimer();
+            }
+
             var request = new ProcedureCallRequestMessage(callId, methodId, parameterData);
             await _session.SendAsync(request, mode.ToSendOptions()).ConfigureAwait(false);
             return await waitResponse.Task.ConfigureAwait(false);
         }
         finally
         {
+            cancellation.Dispose();
             _pendingCalls.TryRemove(callId, out _);
         }
     }

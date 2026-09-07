@@ -69,6 +69,7 @@ internal sealed class TestHub : HubBase
     public new Task SendRPC(int methodId, byte[] parameterData, RpcDeliveryMode mode)
         => base.SendRPC(methodId, parameterData, mode);
 
-    public new Task<byte[]> RequestRPC(int methodId, byte[] parameterData, RpcDeliveryMode mode)
-        => base.RequestRPC(methodId, parameterData, mode);
+    public new Task<byte[]> RequestRPC(int methodId, byte[] parameterData, RpcDeliveryMode mode,
+        CancellationToken cancellationToken = default)
+        => base.RequestRPC(methodId, parameterData, mode, cancellationToken);
 }

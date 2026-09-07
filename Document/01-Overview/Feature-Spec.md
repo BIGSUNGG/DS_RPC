@@ -154,7 +154,13 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - 버전은 루트 `Directory.Build.props`(`MessageProtocolPackageVersion`·`CommunicationPackageVersion` 포함).
 - 태그 `v*` → GitHub Actions pack·publish — 이미 존재하던 `.github/workflows/nuget-publish.yml`(런 이름 "NuGet Publish")가 그 동작이다.
 
-### 게시 상태 (2.9.2)
+### 게시 상태 (2.10.0)
+
+- `v2.10.0` 태그 푸시 → run 34166254578 success, 5개 패키지 NuGet push 승인(5/5)·flatcontainer 색인 확인.
+- 내용: 호출별 타임아웃 정책(`[RemoteProcedure(TimeoutMs)]` + `RequestRPC` TimeSpan? 오버로드 + DRPCGEN010/011). minor.
+- `Source/Directory.Build.props` `<Version>` 2.10.0(릴리스 커밋 `e091aaf`).
+
+### 게시 이력: 2.9.2
 
 - `v2.9.2` 태그 푸시 → run 34165482893 success, 5개 패키지 NuGet push 승인·flatcontainer 색인 확인.
 - 내용: MessageProtocol 2.3.4 → 2.3.7 채택(KI-41 안내형 와이어 거부 등) + 신뢰 경계 회귀 테스트. patch.

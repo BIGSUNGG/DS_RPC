@@ -14,6 +14,7 @@ updated: 2026-09-08
 
 - **`RpcHost.ListenAsync` `maxConnections` 오버로드** — 스펙 개선 영역 1(보안·리소스 고갈 「대량 호출·연결 고갈」) 처리. 동시 수락 연결 수 상한을 DRPC 리슨 경로에 노출(Communication 2.0.1 `RudpTransportOptions.MaxConnections` 채택 완결 — ConnectTimeout 에 이은 두 번째). 상한 도달 시 초과 접속은 즉시 거부되고 수락은 계속(연결 고갈 공격 방어), 0(기본)=무제한·동작 불변, 음수 거부. `HubSessionFactory.CreateTransportOptions` 세 번째 선택 매개변수 추가. E2E — 상한 1에서 첫 클라 정상 동작·초과 접속 즉시 거부 + 음수 거부, 팩토리 단위 4건. 테스트 87→91건 통과.
 - [[../03-Reference/Public-API|Public-API]] 헬퍼 표, [[../01-Overview/Feature-Spec|Feature-Spec]] F7 갱신.
+- **`v2.3.0` 릴리스** — 태그 푸시 → run 34150180755 success. 누적 단위: `MaxPendingCalls`(2차) + `maxConnections` 오버로드(3차) — 리소스 고갈 방어 3종 세트. 게시 상태·README 표기 갱신.
 
 ## 2026-09-08 (2차)
 

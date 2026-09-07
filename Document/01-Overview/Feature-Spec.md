@@ -153,6 +153,12 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - 버전은 루트 `Directory.Build.props`(`MessageProtocolPackageVersion`·`CommunicationPackageVersion` 포함).
 - 태그 `v*` → GitHub Actions pack·publish — 이미 존재하던 `.github/workflows/nuget-publish.yml`(런 이름 "NuGet Publish")가 그 동작이다.
 
+### 게시 상태 (2.3.0)
+
+- `v2.3.0` 태그 푸시 → run 34150180755 success (Require API key → Pack → Push, 5개 nupkg 푸시).
+- 내용: `HubBase.MaxPendingCalls`(outgoing 대기 상한, fail-fast) + `RpcHost.ListenAsync` `maxConnections` 오버로드(연결 고갈 방어) — 리소스 고갈 방어 3종 세트 완성(수신 동시성·송신 대기·수락 연결).
+- `Source/Directory.Build.props` `<Version>` 2.3.0(릴리스 커밋 `fab7836`).
+
 ### 게시 상태 (2.2.0)
 
 - `v2.2.0` 태그 푸시 → run 34148443218 success (Require API key → Pack → Push, 5개 nupkg 푸시 로그 확인).

@@ -12,6 +12,11 @@ updated: 2026-09-07
 
 ## 2026-09-07
 
+- **`v2.1.0` 릴리스 · NuGet 게시**: `Source/Directory.Build.props` `<Version>` 2.1.0 → 태그 `v2.1.0` 푸시 →
+  run 34136624883 success, `DRPC.{Attribute,Shared,Client,Server,CodeGenerator}` 2.1.0 flatcontainer 등록·nupkg HTTP 200 확인.
+  README(기능 목록에 제네릭 프로시저·패키지 버전·테스트 수 77), `CONTEXT`(릴리스 상태), `Feature-Spec`(게시 상태 2.1.0 절),
+  `Public-API`(버전 표기 2.1.0) 갱신.
+
 - **F12 제네릭 프로시저 구현** — `[GenericProcedure(params Type[]) / (int slot, params Type[])]` 속성 신규(DRPC.Attribute, AllowMultiple). 4가지 형태 지원: 반환 전용 `T Proc<T>()`·매개변수 `void Proc<T>(T v)`·복합 `T1 Proc<T1,T2,T3>(T2,T3)`(데카르트 곱, 64구성 상한)·`[GenericMessage]` 파라미터 `void Proc<T>(Package<T>)`(미선언 슬롯은 메시지 구성 선언에서 상속). 호출은 일반 프로시저와 동일(`hub.XxxAsync(42)` 추론 / `hub.XxxAsync<int>()` 명시), 서버 구현은 `Task<T> Xxx_Implementation<T>(...)` partial. 와이어: 페이로드 첫 4바이트 구성 인덱스(슬롯 0이 가장 느린 오도미터) — 포맷·HubBase 불변. 진단: DRPCGEN007(슬롯 미선언)·008(호출 지점 미선언 타입 인자 — 미해결 `{Method}Async` 호출 구조적 탐지, 추론 불가 슬롯은 런타임 백스톱에 위임)·009(무효 선언·[GenericMessage] 슬롯의 비-ID-헤더 타입·타입 파라미터 제약·상한). 런타임 백스톱: 스텁 `else` throw + 수신측 알 수 없는 구성 인덱스 → `RpcErrorCode.Unhandled`.
 - 형제 의존 승격: `MessageProtocol` 2.0.0 → **2.1.0**(GenericMessage 포함 안정판, 형제 저장소 태그 `v2.1.0` 게시 후 핀). Communication 2.0.0 유지.
 - 구현 중 발견·승격된 제약: MessageProtocol 제네릭 구성은 T 멤버를 런타임 메시지 디스패치로 직렬화 → `[GenericMessage]` 슬롯 타입은 ID 헤더 메시지(Standalone/Group)여야 하고 NonId·프리미티브는 런타임 크래시 대신 DRPCGEN009 로 컴파일 타임 거부.

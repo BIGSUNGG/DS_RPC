@@ -15,6 +15,7 @@ updated: 2026-09-07
 ## 구현 상태 (2026-09-07)
 
 F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotnet test DRPC.slnx -c Release` 77개 통과) — 형제 NuGet **MessageProtocol 2.1.0**(GenericMessage 포함), Communication 2.0.0. F10(Template)만 범위 밖.
+**`v2.1.0` 릴리스** — 태그 푸시 → run 34136624883 success, 5개 패키지 2.1.0 NuGet 업로드 확인.
 형제 스택은 NuGet **2.0.0** 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 
 ## 원칙
@@ -149,6 +150,13 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - `Source/` 5개 라이브러리, TFM `netstandard2.1`(CodeGenerator 는 netstandard2.0), `IsPackable=true` (CodeGenerator는 `DevelopmentDependency`).
 - 버전은 루트 `Directory.Build.props`(`MessageProtocolPackageVersion`·`CommunicationPackageVersion` 포함).
 - 태그 `v*` → GitHub Actions pack·publish — 이미 존재하던 `.github/workflows/nuget-publish.yml`(런 이름 "NuGet Publish")가 그 동작이다.
+
+### 게시 상태 (2.1.0)
+
+- `v2.1.0` 태그 푸시 → run 34136624883 success (Require API key → Pack → Push, 모든 스텝 ✓).
+- 업로드된 5개 패키지: `DRPC.Attribute`·`DRPC.Shared`·`DRPC.Client`·`DRPC.Server`·`DRPC.CodeGenerator` 모두 2.1.0,
+  flatcontainer 등록 + nupkg HTTP 200 확인(유입 지연 약 4분 — 정상).
+- `Source/Directory.Build.props` `<Version>` 도 2.1.0 으로 갱신(릴리스 커밋 `1edd8f3`) — 태그가 권위이나 기본값도 일치.
 
 ### 게시 상태 (2.0.0)
 

@@ -63,17 +63,38 @@ internal static partial class RpcHubEmitter
 
         foreach (MethodMetadata method in model.ServerDeclarations.Methods.Concat(model.ClientDeclarations.Methods))
         {
-            EmitPayloadHelpers(sb, method, inner);
+            if (method.IsGeneric)
+            {
+                EmitGenericPayloadHelpers(sb, method, inner);
+            }
+            else
+            {
+                EmitPayloadHelpers(sb, method, inner);
+            }
         }
 
         foreach (MethodMetadata method in model.Outgoing)
         {
-            EmitOutgoing(sb, method, inner);
+            if (method.IsGeneric)
+            {
+                EmitGenericOutgoing(sb, method, inner);
+            }
+            else
+            {
+                EmitOutgoing(sb, method, inner);
+            }
         }
 
         foreach (MethodMetadata method in model.Incoming)
         {
-            EmitIncoming(sb, method, inner);
+            if (method.IsGeneric)
+            {
+                EmitGenericIncoming(sb, method, inner);
+            }
+            else
+            {
+                EmitIncoming(sb, method, inner);
+            }
         }
 
         sb.AppendLine($"{indent}}}");

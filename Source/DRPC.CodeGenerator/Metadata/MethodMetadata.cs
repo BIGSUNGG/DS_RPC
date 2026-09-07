@@ -26,12 +26,24 @@ internal sealed class MethodMetadata
     public ParameterMetadata[] Parameters { get; }
     public ITypeSymbol ReturnType { get; }
 
+    /// <summary>제네릭 메서드의 구성 표. 비제네릭이면 null.</summary>
+    public GenericMethodMetadata? Generic { get; }
+
+    public bool IsGeneric => Generic != null;
+
     public bool IsVoidReturn => ReturnType.SpecialType == SpecialType.System_Void;
 
     /// <summary>생성될 사용자 구현(partial) 메서드 서명.</summary>
-    public string ImplementationSignature => IsVoidReturn
-        ? $"global::System.Threading.Tasks.Task {MethodName}_Implementation({ParameterDeclarationList()})"
-        : $"global::System.Threading.Tasks.Task<{ReturnTypeDisplay}> {MethodName}_Implementation({ParameterDeclarationList()})";
+    public string ImplementationSignature
+    {
+        get
+        {
+            string typeParams = IsGeneric ? $"<{string.Join(", ", Generic!.TypeParameterNames)}>" : string.Empty;
+            return IsVoidReturn
+                ? $"global::System.Threading.Tasks.Task {MethodName}_Implementation{typeParams}({ParameterDeclarationList()})"
+                : $"global::System.Threading.Tasks.Task<{ReturnTypeDisplay}> {MethodName}_Implementation{typeParams}({ParameterDeclarationList()})";
+        }
+    }
 
     /// <summary>생성된 코드 안에서 쓰는 반환 타입 표시(네임스페이스 차이 안전을 위해 항상 fully qualified).</summary>
     public string ReturnTypeDisplay => ReturnType.ToDisplayString(RpcPayload.Qualified);
@@ -50,6 +62,7 @@ internal sealed class MethodMetadata
         ModeExpression = BuildModeExpression(attribute, references);
         (MethodId, HasExplicitMethodId) = ResolveMethodId(attribute, ordinalMethodId);
         OneWay = ResolveNamedFlag(attribute, nameof(OneWay));
+        Generic = methodSymbol.IsGenericMethod ? GenericMethodMetadata.Build(methodSymbol, references) : null;
     }
 
     public string ParameterDeclarationList() => string.Join(", ", Parameters.Select(p =>

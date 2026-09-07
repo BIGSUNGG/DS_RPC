@@ -94,33 +94,89 @@ internal static class RpcHubSourceGenerator
 
             if (symbol.IsGenericMethod)
             {
-                report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
-                    symbol.ToDisplayString(), "generic method"));
-                return false;
-            }
-
-            foreach (IParameterSymbol parameter in symbol.Parameters)
-            {
-                if (parameter.RefKind != RefKind.None)
+                foreach (ITypeParameterSymbol typeParameter in symbol.TypeParameters)
                 {
-                    report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
-                        parameter.Type.ToDisplayString(), "ref/in/out parameter"));
+                    if (typeParameter.ConstraintTypes.Length > 0 || typeParameter.HasReferenceTypeConstraint ||
+                        typeParameter.HasValueTypeConstraint || typeParameter.HasUnmanagedTypeConstraint)
+                    {
+                        report(Diagnostic.Create(DiagnosticDescriptors.GenericDeclarationInvalid, location, symbol.Name,
+                            $"type parameter '{typeParameter.Name}' has constraints; constrained type parameters are not supported"));
+                        return false;
+                    }
+                }
+
+                if (method.Generic?.Error is { } genericError)
+                {
+                    report(Diagnostic.Create(
+                        method.Generic.ErrorId == "DRPCGEN007"
+                            ? DiagnosticDescriptors.GenericDeclarationMissing
+                            : DiagnosticDescriptors.GenericDeclarationInvalid,
+                        location, symbol.Name, genericError));
                     return false;
                 }
 
-                if (!RpcPayload.IsSupported(parameter.Type, references, out _))
+                // 구성별 치환된 시그니처가 페이로드로 쓸 수 있는지 검증(미선언 타입 파라미터 사용 등은 여기서 들통난다).
+                foreach (IMethodSymbol closed in method.Generic!.ClosedMethods)
                 {
-                    report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
-                        parameter.Type.ToDisplayString(), UnsupportedReason(parameter.Type)));
-                    return false;
+                    foreach (IParameterSymbol parameter in closed.Parameters)
+                    {
+                        if (parameter.RefKind != RefKind.None)
+                        {
+                            report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
+                                parameter.Type.ToDisplayString(), "ref/in/out parameter"));
+                            return false;
+                        }
+
+                        if (!RpcPayload.IsSupported(parameter.Type, references, out _))
+                        {
+                            report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
+                                parameter.Type.ToDisplayString(), UnsupportedReason(parameter.Type)));
+                            return false;
+                        }
+                    }
+
+                    if (!RpcPayload.IsSupported(closed.ReturnType, references, allowVoid: true, out _))
+                    {
+                        report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
+                            closed.ReturnType.ToDisplayString(), UnsupportedReason(closed.ReturnType)));
+                        return false;
+                    }
                 }
             }
-
-            if (!RpcPayload.IsSupported(symbol.ReturnType, references, allowVoid: true, out _))
+            else if (method.Symbol.GetAttributes().Any(static a =>
+                         a.AttributeClass?.ContainingNamespace?.ToDisplayString() == "DRPC" &&
+                         a.AttributeClass?.Name == "GenericProcedureAttribute"))
             {
-                report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
-                    symbol.ReturnType.ToDisplayString(), UnsupportedReason(symbol.ReturnType)));
+                report(Diagnostic.Create(DiagnosticDescriptors.GenericDeclarationInvalid, location, symbol.Name,
+                    "[GenericProcedure] is only valid on generic methods"));
                 return false;
+            }
+
+            if (!method.IsGeneric)
+            {
+                foreach (IParameterSymbol parameter in symbol.Parameters)
+                {
+                    if (parameter.RefKind != RefKind.None)
+                    {
+                        report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
+                            parameter.Type.ToDisplayString(), "ref/in/out parameter"));
+                        return false;
+                    }
+
+                    if (!RpcPayload.IsSupported(parameter.Type, references, out _))
+                    {
+                        report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
+                            parameter.Type.ToDisplayString(), UnsupportedReason(parameter.Type)));
+                        return false;
+                    }
+                }
+
+                if (!RpcPayload.IsSupported(symbol.ReturnType, references, allowVoid: true, out _))
+                {
+                    report(Diagnostic.Create(DiagnosticDescriptors.UnsupportedType, location, symbol.Name,
+                        symbol.ReturnType.ToDisplayString(), UnsupportedReason(symbol.ReturnType)));
+                    return false;
+                }
             }
         }
 
@@ -146,7 +202,7 @@ internal static class RpcHubSourceGenerator
     /// 베이스 체인에서 허브 베이스를 찾는다. 클라이언트 측 <c>ClientHub&lt;&gt;</c>(DRPC.Client.Network) 는
     /// client endpoint, 서버 측 <c>ServerHub&lt;&gt;</c>(DRPC.Server.Network) 는 server endpoint(ADR-0001).
     /// </summary>
-    static bool TryResolveHub(INamedTypeSymbol hubSymbol, out INamedTypeSymbol? hubBase, out NetworkKind networkKind,
+    internal static bool TryResolveHub(INamedTypeSymbol hubSymbol, out INamedTypeSymbol? hubBase, out NetworkKind networkKind,
         out bool invalidBase)
     {
         hubBase = null;

@@ -179,6 +179,75 @@ public class RudpLoopbackTests
         client.Dispose();
     }
 
+    [Fact]
+    public async Task Return_only_generic_roundtrips_declared_types()
+    {
+        var (_, client, handle) = await PairAsync();
+        await using var _ = handle;
+
+        Assert.Equal(0, await Within(client.GetDefaultAsync<int>()));
+        Assert.Null(await Within(client.GetDefaultAsync<string>()));
+        client.Dispose();
+    }
+
+    [Fact]
+    public async Task Parameter_generic_infers_type_from_argument()
+    {
+        var (_, client, handle) = await PairAsync();
+        await using var _ = handle;
+
+        // 타입 인자 없이 일반 호출처럼 쓴다 — T 가 인자에서 추론된다.
+        Assert.Equal("System.Int32:42", await Within(client.DescribeAsync(42)));
+        Assert.Equal("System.String:hi", await Within(client.DescribeAsync("hi")));
+        client.Dispose();
+    }
+
+    [Fact]
+    public async Task Complex_multi_slot_generic_roundtrips()
+    {
+        var (_, client, handle) = await PairAsync();
+        await using var _ = handle;
+
+        Assert.Equal(0, await Within(client.BlendAsync<int, float, Order>(1.5f, new Order { Item = "x" })));
+        Assert.Null(await Within(client.BlendAsync<string, double, ChatLine>(2.5, new ShoutChatLine { Text = "y" })));
+
+        await WaitUntilAsync(() => E2EServerHub.ReceivedGeneric.Contains("Blend:Single:Single:Order:Order"));
+        // T3=ChatLine 로 보낸 파생 타입이 그대로 도착한다(그룹 다형성 보존).
+        await WaitUntilAsync(() => E2EServerHub.ReceivedGeneric.Contains("Blend:Double:Double:ChatLine:ShoutChatLine"));
+        client.Dispose();
+    }
+
+    [Fact]
+    public async Task GenericMessage_parameter_roundtrips()
+    {
+        var (_, client, handle) = await PairAsync();
+        await using var _ = handle;
+
+        await Within(client.DeliverAsync(new Package<ChatLine> { Value = new ShoutChatLine { Text = "shout" } }));
+        await Within(client.DeliverAsync(new Package<Receipt> { Value = new Receipt { Tag = "cup" } }));
+
+        await WaitUntilAsync(() => E2EServerHub.ReceivedGeneric.Contains("Deliver:ChatLine:shout"));
+        await WaitUntilAsync(() => E2EServerHub.ReceivedGeneric.Contains("Deliver:Receipt:cup"));
+        client.Dispose();
+    }
+
+    [Fact]
+    public async Task Unknown_construction_index_yields_unhandled_fault()
+    {
+        int port = NextPort();
+        await using var handle = await E2EServerHub.ListenAsync(port, Key, _ => Task.CompletedTask);
+
+        // 생성 스텁을 우회해 선언 밖 구성 인덱스를 실어 보낸다(런타임 백스톱 검증).
+        using var rogue = await RpcClient.ConnectAsync("127.0.0.1", port, Key,
+            channel => new RogueClientHub(hub => HubSessionFactory.CreateRudpSession(channel, hub)));
+
+        // GetDefault(methodId 7) 의 페이로드 = 구성 인덱스 int32 하나.
+        byte[] payload = BitConverter.GetBytes(int.MaxValue);
+        RpcFaultException fault = await Assert.ThrowsAsync<RpcFaultException>(() => Within(rogue.ProbeAsync(7, payload)));
+        Assert.Equal(RpcErrorCode.Unhandled, fault.ErrorCode);
+        Assert.Contains("unknown generic construction index", fault.Message);
+    }
+
     static async Task<(E2EServerHub Server, E2EClientHub Client, RpcListenHandle Handle)> PairAsync()
     {
         int port = NextPort();
@@ -253,4 +322,7 @@ public partial class RogueClientHub : ClientHub<IRogueServerProcedures, IRogueCl
 
     public Task<byte[]> ProbeAsync(int methodId)
         => RequestRPC(methodId, Array.Empty<byte>(), RpcDeliveryMode.ReliableOrdered);
+
+    public Task<byte[]> ProbeAsync(int methodId, byte[] parameterData)
+        => RequestRPC(methodId, parameterData, RpcDeliveryMode.ReliableOrdered);
 }

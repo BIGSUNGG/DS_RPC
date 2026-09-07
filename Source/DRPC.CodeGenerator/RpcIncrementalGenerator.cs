@@ -23,6 +23,32 @@ public sealed class RpcIncrementalGenerator : IIncrementalGenerator
                     && classDecl.BaseList.Types.Any(static b => b.Type.ToString().IndexOf("Hub", System.StringComparison.Ordinal) >= 0),
                 static (ctx, _) => (ClassDeclarationSyntax)ctx.Node);
 
+        // 제네릭 스텁 호출 지점(DRPCGEN008): 미해결 {Method}Async 호출을 구조적으로 검사한다.
+        IncrementalValuesProvider<InvocationExpressionSyntax> stubCalls =
+            context.SyntaxProvider.CreateSyntaxProvider(
+                static (node, _) => node is InvocationExpressionSyntax inv
+                    && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: { } methodName }
+                    && methodName.EndsWith("Async", System.StringComparison.Ordinal),
+                static (ctx, _) => (InvocationExpressionSyntax)ctx.Node);
+
+        context.RegisterSourceOutput(stubCalls.Combine(context.CompilationProvider), static (spc, pair) =>
+        {
+            var (invocation, compilation) = pair;
+            SemanticModel semanticModel = compilation.GetSemanticModel(invocation.SyntaxTree);
+
+            var references = new AttributeReferences(compilation);
+            if (references.RemoteProcedureAttributeType == null)
+            {
+                return; // DRPC.Attribute 미참조 프로젝트 — 대상 아님.
+            }
+
+            Diagnostic? diagnostic = GenericCallSiteCheck.Check(invocation, semanticModel, references);
+            if (diagnostic != null)
+            {
+                spc.ReportDiagnostic(diagnostic);
+            }
+        });
+
         context.RegisterSourceOutput(candidates.Combine(context.CompilationProvider), static (spc, pair) =>
         {
             var (syntax, compilation) = pair;

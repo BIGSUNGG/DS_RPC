@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
 namespace DRPC.CodeGenerator.Reference;
@@ -9,6 +10,7 @@ namespace DRPC.CodeGenerator.Reference;
 internal sealed class AttributeReferences
 {
     public const string RemoteProcedureTypeName = "DRPC.RemoteProcedure";
+    public const string GenericProcedureTypeName = "DRPC.GenericProcedureAttribute";
     public const string RpcDeliveryModeTypeName = "DRPC.RpcDeliveryMode";
     public const string ClientHubTypeName = "DRPC.Client.Network.ClientHub";
     public const string ServerHubTypeName = "DRPC.Server.Network.ServerHub";
@@ -20,15 +22,63 @@ internal sealed class AttributeReferences
     public const string MessageNamespace = "MessageProtocol";
 
     public INamedTypeSymbol? RemoteProcedureAttributeType { get; }
+    public INamedTypeSymbol? GenericProcedureAttributeType { get; }
     public INamedTypeSymbol? RpcDeliveryModeType { get; }
     public INamedTypeSymbol? MessageSerializableType { get; }
 
     public AttributeReferences(Compilation compilation)
     {
         RemoteProcedureAttributeType = compilation.GetTypeByMetadataName(RemoteProcedureTypeName);
+        GenericProcedureAttributeType = compilation.GetTypeByMetadataName(GenericProcedureTypeName);
         RpcDeliveryModeType = compilation.GetTypeByMetadataName(RpcDeliveryModeTypeName);
         MessageSerializableType = compilation.GetTypeByMetadataName(MessageSerializableTypeName + "`1");
     }
+
+    public bool IsGenericProcedureAttribute(INamedTypeSymbol? attributeClass)
+        => attributeClass != null
+            && attributeClass.ContainingNamespace?.ToDisplayString() == "DRPC"
+            && attributeClass.Name == "GenericProcedureAttribute";
+
+    /// <summary>이 메시지 타입(닫힌 구성 포함)이 [GenericMessage] 구성을 하나 이상 선언했는지.</summary>
+    public bool HasGenericMessageAttribute(INamedTypeSymbol type)
+    {
+        foreach (var attribute in type.GetAttributes())
+        {
+            if (IsGenericMessageAttribute(attribute))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>[GenericMessage(typeof(X&lt;…&gt;), ClassId=…)] 구성 선언에서 position 번째 타입 인자만 순서대로 뽑는다.</summary>
+    public IReadOnlyList<ITypeSymbol> GetGenericConstructionArguments(INamedTypeSymbol type, int position)
+    {
+        var result = new System.Collections.Generic.List<ITypeSymbol>();
+
+        foreach (var attribute in type.GetAttributes())
+        {
+            if (!IsGenericMessageAttribute(attribute))
+            {
+                continue;
+            }
+
+            if (attribute.ConstructorArguments.Length > 0 &&
+                attribute.ConstructorArguments[0].Value is INamedTypeSymbol construction &&
+                construction.TypeArguments.Length > position)
+            {
+                result.Add(construction.TypeArguments[position]);
+            }
+        }
+
+        return result;
+    }
+
+    static bool IsGenericMessageAttribute(AttributeData attribute)
+        => attribute.AttributeClass?.ContainingNamespace?.ToDisplayString() == MessageNamespace
+            && attribute.AttributeClass.Name == "GenericMessageAttribute";
 
     public bool HasMessageAttribute(ITypeSymbol type)
         => MessageStyleOf(type) != MessageStyle.None;

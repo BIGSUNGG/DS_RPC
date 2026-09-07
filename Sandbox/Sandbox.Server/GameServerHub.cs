@@ -39,4 +39,26 @@ public partial class GameServerHub : ServerHub<IGameServerProcedures, IGameClien
         Console.WriteLine($"[server] {line.Describe()} ({line.GetType().Name})");
         return Task.CompletedTask;
     }
+
+    /// <summary>제네릭 ①: T 슬롯이 허용 집합(int/string) 안에서만 컴파일·런타임 양쪽에 걸린다.</summary>
+    private partial Task<T> GetConfig_Implementation<T>()
+        => Task.FromResult<T>(typeof(T) == typeof(int) ? (T)(object)42 : (T)(object)"default");
+
+    /// <summary>제네릭 ②: 호출 측 타입 추론으로 일반 호출처럼 쓴다.</summary>
+    private partial Task<string> Describe_Implementation<T>(T value)
+        => Task.FromResult($"{typeof(T).Name}={value}");
+
+    private partial Task<T1> Blend_Implementation<T1, T2, T3>(T2 left, T3 right)
+    {
+        Console.WriteLine($"[server] Blend<{typeof(T1).Name}, {typeof(T2).Name}, {typeof(T3).Name}> left={left} right={right?.GetType().Name ?? "null"}");
+        return Task.FromResult<T1>(default!);
+    }
+
+    /// <summary>제네릭 ④: [GenericMessage] 구성(ClassId)이 T 를 와이어에서 식별한다.</summary>
+    private partial Task Unwrap_Implementation<T>(GiftBox<T> box)
+    {
+        string detail = box.Gift switch { ChatLine c => c.Text, Token t => $"token#{t.Value}", _ => "?" };
+        Console.WriteLine($"[server] Unwrap<{typeof(T).Name}>: {detail}");
+        return Task.CompletedTask;
+    }
 }

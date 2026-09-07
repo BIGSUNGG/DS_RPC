@@ -25,7 +25,24 @@ Console.WriteLine("[client] LogChat(OneWay) sent");
 await hub.ChatMessageAsync(new ShoutChatLine { Text = "gg" });
 Console.WriteLine("[client] ChatMessage(OneWay, 실제 타입 ShoutChatLine) sent");
 
-// 6) 피어가 보낸 one-way 을 수신 구현이 처리했는지 확인하려면 잠시 기다린다.
+// 6) 제네릭 ① — 반환 전용: 명시 타입 인자. 허용 집합은 [GenericProcedure] 선언(int/string).
+Console.WriteLine($"[client] GetConfig<int>() -> {await hub.GetConfigAsync<int>()}");
+Console.WriteLine($"[client] GetConfig<string>() -> {await hub.GetConfigAsync<string>()}");
+
+// 7) 제네릭 ② — 매개변수: 타입 인자 없이 일반 호출처럼(T 추론).
+Console.WriteLine($"[client] Describe(7) -> {await hub.DescribeAsync(7)}");
+Console.WriteLine($"[client] Describe(\"gg\") -> {await hub.DescribeAsync("gg")}");
+
+// 8) 제네릭 ③ — 복합 다중 슬롯(데카르트 곱 조합).
+Console.WriteLine($"[client] Blend<int, float, Player>(1.5f, player) -> {await hub.BlendAsync<int, float, Player>(1.5f, new Player { Id = 1, Name = "Hong" })}");
+Console.WriteLine($"[client] Blend<string, double, ChatLine>(2.5, chat) -> {await hub.BlendAsync<string, double, ChatLine>(2.5, new ShoutChatLine { Text = "hi" })}");
+
+// 9) 제네릭 ④ — [GenericMessage] 파라미터: T 허용 집합을 GiftBox 구성 선언에서 상속.
+await hub.UnwrapAsync(new GiftBox<ChatLine> { Gift = new ShoutChatLine { Text = "boxed" } });
+await hub.UnwrapAsync(new GiftBox<Token> { Gift = new Token { Value = 7 } });
+Console.WriteLine("[client] Unwrap(GiftBox<ChatLine>/GiftBox<Token>) sent");
+
+// 10) 피어가 보낸 one-way 을 수신 구현이 처리했는지 확인하려면 잠시 기다린다.
 await Task.Delay(500);
 
 hub.Disconnect();

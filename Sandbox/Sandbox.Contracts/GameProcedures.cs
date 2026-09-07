@@ -29,6 +29,27 @@ public interface IGameServerProcedures : IServerProcedureDeclarations
     /// <summary>다형성: 그룹 루트 타입으로 선언하면 실제 타입으로 복원되어 전달된다.</summary>
     [RemoteProcedure(RpcDeliveryMode.ReliableUnordered, 4, OneWay = true)]
     void ChatMessage(ChatLine line);
+
+    /// <summary>제네릭 ①: 반환 전용. 허용 T 를 [GenericProcedure] 로 사전 선언한다.</summary>
+    [RemoteProcedure(methodId: 5)]
+    [GenericProcedure(typeof(int), typeof(string))]
+    T GetConfig<T>();
+
+    /// <summary>제네릭 ②: 매개변수 제네릭. 타입 인자 없이 일반 호출처럼 쓴다(T 추론).</summary>
+    [RemoteProcedure(methodId: 6)]
+    [GenericProcedure(typeof(int), typeof(string))]
+    string Describe<T>(T value);
+
+    /// <summary>제네릭 ③: 복합 다중 슬롯(데카르트 곱). T2/T3 는 매개변수, T1 은 반환.</summary>
+    [RemoteProcedure(methodId: 7)]
+    [GenericProcedure(0, typeof(int), typeof(string))]
+    [GenericProcedure(1, typeof(float), typeof(double))]
+    [GenericProcedure(2, typeof(Player), typeof(ChatLine))]
+    T1 Blend<T1, T2, T3>(T2 left, T3 right);
+
+    /// <summary>제네릭 ④: [GenericMessage] 파라미터. T 허용 집합은 GiftBox 구성 선언에서 상속한다.</summary>
+    [RemoteProcedure(methodId: 8)]
+    void Unwrap<T>(GiftBox<T> box);
 }
 
 /// <summary>클라이언트가 구현하고 서버가 호출하는 계약(양방향 RPC).</summary>
@@ -87,4 +108,22 @@ public partial class ChatLine
 public partial class ShoutChatLine : ChatLine
 {
     public override string Describe() => $"SHOUT: {Text.ToUpperInvariant()}";
+}
+
+/// <summary>
+/// 제네릭 ④용 [GenericMessage]. T 는 ID 헤더 메시지(Standalone/Group)여야 한다 —
+/// 구성 등록이 (MessageId, ClassId) 디스패치를 요구한다(NonId·프리미티브는 DRPCGEN009 로 거부).
+/// </summary>
+[StandaloneMessage(60)]
+[GenericMessage(typeof(GiftBox<ChatLine>), ClassId = 1)]
+[GenericMessage(typeof(GiftBox<Token>), ClassId = 2)]
+public partial class GiftBox<T>
+{
+    public T Gift { get; set; } = default!;
+}
+
+[StandaloneMessage(61)]
+public partial class Token
+{
+    public int Value { get; set; }
 }

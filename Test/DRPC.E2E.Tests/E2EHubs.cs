@@ -38,6 +38,27 @@ public interface IServerProcedures : IServerProcedureDeclarations
     /// <summary>응답이 늦어 호출 측 타임아웃을 유발한다.</summary>
     [RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 6)]
     int Slow(int delayMs);
+
+    /// <summary>제네릭 ①: 반환 전용 제네릭. 허용 T = int/string(메시지 타입 반환은 ③④ 가 담당).</summary>
+    [RemoteProcedure(methodId: 7)]
+    [GenericProcedure(typeof(int), typeof(string))]
+    T GetDefault<T>();
+
+    /// <summary>제네릭 ②: 매개변수 제네릭(호출 측 타입 추론). T = int/string.</summary>
+    [RemoteProcedure(methodId: 8)]
+    [GenericProcedure(typeof(int), typeof(string))]
+    string Describe<T>(T value);
+
+    /// <summary>제네릭 ③: 복합 다중 슬롯(반환 T1 + 매개변수 T2, T3, 데카르트 곱).</summary>
+    [RemoteProcedure(methodId: 9)]
+    [GenericProcedure(0, typeof(int), typeof(string))]
+    [GenericProcedure(1, typeof(float), typeof(double))]
+    [GenericProcedure(2, typeof(Order), typeof(ChatLine))]
+    T1 Blend<T1, T2, T3>(T2 left, T3 right);
+
+    /// <summary>제네릭 ④: [GenericMessage] 파라미터. T 허용 집합은 Package 구성 선언에서 상속(메시지 타입만 가능 — T 멤버는 런타임 메시지 디스패치로 직렬화된다).</summary>
+    [RemoteProcedure(methodId: 10)]
+    void Deliver<T>(Package<T> box);
 }
 
 public interface IClientProcedures : IClientProcedureDeclarations
@@ -77,12 +98,29 @@ public partial class ShoutChatLine : ChatLine
 {
 }
 
+/// <summary>제네릭 ④용 [GenericMessage]. 구성(ClassId)마다 와이어 (MessageId, ClassId) 로 식별된다.
+/// T 는 ID 헤더 메시지(Standalone/Group)여야 한다 — NonId 는 제네릭 구성 등록이 막힌다.</summary>
+[StandaloneMessage(50)]
+[GenericMessage(typeof(Package<ChatLine>), ClassId = 1)]
+[GenericMessage(typeof(Package<Receipt>), ClassId = 2)]
+public partial class Package<T>
+{
+    public T Value { get; set; } = default!;
+}
+
+[StandaloneMessage(51)]
+public partial class Receipt
+{
+    public string Tag { get; set; } = string.Empty;
+}
+
 /// <summary>
 /// 서버 측 허브. Incoming = 서버 계약(자기가 구현), Outgoing = 클라이언트 계약(상대를 호출).
 /// </summary>
 public partial class E2EServerHub : ServerHub<IServerProcedures, IClientProcedures>
 {
     public static readonly System.Collections.Concurrent.ConcurrentQueue<string> ReceivedNotes = new();
+    public static readonly System.Collections.Concurrent.ConcurrentQueue<string> ReceivedGeneric = new();
 
     private partial Task<int> Add_Implementation(int value1, int value2) => Task.FromResult(value1 + value2);
 
@@ -109,6 +147,24 @@ public partial class E2EServerHub : ServerHub<IServerProcedures, IClientProcedur
     {
         await Task.Delay(delayMs).ConfigureAwait(false);
         return delayMs;
+    }
+
+    private partial Task<T> GetDefault_Implementation<T>() => Task.FromResult<T>(default!);
+
+    private partial Task<string> Describe_Implementation<T>(T value)
+        => Task.FromResult($"{typeof(T).FullName}:{value}");
+
+    private partial Task<T1> Blend_Implementation<T1, T2, T3>(T2 left, T3 right)
+    {
+        ReceivedGeneric.Enqueue($"Blend:{typeof(T2).Name}:{left?.GetType().Name ?? typeof(T2).Name}:{typeof(T3).Name}:{right?.GetType().Name ?? typeof(T3).Name}");
+        return Task.FromResult<T1>(default!);
+    }
+
+    private partial Task Deliver_Implementation<T>(Package<T> box)
+    {
+        string detail = box.Value switch { ChatLine c => c.Text, Receipt r => r.Tag, _ => "?" };
+        ReceivedGeneric.Enqueue($"Deliver:{typeof(T).Name}:{detail}");
+        return Task.CompletedTask;
     }
 }
 

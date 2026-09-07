@@ -53,4 +53,28 @@ internal static class DiagnosticDescriptors
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor GenericDeclarationMissing = new(
+        id: "DRPCGEN007",
+        title: "DRPC generic procedure type parameter is not declared",
+        messageFormat: "Method '{0}' has a generic type parameter without an allowed-type declaration: {1}",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor GenericTypeArgumentNotDeclared = new(
+        id: "DRPCGEN008",
+        title: "DRPC generic procedure type argument is not declared",
+        messageFormat: "The call '{0}' uses type argument '{1}', which is not declared for '{2}'. Declare it with [GenericProcedure] (slot {3}) or use a declared type.",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor GenericDeclarationInvalid = new(
+        id: "DRPCGEN009",
+        title: "DRPC generic procedure declaration is invalid",
+        messageFormat: "Method '{0}' has an invalid generic procedure declaration: {1}",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

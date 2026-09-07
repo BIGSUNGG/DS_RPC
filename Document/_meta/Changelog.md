@@ -10,6 +10,11 @@ updated: 2026-09-08
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-09 (14차 — 루프 종료)
+
+- **영역 4(구조) 검토 수행 + 발견 위반 1건 수정** — `RpcClient` 의 커넥터 접속·허브 조립 본문이 타임아웃 오버로드·`ConnectWithOptionsAsync` 에 2벌 존재 → `ConnectCoreAsync` 단일 경로로 통합(동작 보존, 110/110 통과). 검토 결론: HubBase(~450줄 응집적 런타임 핵심)·RpcHost·생성기 이미 3파일 분할·DRPCMessageHandler 박형 — 그 외 SRP/SOLID 위반 없음. 릴리스 없음(내부 리팩터만 — 미출시 커밋로 feature/improvement 에 대기, 병합은 사용자 몫).
+- **루프 종료(/loop stop)** — 14반복 · 13커밋 · 9릴리스(v2.2.0→v2.9.1) · 테스트 77→110 · 벤치마크 기준선 확보 · 런북 완결.
+
 ## 2026-09-09 (13차)
 
 - **[[../04-Guides/Production-Hardening|Production-Hardening]] 런북 신규** — 스펙 목표(「실제 상용 서비스 투입 수준」)의 운영자 면 문서. 12개 노브·기능을 8절 런북으로 통합: 접속 예산(ConnectTimeout·RpcEndpointOptions)·고갈 방어 3종(연결/수신/대기 — 「상용 배포 시 명시적 상한 필수」 명시)·CRC32c 무결성(양단 일치·검출 전용 한계)·호출 권한(AuthorizeRequestAsync)·오류 위생(SendErrorDetails)·큐 정책(FrameTimeout·MaxFrameLength)·운영 신호(ActiveConnectionCount·FlowControl)·호출 취소. 모든 예시 v2.9.1 실제 API 기준. Getting-Started §관련·CONTEXT 에서 연결. 문서 전용 — 릴리스 없음.

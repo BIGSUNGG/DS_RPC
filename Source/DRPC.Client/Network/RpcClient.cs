@@ -41,16 +41,9 @@ public static class RpcClient
             throw new ArgumentOutOfRangeException(nameof(connectTimeoutMs));
         }
 
-        var connector = new RudpConnector();
-
-        if (!await connector.ConnectAsync(host, port, HubSessionFactory.CreateTransportOptions(connectionKey, connectTimeoutMs),
-                cancellationToken).ConfigureAwait(false) || connector.Channel is null)
-        {
-            throw new InvalidOperationException("Failed to connect to server.");
-        }
-
-        IMessageChannel channel = connector.Channel;
-        return hubFactory(channel);
+        return await ConnectCoreAsync<THub>(host, port,
+            HubSessionFactory.CreateTransportOptions(connectionKey, connectTimeoutMs),
+            hubFactory, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -59,7 +52,7 @@ public static class RpcClient
     /// <exception cref="ArgumentNullException"><paramref name="endpointOptions"/> 가 null.</exception>
     /// <exception cref="InvalidOperationException">접속 거부·호스트 해석 실패·재시도 소진.</exception>
     /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> 취소.</exception>
-    public static async Task<THub> ConnectWithOptionsAsync<THub>(
+    public static Task<THub> ConnectWithOptionsAsync<THub>(
         string host,
         int port,
         RpcEndpointOptions endpointOptions,
@@ -72,10 +65,23 @@ public static class RpcClient
             throw new ArgumentNullException(nameof(endpointOptions));
         }
 
+        return ConnectCoreAsync<THub>(host, port, endpointOptions.ToTransportOptions(),
+            hubFactory, cancellationToken);
+    }
+
+    /// <summary>전송 옵션 조립 후 접속·허브 팩토리 조립까지의 단일 경로(중복 제거 — 구조 검토 1건).</summary>
+    static async Task<THub> ConnectCoreAsync<THub>(
+        string host,
+        int port,
+        RudpTransportOptions transportOptions,
+        Func<IMessageChannel, THub> hubFactory,
+        CancellationToken cancellationToken)
+        where THub : Shared.Network.HubBase
+    {
         var connector = new RudpConnector();
 
-        if (!await connector.ConnectAsync(host, port, endpointOptions.ToTransportOptions(),
-                cancellationToken).ConfigureAwait(false) || connector.Channel is null)
+        if (!await connector.ConnectAsync(host, port, transportOptions, cancellationToken).ConfigureAwait(false)
+            || connector.Channel is null)
         {
             throw new InvalidOperationException("Failed to connect to server.");
         }

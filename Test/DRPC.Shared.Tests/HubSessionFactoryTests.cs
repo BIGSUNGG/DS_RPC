@@ -93,4 +93,23 @@ public class HubSessionFactoryTests
         Assert.Equal(42, roundtripped.MethodId);
         Assert.Equal(new byte[] { 1, 2, 3 }, roundtripped.ParameterData);
     }
+
+    [Fact]
+    public void Converter_rejects_invalid_header_flags_with_InvalidDataException()
+    {
+        // 신뢰 경계 계약(MessageProtocol 2.3.7 채택 핀): 플래그 니블이 독립·그룹 비트를 하나도
+        // 세우지 않은 불법 프레임은 안내형 InvalidDataException 으로 거부된다. 2.3.4 에서는 같은 프레임이
+        // 캐스트가 일어난 적도 없는 InvalidCastException 이었고 원인(플래그 비트 불법)을 가렸다 —
+        // 하위 패키지를 되돌리면 이 테스트가 실패한다(채택 고정).
+        IMessageConverter converter = HubSessionFactory.Converter;
+        var request = new ProcedureCallRequestMessage(7u, 42, new byte[] { 1, 2, 3 });
+        var writer = new System.Buffers.ArrayBufferWriter<byte>();
+        converter.Serialize(request, writer);
+
+        byte[] corrupt = writer.WrittenSpan.ToArray();
+        // 헤더 상위 니블 = 플래그(NonIdMessage 0x01 단독 — 독립/그룹 루트/그룹 요소 어느 것도 아님), 하위 니블 = 카테고리 유지.
+        corrupt[0] = (byte)((corrupt[0] & 0x0F) | (0x01 << 4));
+
+        Assert.Throws<System.IO.InvalidDataException>(() => converter.Deserialize(corrupt));
+    }
 }

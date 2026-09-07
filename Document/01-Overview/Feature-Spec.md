@@ -3,7 +3,7 @@ project: DS_RPC
 type: overview
 status: stable
 tags: [scope, spec, feature]
-updated: 2026-09-07
+updated: 2026-09-09
 ---
 
 # Feature Spec — 재구축 구현 기능 명세
@@ -14,7 +14,7 @@ updated: 2026-09-07
 
 ## 구현 상태 (2026-09-08)
 
-F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotnet test DRPC.slnx -c Release` 109개 통과) — 형제 NuGet **MessageProtocol 2.3.4**, **Communication 2.4.0**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 채택). F10(Template)만 범위 밖.
+F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotnet test DRPC.slnx -c Release` 109개 통과) — 형제 NuGet **MessageProtocol 2.3.7**, **Communication 2.4.0**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 채택). F10(Template)만 범위 밖.
 **`v2.1.0` 릴리스** — 태그 푸시 → run 34136624883 success, 5개 패키지 2.1.0 NuGet 업로드 확인.
 형제 스택은 NuGet 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 

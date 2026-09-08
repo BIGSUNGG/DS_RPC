@@ -12,9 +12,9 @@ updated: 2026-09-09
 이 문서는 **구현할 기능의 범위·동작·수용 기준**을 정의한다.
 레거시 동작 근거는 아카이브 문서: [[../../Legacy/Document/03-Reference/Public-API|Public-API (Legacy)]], [[../../Legacy/Document/02-Architecture/Data-Flow|Data-Flow (Legacy)]], [[../../Legacy/Document/06-Troubleshooting/Known-Issues|Known-Issues (Legacy)]].
 
-## 구현 상태 (2026-09-08)
+## 구현 상태 (2026-09-09)
 
-F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotnet test DRPC.slnx -c Release` 109개 통과) — 형제 NuGet **MessageProtocol 2.3.7**, **Communication 2.4.0**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 채택). F10(Template)만 범위 밖.
+F1–F9·F11 구현 완료 + **제네릭 프로시저(F12)·**패킷 암호화(F13) 구현 완료**(`dotnet test DRPC.slnx -c Release` 124개 통과) — 형제 NuGet **MessageProtocol 2.3.9**, **Communication.Network.RUDP.*/Communication.Shared 2.5.0**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 + **DTLS 1.2 패킷 암호화** 채택). F10(Template)만 범위 밖.
 **`v2.1.0` 릴리스** — 태그 푸시 → run 34136624883 success, 5개 패키지 2.1.0 NuGet 업로드 확인.
 형제 스택은 NuGet 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 
@@ -43,6 +43,7 @@ F1–F9·F11 구현 완료 + **제네릭 프로시저(F12) 구현 완료**(`dotn
 | F10 | Template | TemplateSource/* | P2 |
 | F11 | 테스트 인프라 | Test/* | P0–P2 |
 | F12 | 제네릭 프로시저 호출 | DRPC.Attribute·CodeGenerator | P0 |
+| F13 | 패킷 암호화 (DTLS 1.2 옵트인) | DRPC.Shared | P0 |
 
 ---
 
@@ -288,6 +289,19 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - 페이로드 이중 직렬화·버퍼 풀링 최적화 (측정 후, 형제 합의 필요)
 - Communication 수신 핸들러 async 화 (형제 프로젝트 영역)
 - 페이로드 와이어 포맷의 버전 간 호환(단방향 인코딩만 보장)
+
+## F13 — 패킷 암호화 (DTLS 1.2 옵트인)
+
+- **위임 구조** — 암호화 구현은 전송 스택(Communication 2.5.0, BouncyCastle DTLS 1.2)에 위임하고 DRPC 는 옵션 표면만 노출한다([[../05-Decisions/0003-dtls-delegation-and-flat-options|ADR-0003]]). `RpcEndpointOptions` 에 TLS 필드를 하나라도 설정하면 `ToTransportOptions()` 가 `RudpTlsOptions` 를 조립해 `RudpTransportOptions.Tls` 로 전달.
+- **역할 분리 속성** — 서버: `ServerCertificate`(`X509Certificate2`). 클라: `TlsTargetHost`(SAN/CN 일치) 또는 `TlsCertificateValidation`(핀닝 콜백 — `RudpTlsOptions.GetSha256Fingerprint` 지문 비교 권장). 검증 수단 없는 클라는 서버 인증서 **기본 거부**(fail-closed — Communication 계약 승계).
+- **기본 평문** — 미설정(null)이면 기존 동작·와이어 호환 100% 유지(하위호환). **양단 모두 암호화 모드여야 한다**(와이어 비호환 — 평문 끝단은 RUDP 연결까진 성공하지만 어떤 RPC 도 완료되지 않는다, CRC32c 와 동일 표기 계약).
+- **시점** — 연결 확립(키 수락) 후 DTLS 핸드셰이크를 완료한 뒤에만 채널을 전달한다(핸드셰이크 상한 기본 15초 — Communication 기본값 승계, DRPC 표면에는 미노출). 실패·상한 초과는 연결 실패로 확정.
+- **미노출** — `HandshakeTimeout` 등 세부 노브는 Communication 기본값으로 충분하다고 판단해 DRPC 표면에서 제외(필요 시 옵션 추가는 순수 가산).
+- Sandbox `--tls`(서버: 자가서명 인증서 생성·지문 출력, 클라: `--tls <지문>` 핀닝) — 수동 왕복 확인 경로.
+
+### 수용 기준
+
+- E2E(실제 RUDP 소켓): 핀닝 왕복·TargetHost 왕복·핀 불일치 거부·검증 수단 없음 거부(fail-closed)·평문 클라이언트 비호환 5건 통과.
 
 ## 오픈 이슈
 

@@ -1,10 +1,27 @@
+using Communication.Network.RUDP;
+using Communication.Shared.Channels;
+using DRPC.Client.Network;
+using DRPC.Shared;
+using DRPC.Shared.Network;
 using Sandbox.Client;
 using Sandbox.Contracts;
 
 const string ConnectionKey = "sandbox-key";
 
-using var hub = await GameClientHub.ConnectAsync("127.0.0.1", 9050, ConnectionKey);
-Console.WriteLine("[client] connected");
+// --tls <지문>: 서버가 --tls 로 출력한 SHA-256 지문으로 인증서를 핀닝 검증한다. 인자가 없으면 평문 접속.
+string? fingerprint = args.Length >= 2 && args[0] == "--tls" ? args[1] : null;
+
+var clientOptions = new RpcEndpointOptions { ConnectionKey = ConnectionKey };
+if (fingerprint is not null)
+{
+    Console.WriteLine($"[client] DTLS 핀 검증 대상 지문: {fingerprint}");
+    string expected = fingerprint.ToLowerInvariant();
+    clientOptions.TlsCertificateValidation = der => RudpTlsOptions.GetSha256Fingerprint(der) == expected;
+}
+
+using var hub = await RpcClient.ConnectWithOptionsAsync("127.0.0.1", 9050, clientOptions,
+    channel => new GameClientHub(h => HubSessionFactory.CreateRudpSession(channel, h)));
+Console.WriteLine($"[client] connected{(fingerprint is not null ? " (DTLS 1.2)" : "")}");
 
 // 1) 기본 ReliableOrdered 호출
 Console.WriteLine($"[client] Add(2, 3) -> {await hub.AddAsync(2, 3)}");

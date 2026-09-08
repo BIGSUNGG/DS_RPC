@@ -38,12 +38,16 @@ public static class HubSessionFactory
     /// (Communication 2.0.1 <c>RudpTransportOptions.ConnectTimeout</c>). 0이면(기본) 전송 스택 기본값을 유지하고 음수는 거부한다.
     /// <paramref name="maxConnections"/> 가 양수면 동시 수락 연결 수 상한으로 걸고(상한 도달 시 접속 요청은 즉시 거부·수락 계속,
     /// Communication 2.0.1 <c>RudpTransportOptions.MaxConnections</c> — 서버 쪽에서만 의미), 0이면(기본) 무제한이다. 음수는 거부한다.
+    /// <paramref name="tls"/> 를 설정하면 연결 확립 후 DTLS 1.2 핸드셰이크를 완료한 뒤에만 채널을 전달한다
+    /// (Communication 2.5.0 <c>RudpTransportOptions.Tls</c> — 서버: <c>ServerCertificate</c>, 클라: <c>TargetHost</c>/<c>RemoteCertificateValidation</c> 필수).
+    /// null이면(기본) 평문이다.
     /// </summary>
     public static RudpTransportOptions CreateTransportOptions(
         string? connectionKey,
         int connectTimeoutMs = 0,
         int maxConnections = 0,
-        bool enableCrc32c = false)
+        bool enableCrc32c = false,
+        RudpTlsOptions? tls = null)
     {
         if (connectTimeoutMs < 0)
         {
@@ -74,6 +78,11 @@ public static class HubSessionFactory
         if (enableCrc32c)
         {
             options.Crc32cEnabled = true;
+        }
+
+        if (tls is not null)
+        {
+            options.Tls = tls;
         }
 
         return options;

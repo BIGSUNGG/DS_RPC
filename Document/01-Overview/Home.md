@@ -3,7 +3,7 @@ project: DS_RPC
 type: overview
 status: stable
 tags: [moc, home]
-updated: 2026-09-05
+updated: 2026-09-09
 ---
 
 # DS_RPC (DRPC) — Home
@@ -33,6 +33,7 @@ updated: 2026-09-05
 
 - [[../05-Decisions/0001-hub-naming-and-version-2|0001]] — Hub 명명 정렬·2.0.0 출발
 - [[../05-Decisions/0002-async-only-delivery-and-payload|0002]] — Async 전용 스텁·자체 전송 열거형·CallId 0 one-way·flat 페이로드
+- [[../05-Decisions/0003-dtls-delegation-and-flat-options|0003]] — DTLS 위임 구조·평탄 옵션 표면(F13 패킷 암호화)
 
 ### Meta
 
@@ -40,7 +41,7 @@ updated: 2026-09-05
 
 ## 상태
 
-F1–F9·F11 구현 완료(테스트 58개 통과)·`v2.0.0` NuGet 게시 확인. F10 Template 는 범위 밖.
+F1–F9·F11·F12·F13 구현 완료(테스트 124개 통과)·`v2.11.0` NuGet 게시. F10 Template 는 범위 밖.
 
 ## 아카이브
 

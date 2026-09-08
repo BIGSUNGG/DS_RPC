@@ -10,14 +10,14 @@ updated: 2026-09-09
 
 재구축 중인 DS_RPC 저장소. 작업 시작 시 이 문서를 먼저 읽는다.
 
-## 현 상태 (2026-09-07)
+## 현 상태 (2026-09-09)
 
-- **재구축 F1–F7·F9·F11·F12 구현 완료.** `Source/` 5개 패키지(Attribute·Shared·CodeGenerator·Client·Server), `Sandbox/` 3개, `Test/` 3계층(119개 통과) + 벤치마크 1(DRPC.Benchmarks, [[../03-Reference/Performance|Performance]] 기준선).
-- 형제 스택은 **NuGet 안정판만** 참조한다(`MessageProtocol` **2.3.7** — 디스패치 캐스트·플래그 비트 불법 프레임의 안내형 거부 포함, `Communication.Network.RUDP.*`·`Communication.Shared` **2.4.0** — CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 포함) — 형제 저장소 프로젝트 참조·하드 경로 없음.
+- **재구축 F1–F9·F11·F12·F13 구현 완료.** `Source/` 5개 패키지(Attribute·Shared·CodeGenerator·Client·Server), `Sandbox/` 3개, `Test/` 3계층(124개 통과) + 벤치마크 1(DRPC.Benchmarks, [[../03-Reference/Performance|Performance]] 기준선).
+- 형제 스택은 **NuGet 안정판만** 참조한다(`MessageProtocol` **2.3.9**, `Communication.Network.RUDP.*`·`Communication.Shared` **2.5.0** — CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 래치 재생 + **DTLS 1.2 패킷 암호화(F13)** 포함) — 형제 저장소 프로젝트 참조·하드 경로 없음.
 - 저장소 루트 솔루션은 `DRPC.slnx`.
 - 빌드·테스트는 **`-c Release`** 를 쓴다. `Debug` 는 언어 서버가 생성기 DLL 을 점유해 복사가 실패할 수 있다([[../06-Troubleshooting/Known-Issues|Known-Issues]]).
-- 구현 범위·수용 기준의 권위 문서는 [[../01-Overview/Feature-Spec|Feature-Spec]](F12 제네릭 프로시저 포함). 설계 결정은 [[../05-Decisions/0001-hub-naming-and-version-2|ADR-0001]], [[../05-Decisions/0002-async-only-delivery-and-payload|ADR-0002]]. 상용 투입 런북은 [[../04-Guides/Production-Hardening|Production-Hardening]].
-- 미구현: F10 TemplateSource. (릴리스: … → `v2.9.0`(P4 운영 신호) → `v2.9.1`(핫패스 할당 제거·Comm 2.4.0, patch) → `v2.9.2`(MessageProtocol 2.3.7 채택, patch) → `v2.10.0`(호출별 타임아웃 정책, minor) — 5개 패키지 NuGet 게시 확인)
+- 구현 범위·수용 기준의 권위 문서는 [[../01-Overview/Feature-Spec|Feature-Spec]](F12 제네릭 프로시저·F13 패킷 암호화 포함). 설계 결정은 [[../05-Decisions/0001-hub-naming-and-version-2|ADR-0001]], [[../05-Decisions/0002-async-only-delivery-and-payload|ADR-0002]], [[../05-Decisions/0003-dtls-delegation-and-flat-options|ADR-0003]]. 상용 투입 런북은 [[../04-Guides/Production-Hardening|Production-Hardening]].
+- 미구현: F10 TemplateSource. (릴리스: … → `v2.9.2`(MessageProtocol 2.3.7 채택, patch) → `v2.10.0`(호출별 타임아웃 정책, minor) → `v2.11.0`(패킷 암호화 F13 + Comm 2.5.0·MP 2.3.9 채택, minor) — 5개 패키지 NuGet 게시 확인)
 - 레거시 코드·문서는 `Legacy/` 아카이브. 동작 근거가 필요하면 레거시를 참고하되 **구현 대상은 Feature-Spec** 이다.
 
 ```powershell

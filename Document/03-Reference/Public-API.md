@@ -3,7 +3,7 @@ project: DS_RPC
 type: reference
 status: stable
 tags: [reference, api, packages, nuget]
-updated: 2026-09-07
+updated: 2026-09-09
 ---
 
 # Public-API — 재구축 2.1.0
@@ -132,10 +132,10 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
 
 | 타입 | 멤버 |
 | ------ | ------ |
-| `DRPC.Client.Network.RpcClient` | `Task<THub> ConnectAsync<THub>(string host, int port, string? connectionKey, Func<IMessageChannel, THub> hubFactory, CancellationToken ct = default)`, 오버로드 `ConnectAsync<THub>(host, port, connectionKey, int connectTimeoutMs, hubFactory, ct = default)` — 침묵 호스트 연결 실패를 상한 이내로 확정(Communication 2.0.1 `ConnectTimeout` 채택, 0=기본 약 5초, 음수는 `ArgumentOutOfRangeException`), `ConnectWithOptionsAsync<THub>(host, port, RpcEndpointOptions, hubFactory, ct)` — 옵션 일괄 지정(키·타임아웃·상한·CRC32c) |
+| `DRPC.Client.Network.RpcClient` | `Task<THub> ConnectAsync<THub>(string host, int port, string? connectionKey, Func<IMessageChannel, THub> hubFactory, CancellationToken ct = default)`, 오버로드 `ConnectAsync<THub>(host, port, connectionKey, int connectTimeoutMs, hubFactory, ct = default)` — 침묵 호스트 연결 실패를 상한 이내로 확정(Communication 2.0.1 `ConnectTimeout` 채택, 0=기본 약 5초, 음수는 `ArgumentOutOfRangeException`), `ConnectWithOptionsAsync<THub>(host, port, RpcEndpointOptions, hubFactory, ct)` — 옵션 일괄 지정(키·타임아웃·상한·CRC32c·DTLS) |
 | `DRPC.Server.Network.RpcHost` | `Task<RpcListenHandle> ListenAsync<THub>(int port, string? connectionKey, Func<IMessageChannel, THub> hubFactory, Func<THub, Task>? onConnected, CancellationToken ct = default)`, 오버로드 `ListenAsync<THub>(port, int maxConnections, connectionKey, hubFactory, onConnected, ct = default)` — 동시 수락 연결 상한(연결 고갈 공격 방어, 0=무제한·음수 거부), `ListenWithOptionsAsync<THub>(port, RpcEndpointOptions, hubFactory, onConnected, ct)` — 옵션 일괄 지정 |
-| `DRPC.Shared.Network.RpcEndpointOptions` | `ConnectionKey`·`ConnectTimeoutMs`(0=기본)·`MaxConnections`(0=무제한)·`EnableCrc32c`(양단 일치 필수 — 와이어 비호환, 검출 전용) + `ToTransportOptions()` |
-| `DRPC.Shared.Network.HubSessionFactory` | `IMessageConverter Converter`, `ISession CreateRudpSession(IMessageChannel, IHubBase)`, 오버로드 `CreateRudpSession(IMessageChannel, IHubBase, MessageQueueOptions?)`(FrameTimeout·MaxFrameLength 등 세션 큐 정책 — 형제 제안 P3), `RudpTransportOptions CreateTransportOptions(string? connectionKey, int connectTimeoutMs = 0, int maxConnections = 0, bool enableCrc32c = false)`(각 0/false=미설정·음수 거부) |
+| `DRPC.Shared.Network.RpcEndpointOptions` | `ConnectionKey`·`ConnectTimeoutMs`(0=기본)·`MaxConnections`(0=무제한)·`EnableCrc32c`(양단 일치 필수 — 와이어 비호환, 검출 전용)·`ServerCertificate`(DTLS 서버 인증서)·`TlsTargetHost`(클라 검증 — SAN/CN 일치)·`TlsCertificateValidation`(클라 검증 — 핀닝 콜백, `RudpTlsOptions.GetSha256Fingerprint` 권장; 검증 수단 없으면 기본 거부 — F13, Communication 2.5.0 위임·[[../05-Decisions/0003-dtls-delegation-and-flat-options | ADR-0003]]) + `ToTransportOptions()` |
+| `DRPC.Shared.Network.HubSessionFactory` | `IMessageConverter Converter`, `ISession CreateRudpSession(IMessageChannel, IHubBase)`, 오버로드 `CreateRudpSession(IMessageChannel, IHubBase, MessageQueueOptions?)`(FrameTimeout·MaxFrameLength 등 세션 큐 정책 — 형제 제안 P3), `RudpTransportOptions CreateTransportOptions(string? connectionKey, int connectTimeoutMs = 0, int maxConnections = 0, bool enableCrc32c = false, RudpTlsOptions? tls = null)`(각 0/false/null=미설정·음수 거부) |
 | `DRPC.Shared.Network.RpcDeliveryMap` | `RudpSendOptions ToSendOptions(this RpcDeliveryMode)` — DRPC↔RUDP 열거형 유일한 대응 지점 |
 
 ## 오류 모델

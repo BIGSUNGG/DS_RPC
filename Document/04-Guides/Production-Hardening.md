@@ -48,6 +48,22 @@ options.EnableCrc32c = true;   // 서버·클라 양단 같은 값 (와이어 �
 
 송신마다 체크섬(4B)을 붙이고 수신은 위반 패킷을 **프로토콜 처리 전에 폐기** — IPv4 UDP 체크섬 비활성(0) 경로 차단. 위변조 **검출** 전용(키 없는 CRC — 기밀성·인증 없음).
 
+## 3.5. 패킷 암호화 — DTLS 1.2 (옵트인, v2.11.0+)
+
+```csharp
+// 서버: 인증서 지정 — 이 순간 모든 패킷이 DTLS 1.2 로 암호화된다(양단 모두 켜야 함 — 와이어 비호환)
+var serverOptions = new RpcEndpointOptions { ServerCertificate = serverCert };
+
+// 클라: 핀닝(권장 — 게임 표준) 또는 TargetHost 검증. 둘 다 없으면 서버 인증서 기본 거부(fail-closed)
+var clientOptions = new RpcEndpointOptions
+{
+    TlsCertificateValidation = der => RudpTlsOptions.GetSha256Fingerprint(der) == expectedFingerprint,
+};
+```
+
+기밀성 + 서버 인증(클라 관점). ConnectionKey 평문 비교·클라이언트 인증은 그대로 앱 계층 몫(세션 토큰 + `AuthorizeRequestAsync`).
+자세한 계약: [[../01-Overview/Feature-Spec|Feature-Spec]] F13, [[../05-Decisions/0003-dtls-delegation-and-flat-options|ADR-0003]].
+
 ## 4. 호출 권한 — 관리자 전용 프로시저
 
 ```csharp

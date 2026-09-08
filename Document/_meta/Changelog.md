@@ -10,6 +10,11 @@ updated: 2026-09-09
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-09 (18차)
+
+- **패킷 암호화(F13) 구현 + 형제 최신 채택** — Communication 2.5.0(RUDP DTLS 1.2·BouncyCastle)을 옵션 표면으로 노출: `RpcEndpointOptions` 에 `ServerCertificate`(서버)·`TlsTargetHost`/`TlsCertificateValidation`(클라 검증, 둘 다 없으면 기본 거부 fail-closed) 추가, `ToTransportOptions()` 가 `RudpTlsOptions` 를 조립해 전달(위임 구조·세부 노브 미노출 — [[../05-Decisions/0003-dtls-delegation-and-flat-options|ADR-0003]]). 미설정 시 평문 100% 하위호환. MessageProtocol 2.3.7 → **2.3.9**, Communication 2.4.0 → **2.5.0** 채택(형제 저장소 수정 없음 — 이미 게시됨). Sandbox `--tls`(서버 자가서명 인증서·지문 출력, 클라 `--tls <지문>` 핀닝) 추가. 테스트 119 → 124(E2E 5: 핀닝·TargetHost 왕복, 핀 불일치·검증 수단 없음 거부, 평문 비호환). Feature-Spec F13·Public-API·Production-Readiness-Review 전제 1 갱신(기밀성·서버 인증 해소, 클라 인증은 여전히 앱 계층)·Production-Hardening §3.5 신설·ADR-0003 신규.
+- **v2.11.0 릴리스(minor)** — 태그 → Actions verify+publish success → 5개 패키지 게시 확인. README 버전 표기 동기화.
+
 ## 2026-09-09 (17차)
 
 - **게시·개발 CI 게이트 신설** — `nuget-publish.yml` 이 pack(컴파일)만 하고 **테스트 없이** NuGet 에 푸시하던 구조였다(모든 릴리스가 로컬 머신 신뢰 전용). 태그 푸시 시 `verify` 잡(build Release + test)을 먼저 돌리고 `publish` 가 `needs: verify` 로 의존 — 배포 게이트가 개발 게이트보다 느슨하면 안 된다는 형제 원칙(Comm 후반 31·MP 2.3.8)과 정렬. `ci.yml`(push/PR → build+test)도 신설해 릴리스 시점 이전에 파손을 잡는다. 패키지 불변(버전 무관) — 릴리스 없음. 형제 확인: MP v2.3.9(테스트·퍼즈·문서 전용 — 채택 불필요), Comm 무변동.
@@ -148,3 +153,7 @@ updated: 2026-09-09
 - `01-Overview/Feature-Spec.md` 신규: 레거시 패리티 기반 재구축 기능 명세(F1–F11, 재구축 결정, 오픈 이슈).
 - `01-Overview/Home.md` 신규: 사람용 진입점(스텁).
 - `00-AI/CONTEXT.md`, `00-AI/CONVENTIONS.md` 신규: 에이전트 진입점·작성 규약(레거시 승계).
+
+## 2026-09-09
+
+- `03-Reference/Production-Readiness-Review.md` 신규: v2.10.0 상용 투입 평가(조건부 가능 — 인증/상한/버전 고정/관측성 4대 전제).

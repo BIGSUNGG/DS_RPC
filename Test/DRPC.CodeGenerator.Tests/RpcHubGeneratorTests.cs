@@ -106,6 +106,18 @@ public class RpcHubGeneratorTests
     }
 
     [Fact]
+    public void Endpoint_generates_options_overload_routing_to_with_options_helpers()
+    {
+        var server = GeneratorHarness.Run(GeneratorHarness.ServerHub(AddContract));
+        var client = GeneratorHarness.Run(GeneratorHarness.ClientHub(AddContract));
+
+        Assert.Contains("ListenAsync(int port, global::DRPC.Shared.Network.RpcEndpointOptions options, global::System.Func<TestServerHub, global::System.Threading.Tasks.Task> onConnected", server.GeneratedSource);
+        Assert.Contains("global::DRPC.Server.Network.RpcHost.ListenWithOptionsAsync(port, options,", server.GeneratedSource);
+        Assert.Contains("ConnectAsync(string host, int port, global::DRPC.Shared.Network.RpcEndpointOptions options", client.GeneratedSource);
+        Assert.Contains("global::DRPC.Client.Network.RpcClient.ConnectWithOptionsAsync(host, port, options,", client.GeneratedSource);
+    }
+
+    [Fact]
     public void Registration_is_seeded_only_from_incoming_contract()
     {
         // 서버 허브: Incoming = 서버 계약. 클라이언트 계약은 outgoing 이므로 등록하지 않는다.

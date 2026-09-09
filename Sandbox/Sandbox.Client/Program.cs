@@ -1,7 +1,5 @@
-using Communication.Network.RUDP;
-using Communication.Shared.Channels;
-using DRPC.Client.Network;
-using DRPC.Shared;
+using Communication.Network.RUDP;   // RudpTlsOptions — DTLS 핀닝 검증
+using DRPC.Shared;                  // RpcFaultException
 using DRPC.Shared.Message;
 using DRPC.Shared.Network;
 using Sandbox.Client;
@@ -20,8 +18,7 @@ if (fingerprint is not null)
     clientOptions.TlsCertificateValidation = der => RudpTlsOptions.GetSha256Fingerprint(der) == expected;
 }
 
-using var hub = await RpcClient.ConnectWithOptionsAsync("127.0.0.1", 9050, clientOptions,
-    channel => new GameClientHub(h => HubSessionFactory.CreateRudpSession(channel, h)));
+using var hub = await GameClientHub.ConnectAsync("127.0.0.1", 9050, clientOptions);
 Console.WriteLine($"[client] connected{(fingerprint is not null ? " (DTLS 1.2)" : "")}");
 
 // 1) 기본 ReliableOrdered 호출

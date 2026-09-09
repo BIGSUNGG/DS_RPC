@@ -130,10 +130,14 @@ internal static partial class RpcHubEmitter
 
         sb.AppendLine($"{indent}/// <summary>서버에 접속해 허브를 만든다. 생성된 허브만 이 정적 메서드를 쓴다.</summary>");
         sb.AppendLine($"{indent}public static global::System.Threading.Tasks.Task<{hub}> ConnectAsync(string host, int port, global::System.Threading.CancellationToken cancellationToken = default)");
-        sb.AppendLine($"{indent}    => ConnectAsync(host, port, null, cancellationToken);");
+        sb.AppendLine($"{indent}    => ConnectAsync(host, port, (string?)null, cancellationToken);");
         sb.AppendLine();
         sb.AppendLine($"{indent}public static global::System.Threading.Tasks.Task<{hub}> ConnectAsync(string host, int port, string? connectionKey, global::System.Threading.CancellationToken cancellationToken = default)");
         sb.AppendLine($"{indent}    => global::DRPC.Client.Network.RpcClient.ConnectAsync(host, port, connectionKey, {connectBody}, cancellationToken);");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}/// <summary>RpcEndpointOptions 로 전송 옵션(키·DTLS·타임아웃 등)을 일괄 지정해 접속한다.</summary>");
+        sb.AppendLine($"{indent}public static global::System.Threading.Tasks.Task<{hub}> ConnectAsync(string host, int port, global::DRPC.Shared.Network.RpcEndpointOptions options, global::System.Threading.CancellationToken cancellationToken = default)");
+        sb.AppendLine($"{indent}    => global::DRPC.Client.Network.RpcClient.ConnectWithOptionsAsync(host, port, options, {connectBody}, cancellationToken);");
         sb.AppendLine();
     }
 
@@ -144,10 +148,14 @@ internal static partial class RpcHubEmitter
 
         sb.AppendLine($"{indent}/// <summary>port 를 받아 peer 마다 허브를 만든다. 반환 핸들을 Dispose 하면 리스너와 peer 가 정리된다.</summary>");
         sb.AppendLine($"{indent}public static global::System.Threading.Tasks.Task<global::DRPC.Shared.Network.RpcListenHandle> ListenAsync(int port, global::System.Func<{hub}, global::System.Threading.Tasks.Task> onConnected, global::System.Threading.CancellationToken cancellationToken = default)");
-        sb.AppendLine($"{indent}    => ListenAsync(port, null, onConnected, cancellationToken);");
+        sb.AppendLine($"{indent}    => ListenAsync(port, (string?)null, onConnected, cancellationToken);");
         sb.AppendLine();
         sb.AppendLine($"{indent}public static global::System.Threading.Tasks.Task<global::DRPC.Shared.Network.RpcListenHandle> ListenAsync(int port, string? connectionKey, global::System.Func<{hub}, global::System.Threading.Tasks.Task> onConnected, global::System.Threading.CancellationToken cancellationToken = default)");
         sb.AppendLine($"{indent}    => global::DRPC.Server.Network.RpcHost.ListenAsync(port, connectionKey, {listenFactory}, onConnected, cancellationToken);");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}/// <summary>RpcEndpointOptions 로 전송 옵션(키·DTLS·타임아웃 등)을 일괄 지정해 리스닝한다.</summary>");
+        sb.AppendLine($"{indent}public static global::System.Threading.Tasks.Task<global::DRPC.Shared.Network.RpcListenHandle> ListenAsync(int port, global::DRPC.Shared.Network.RpcEndpointOptions options, global::System.Func<{hub}, global::System.Threading.Tasks.Task> onConnected, global::System.Threading.CancellationToken cancellationToken = default)");
+        sb.AppendLine($"{indent}    => global::DRPC.Server.Network.RpcHost.ListenWithOptionsAsync(port, options, {listenFactory}, onConnected, cancellationToken);");
         sb.AppendLine();
         sb.AppendLine($"{indent}public static global::System.Threading.Tasks.Task<global::DRPC.Shared.Network.RpcListenHandle> ListenAsync(int port, global::System.Threading.CancellationToken cancellationToken = default)");
         sb.AppendLine($"{indent}    => global::DRPC.Server.Network.RpcHost.ListenAsync(port, null, {listenFactory}, null, cancellationToken);");

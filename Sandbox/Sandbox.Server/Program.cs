@@ -1,9 +1,6 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Communication.Network.RUDP;
-using Communication.Shared.Channels;
-using DRPC.Server.Network;
-using DRPC.Shared;
+using Communication.Network.RUDP;   // RudpTlsOptions — 인증서 지문 출력
 using DRPC.Shared.Network;
 using Sandbox.Contracts;
 using Sandbox.Server;
@@ -23,9 +20,7 @@ if (tls)
     Console.WriteLine("[server] 클라이언트 실행: dotnet run --project Sandbox/Sandbox.Client -- --tls <지문>");
 }
 
-await using var handle = await RpcHost.ListenWithOptionsAsync(Port, serverOptions,
-    channel => new GameServerHub(hub => HubSessionFactory.CreateRudpSession(channel, hub)),
-    async hub =>
+await using var handle = await GameServerHub.ListenAsync(Port, serverOptions, async hub =>
 {
     Console.WriteLine("[server] client connected — 서버가 클라이언트로 역호출 시작");
 

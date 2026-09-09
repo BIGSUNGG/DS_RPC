@@ -12,7 +12,7 @@ updated: 2026-09-09
 
 ## 2026-09-09 (21차)
 
-- **v2.13.0 릴리스(minor)** — 생성 허브 `RpcEndpointOptions` 오버로드(옵션 사용 시에도 간단 경로 유지). 태그 `v2.13.0` → Actions verify(build Release + test) → publish → 5개 패키지 게시 확인. README·CONTEXT 릴리스 사슬·`Source/Directory.Build.props` Version 동기화.
+- **v2.13.0 릴리스(minor)** — 생성 허브 `RpcEndpointOptions` 오버로드(옵션 사용 시에도 간단 경로 유지). 태그 `v2.13.0` → Actions verify(build Release + test — run 34318814935, 132 통과) success → publish → 5개 패키지 게시 확인(flatcontainer 2.13.0 등록). README·CONTEXT 릴리스 사슬·`Source/Directory.Build.props` Version 동기화.
 
 ## 2026-09-09 (20차)
 

@@ -10,6 +10,10 @@ updated: 2026-09-09
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-09 (19차)
+
+- **v2.12.0 릴리스(minor)** — F14 구현 전 검증 게이트. 태그 → Actions verify+publish success(run 34314132311) → 5개 패키지 게시 확인(registration 2.12.0 등록 — flatcontainer 는 유입 지연 후 전파). README 버전 표기·CONTEXT 릴리스 사슬 동기화.
+
 ## 2026-09-09 (18차)
 
 - **패킷 암호화(F13) 구현 + 형제 최신 채택** — Communication 2.5.0(RUDP DTLS 1.2·BouncyCastle)을 옵션 표면으로 노출: `RpcEndpointOptions` 에 `ServerCertificate`(서버)·`TlsTargetHost`/`TlsCertificateValidation`(클라 검증, 둘 다 없으면 기본 거부 fail-closed) 추가, `ToTransportOptions()` 가 `RudpTlsOptions` 를 조립해 전달(위임 구조·세부 노브 미노출 — [[../05-Decisions/0003-dtls-delegation-and-flat-options|ADR-0003]]). 미설정 시 평문 100% 하위호환. MessageProtocol 2.3.7 → **2.3.9**, Communication 2.4.0 → **2.5.0** 채택(형제 저장소 수정 없음 — 이미 게시됨). Sandbox `--tls`(서버 자가서명 인증서·지문 출력, 클라 `--tls <지문>` 핀닝) 추가. 테스트 119 → 124(E2E 5: 핀닝·TargetHost 왕복, 핀 불일치·검증 수단 없음 거부, 평문 비호환). Feature-Spec F13·Public-API·Production-Readiness-Review 전제 1 갱신(기밀성·서버 인증 해소, 클라 인증은 여전히 앱 계층)·Production-Hardening §3.5 신설·ADR-0003 신규.

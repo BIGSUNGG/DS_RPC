@@ -17,7 +17,7 @@ updated: 2026-09-09
 - 저장소 루트 솔루션은 `DRPC.slnx`.
 - 빌드·테스트는 **`-c Release`** 를 쓴다. `Debug` 는 언어 서버가 생성기 DLL 을 점유해 복사가 실패할 수 있다([[../06-Troubleshooting/Known-Issues|Known-Issues]]).
 - 구현 범위·수용 기준의 권위 문서는 [[../01-Overview/Feature-Spec|Feature-Spec]](F12 제네릭 프로시저·F13 패킷 암호화 포함). 설계 결정은 [[../05-Decisions/0001-hub-naming-and-version-2|ADR-0001]], [[../05-Decisions/0002-async-only-delivery-and-payload|ADR-0002]], [[../05-Decisions/0003-dtls-delegation-and-flat-options|ADR-0003]]. 상용 투입 런북은 [[../04-Guides/Production-Hardening|Production-Hardening]].
-- 미구현: F10 TemplateSource. (릴리스: … → `v2.9.2`(MessageProtocol 2.3.7 채택, patch) → `v2.10.0`(호출별 타임아웃 정책, minor) → `v2.11.0`(패킷 암호화 F13 + Comm 2.5.0·MP 2.3.9 채택, minor) — 5개 패키지 NuGet 게시 확인)
+- 미구현: F10 TemplateSource. (릴리스: … → `v2.9.2`(MessageProtocol 2.3.7 채택, patch) → `v2.10.0`(호출별 타임아웃 정책, minor) → `v2.11.0`(패킷 암호화 F13 + Comm 2.5.0·MP 2.3.9 채택, minor) → `v2.12.0`(구현 전 검증 게이트 F14, minor) — 5개 패키지 NuGet 게시 확인)
 - 레거시 코드·문서는 `Legacy/` 아카이브. 동작 근거가 필요하면 레거시를 참고하되 **구현 대상은 Feature-Spec** 이다.
 
 ```powershell

@@ -20,4 +20,7 @@ public static class RpcErrorCode
 
     /// <summary><c>HubBase.AuthorizeRequestAsync</c> 가 요청을 거부함(호출 권한 없음).</summary>
     public const int PermissionDenied = 6;
+
+    /// <summary><c>_Validate</c> 가 false 를 반환해 <c>_Implementation</c> 호출을 거부함.</summary>
+    public const int ValidationFailed = 7;
 }

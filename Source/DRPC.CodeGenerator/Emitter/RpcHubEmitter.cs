@@ -217,6 +217,8 @@ internal static partial class RpcHubEmitter
             args = string.Join(", ", method.Parameters.Select(static p => p.Name));
         }
 
+        EmitValidationGate(sb, method, args, indent + "    ");
+
         if (method.IsVoidReturn)
         {
             sb.AppendLine($"{indent}    await {method.MethodName}_Implementation({args}).ConfigureAwait(false);");
@@ -231,6 +233,32 @@ internal static partial class RpcHubEmitter
         sb.AppendLine($"{indent}}}");
         sb.AppendLine();
         sb.AppendLine($"{indent}private partial {method.ImplementationSignature};");
+        EmitValidateDeclaration(sb, method, indent);
+    }
+
+    /// <summary>Validation=true 메서드의 _Validate 게이트 — false 반환 시 ValidationFailed 예외로 구현 호출을 끊는다. 제네릭은 typeArgs 로 닫힌 타입 인수를 넘긴다.</summary>
+    internal static void EmitValidationGate(StringBuilder sb, MethodMetadata method, string args, string indent, string typeArgs = "")
+    {
+        if (!method.Validation)
+        {
+            return;
+        }
+
+        sb.AppendLine($"{indent}if (!await {method.MethodName}_Validate{typeArgs}({args}).ConfigureAwait(false))");
+        sb.AppendLine($"{indent}{{");
+        sb.AppendLine($"{indent}    throw new global::DRPC.Shared.RpcValidationFailedException(\"{method.MethodName}\");");
+        sb.AppendLine($"{indent}}}");
+    }
+
+    /// <summary>Validation=true 일 때 _Validate partial 선언을 추가한다(미구현 시 컴파일 에러 — fail-closed).</summary>
+    internal static void EmitValidateDeclaration(StringBuilder sb, MethodMetadata method, string indent)
+    {
+        if (!method.Validation)
+        {
+            return;
+        }
+
+        sb.AppendLine($"{indent}private partial {method.ValidateSignature};");
         sb.AppendLine();
     }
 

@@ -34,6 +34,8 @@ public sealed class RemoteProcedure : Attribute
     public RpcDeliveryMode Mode { get; }
     public int MethodId { get; }
     public bool OneWay { get; set; }      // named arg: OneWay = true
+    public int TimeoutMs { get; set; } = -1;  // named arg: TimeoutMs = 400 — 호출별 응답 대기 상한(v2.10.0, 문서 누락 보강)
+    public bool Validation { get; set; }  // named arg: Validation = true — _Implementation 전 _Validate 게이트(F14)
 }
 
 public enum RpcDeliveryMode
@@ -141,6 +143,13 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
 ## 오류 모델
 
 와이어 오류는 `DRPC.Shared.RpcFaultException`(`CallId`, `ErrorCode`, 메시지=원문)으로 관찰된다.
+`DRPC.Shared.RpcValidationFailedException`(primary constructor, 메서드명)은 서버 내부 신호 — `_Validate` false 시 디스패치가 던지고 허브가 `ValidationFailed`(7) 응답으로 변환한다(예상 거부라 `Unhandled` 트레이스에 남지 않음).
+
+`[RemoteProcedure(Validation = true)]` 옵트인 시 디스패치는 `{Name}_Implementation` 호출 전
+`private partial Task<bool> {Name}_Validate(매개변수 원본과 동일)` 을 먼저 기다린다(제네릭은 `{Name}_Validate<T...>`
+열림 partial, 디스패치는 구성별 닫힌 타입으로 호출). **true 여야만** 구현이 호출된다. false → 구현 미호출 +
+`ValidationFailed`(7) 응답(클라 `RpcFaultException` 관찰). one-way 는 응답 채널이 없어 조용히 스킵.
+`_Validate` 미구현 시 partial 선언이 소거되어 컴파일 에러(fail-closed — F14).
 
 `DRPC.Shared.Message.RpcErrorCode`:
 
@@ -150,6 +159,7 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
 | `UnknownMethod` | 2 | 등록되지 않은 MethodId (와이어) |
 | `Overloaded` | 5 | `MaxConcurrentIncoming` 초과 (와이어) |
 | `PermissionDenied` | 6 | `AuthorizeRequestAsync` 훅이 요청 거부 (와이어) |
+| `ValidationFailed` | 7 | `_Validate` false 로 `_Implementation` 호출 거부 (와이어, F14) |
 | `Timeout` | 3 | 호출 측 `TimeoutException` — 와이어 코드로는 전송되지 않음 |
 | `Disconnected` | 4 | 호출 측 `InvalidOperationException` — 와이어 코드로는 전송되지 않음 |
 

@@ -157,3 +157,12 @@ updated: 2026-09-09
 ## 2026-09-09
 
 - `03-Reference/Production-Readiness-Review.md` 신규: v2.10.0 상용 투입 평가(조건부 가능 — 인증/상한/버전 고정/관측성 4대 전제).
+- **F14 구현 — 구현 전 검증 게이트**: `[RemoteProcedure(Validation = true)]` 옵트인 시 디스패치가
+  `{Name}_Implementation` 앞에서 `partial Task<bool> {Name}_Validate(매개변수 동일)` 를 기다려 true 여야만 구현 호출.
+  false 는 신규 `DRPC.Shared.RpcValidationFailedException` → `RpcErrorCode.ValidationFailed`(7) 오류 응답
+  (one-way 는 조용히 스킵). 미구현 시 컴파일 에러(fail-closed). 일반+제네릭(`RpcHubEmitter.Generic.cs` 구성별) 이미터 적용.
+  코드 변경: `DRPC.Attribute`(속성)·`DRPC.Shared`(오류 코드 7·예외·`HubBase` catch 분기)·`DRPC.CodeGenerator`(메타데이터·이미터 게이트/선언).
+- 테스트 7건 추가(생성기 4 + E2E 3) — 총 131개 통과. `Feature-Spec`(F14 신규·F5 Incoming 보강)·
+  `Public-API`(Validation·TimeoutMs 누락 보강·오류 코드 7·_Validate 계약) 갱신.
+- Sandbox 데모에 검증 게이트 예시 추가: `TransferGold(methodId 9, Validation = true)` — 계약·서버 허브 `_Validate`/`_Implementation`·
+  클라이언트 통과/거부(`RpcFaultException` 코드 7 catch) 왕복 실측 확인. F9 데모 목록 갱신.

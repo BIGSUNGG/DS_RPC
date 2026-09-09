@@ -50,6 +50,11 @@ public interface IGameServerProcedures : IServerProcedureDeclarations
     /// <summary>제네릭 ④: [GenericMessage] 파라미터. T 허용 집합은 GiftBox 구성 선언에서 상속한다.</summary>
     [RemoteProcedure(methodId: 8)]
     void Unwrap<T>(GiftBox<T> box);
+
+    /// <summary>F14 검증 게이트: _Validate 가 true 여야만 _Implementation 이 호출된다. false 면
+    /// 구현은 실행되지 않고 클라이언트에 RpcErrorCode.ValidationFailed(7) 오류가 간다.</summary>
+    [RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 9, Validation = true)]
+    int TransferGold(int fromPlayer, int toPlayer, int amount);
 }
 
 /// <summary>클라이언트가 구현하고 서버가 호출하는 계약(양방향 RPC).</summary>

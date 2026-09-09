@@ -23,6 +23,9 @@ internal sealed class MethodMetadata
     /// <summary>호출별 응답 대기 상한(밀리초). -1(기본) = 허브 기본 상속, 양수 = 이 호출 전용 예산.</summary>
     public int TimeoutMs { get; }
 
+    /// <summary>true면 _Implementation 호출 전 _Validate(Task&lt;bool&gt;) 게이트를 건다.</summary>
+    public bool Validation { get; }
+
     /// <summary>예: <c>global::DRPC.RpcDeliveryMode.Unreliable</c></summary>
     public string ModeExpression { get; }
 
@@ -48,6 +51,16 @@ internal sealed class MethodMetadata
         }
     }
 
+    /// <summary>Validation=true 일 때 생성되는 검증(partial) 메서드 서명. 매개변수는 원본과 동일.</summary>
+    public string ValidateSignature
+    {
+        get
+        {
+            string typeParams = IsGeneric ? $"<{string.Join(", ", Generic!.TypeParameterNames)}>" : string.Empty;
+            return $"global::System.Threading.Tasks.Task<bool> {MethodName}_Validate{typeParams}({ParameterDeclarationList()})";
+        }
+    }
+
     /// <summary>생성된 코드 안에서 쓰는 반환 타입 표시(네임스페이스 차이 안전을 위해 항상 fully qualified).</summary>
     public string ReturnTypeDisplay => ReturnType.ToDisplayString(RpcPayload.Qualified);
 
@@ -66,6 +79,7 @@ internal sealed class MethodMetadata
         (MethodId, HasExplicitMethodId) = ResolveMethodId(attribute, ordinalMethodId);
         OneWay = ResolveNamedFlag(attribute, nameof(OneWay));
         TimeoutMs = ResolveNamedInt(attribute, nameof(TimeoutMs), -1);
+        Validation = ResolveNamedFlag(attribute, nameof(Validation));
         Generic = methodSymbol.IsGenericMethod ? GenericMethodMetadata.Build(methodSymbol, references) : null;
     }
 

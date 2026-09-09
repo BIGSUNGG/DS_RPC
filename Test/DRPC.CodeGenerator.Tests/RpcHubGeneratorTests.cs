@@ -307,6 +307,44 @@ public class RpcHubGeneratorTests
         Assert.Empty(result.CompileErrors());
     }
 
+    [Fact]
+    public void Validation_emits_gate_and_partial_declaration()
+    {
+        var result = GeneratorHarness.Run(GeneratorHarness.ServerHub(
+            "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 3, Validation = true)] int Add(int value1, int value2);",
+            hubBody: """
+                private partial Task<bool> Add_Validate(int value1, int value2) => Task.FromResult(true);
+                private partial Task<int> Add_Implementation(int value1, int value2) => Task.FromResult(value1 + value2);
+                """));
+
+        // 게이트는 구현 호출 앞에, 미구현 시 컴파일 에러(fail-closed)를 내는 partial 선언이 따라온다.
+        Assert.Contains("if (!await Add_Validate(value1, value2).ConfigureAwait(false))", result.GeneratedSource);
+        Assert.Contains("throw new global::DRPC.Shared.RpcValidationFailedException(\"Add\");", result.GeneratedSource);
+        Assert.Contains("private partial global::System.Threading.Tasks.Task<bool> Add_Validate(global::System.Int32 value1, global::System.Int32 value2);", result.GeneratedSource);
+        Assert.Empty(result.CompileErrors());
+    }
+
+    [Fact]
+    public void Validation_without_user_validate_partial_fails_to_compile()
+    {
+        // 구현부가 없으면 partial 선언이 컴파일에서 사라져 호출 지점이 컴파일 에러로 실패한다(fail-closed).
+        var result = GeneratorHarness.Run(GeneratorHarness.ServerHub(
+            "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 3, Validation = true)] int Add(int value1, int value2);",
+            hubBody: "private partial Task<int> Add_Implementation(int value1, int value2) => Task.FromResult(value1 + value2);"));
+
+        Assert.NotEmpty(result.CompileErrors());
+    }
+
+    [Fact]
+    public void Validation_absent_emits_no_validate()
+    {
+        var result = GeneratorHarness.Run(GeneratorHarness.ServerHub(AddContract,
+            hubBody: "private partial Task<int> Add_Implementation(int value1, int value2) => Task.FromResult(value1 + value2);"));
+
+        Assert.DoesNotContain("_Validate", result.GeneratedSource);
+        Assert.Empty(result.CompileErrors());
+    }
+
     static void Diagnostic_AssertIds(GeneratorHarness.GeneratorResult result, string id)
     {
         Assert.Contains(id, result.Diagnostics.Select(static d => d.Id));

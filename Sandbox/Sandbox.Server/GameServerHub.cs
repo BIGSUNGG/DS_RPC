@@ -61,4 +61,19 @@ public partial class GameServerHub : ServerHub<IGameServerProcedures, IGameClien
         Console.WriteLine($"[server] Unwrap<{typeof(T).Name}>: {detail}");
         return Task.CompletedTask;
     }
+
+    /// <summary>F14 검증 게이트: 구현보다 먼저 호출된다. false 면 TransferGold_Implementation 은
+    /// 실행되지 않고 허브가 RpcErrorCode.ValidationFailed(7) 오류 응답을 보낸다(클라 RpcFaultException 관찰).</summary>
+    private partial Task<bool> TransferGold_Validate(int fromPlayer, int toPlayer, int amount)
+    {
+        bool pass = amount > 0 && fromPlayer != toPlayer;
+        Console.WriteLine($"[server] TransferGold_Validate from={fromPlayer} to={toPlayer} amount={amount} -> {(pass ? "pass" : "reject")}");
+        return Task.FromResult(pass);
+    }
+
+    private partial Task<int> TransferGold_Implementation(int fromPlayer, int toPlayer, int amount)
+    {
+        Console.WriteLine($"[server] TransferGold_Implementation {fromPlayer}->{toPlayer} x{amount}");
+        return Task.FromResult(amount);
+    }
 }

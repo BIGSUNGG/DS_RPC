@@ -50,6 +50,28 @@ public class GenericProcedureGeneratorTests
     }
 
     [Fact]
+    public void Validation_gate_is_emitted_per_construction()
+    {
+        var result = GeneratorHarness.Run(GeneratorHarness.ServerHub(
+            """
+            [RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 7, Validation = true)]
+            [GenericProcedure(typeof(int), typeof(string))]
+            T GetDefault<T>();
+            """,
+            hubBody: """
+                private partial Task<bool> GetDefault_Validate<T>() => Task.FromResult(true);
+                private partial Task<T> GetDefault_Implementation<T>() => Task.FromResult<T>(default!);
+                """));
+
+        // 구성별 케이스마다 닫힌 타입 인수로 게이트가 붙고, 열림 제네릭 partial 선언이 한 번 따라온다.
+        Assert.Contains("if (!await GetDefault_Validate<global::System.Int32>().ConfigureAwait(false))", result.GeneratedSource);
+        Assert.Contains("if (!await GetDefault_Validate<global::System.String>().ConfigureAwait(false))", result.GeneratedSource);
+        Assert.Contains("throw new global::DRPC.Shared.RpcValidationFailedException(\"GetDefault\");", result.GeneratedSource);
+        Assert.Contains("private partial global::System.Threading.Tasks.Task<bool> GetDefault_Validate<T>();", result.GeneratedSource);
+        Assert.Empty(result.CompileErrors());
+    }
+
+    [Fact]
     public void Multi_slot_generic_emits_cartesian_arms_and_closed_implementation_call()
     {
         string contract =

@@ -2,6 +2,7 @@ using Communication.Network.RUDP;
 using Communication.Shared.Channels;
 using DRPC.Client.Network;
 using DRPC.Shared;
+using DRPC.Shared.Message;
 using DRPC.Shared.Network;
 using Sandbox.Client;
 using Sandbox.Contracts;
@@ -59,7 +60,19 @@ await hub.UnwrapAsync(new GiftBox<ChatLine> { Gift = new ShoutChatLine { Text = 
 await hub.UnwrapAsync(new GiftBox<Token> { Gift = new Token { Value = 7 } });
 Console.WriteLine("[client] Unwrap(GiftBox<ChatLine>/GiftBox<Token>) sent");
 
-// 10) 피어가 보낸 one-way 을 수신 구현이 처리했는지 확인하려면 잠시 기다린다.
+// 10) F14 검증 게이트 — _Validate 를 통과하는 호출만 구현이 실행된다.
+Console.WriteLine($"[client] TransferGold(7, 8, 100) -> {await hub.TransferGoldAsync(7, 8, 100)}");
+
+try
+{
+    await hub.TransferGoldAsync(7, 7, -50); // amount <= 0 — _Validate false → 서버 구현 미호출
+}
+catch (RpcFaultException fault) when (fault.ErrorCode == RpcErrorCode.ValidationFailed)
+{
+    Console.WriteLine($"[client] TransferGold(7, 7, -50) rejected: ErrorCode={fault.ErrorCode} ({fault.Message})");
+}
+
+// 11) 피어가 보낸 one-way 을 수신 구현이 처리했는지 확인하려면 잠시 기다린다.
 await Task.Delay(500);
 
 hub.Disconnect();

@@ -32,6 +32,15 @@ public sealed class RemoteProcedure : System.Attribute
     public bool OneWay { get; set; }
 
     /// <summary>
+    /// true이면 디스패치가 <c>_Implementation</c> 호출 전에 <c>_Validate</c> 를 먼저 기다린다.
+    /// <c>_Validate</c> 는 사용자가 partial 로 구현하는 <c>Task&lt;bool&gt;</c> 메서드(매개변수 원본과 동일)이고,
+    /// true를 반환해야만 <c>_Implementation</c> 이 호출된다. false면 구현을 호출하지 않고
+    /// <c>RpcErrorCode.ValidationFailed</c>(7) 오류 응답을 보낸다(one-way 는 조용히 스킵).
+    /// 미구현 시 컴파일 에러가 난다(fail-closed).
+    /// </summary>
+    public bool Validation { get; set; }
+
+    /// <summary>
     /// 이 호출의 응답 대기 상한(밀리초). 기본 -1이면 허브 기본값(<c>HubBase.RpcTimeout</c>)을 따른다.
     /// 양수면 이 호출에만 그 예산이 적용된다 — 느린 배치 호출에만 넉넉한 상한을 주고 나머지는 허브 기본으로
     /// 지키게 하는 용도(호출별 타임아웃 정책). one-way 호출은 응답을 기다리지 않으므로 무의미하다(DRPCGEN011 경고).

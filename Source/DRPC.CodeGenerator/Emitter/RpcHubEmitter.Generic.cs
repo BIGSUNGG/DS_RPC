@@ -112,6 +112,8 @@ internal static partial class RpcHubEmitter
                 args = string.Join(", ", closed.Parameters.Select(static p => p.Name));
             }
 
+            EmitValidationGate(sb, method, args, indent + "            ", $"<{ClosedTypeArgumentList(generic.Instantiations[i])}>");
+
             if (method.IsVoidReturn)
             {
                 sb.AppendLine($"{indent}            await {method.MethodName}_Implementation<{ClosedTypeArgumentList(generic.Instantiations[i])}>({args}).ConfigureAwait(false);");
@@ -133,7 +135,7 @@ internal static partial class RpcHubEmitter
         sb.AppendLine($"{indent}}}");
         sb.AppendLine();
         sb.AppendLine($"{indent}private partial {method.ImplementationSignature};");
-        sb.AppendLine();
+        EmitValidateDeclaration(sb, method, indent);
     }
 
     /// <summary>구성별 닫힌 페이로드 헬퍼. WriteParams/ReadParams 는 구성 인덱스를 포함한다(송수신 대칭).</summary>

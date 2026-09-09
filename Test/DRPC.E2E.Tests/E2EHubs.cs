@@ -63,6 +63,19 @@ public interface IServerProcedures : IServerProcedureDeclarations
     /// <summary>제네릭 ④: [GenericMessage] 파라미터. T 허용 집합은 Package 구성 선언에서 상속(메시지 타입만 가능 — T 멤버는 런타임 메시지 디스패치로 직렬화된다).</summary>
     [RemoteProcedure(methodId: 10)]
     void Deliver<T>(Package<T> box);
+
+    /// <summary>Validation=true: _Validate true 면 구현이 호출된다.</summary>
+    [RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 12, Validation = true)]
+    int GuardedAdd(int value1, int value2);
+
+    /// <summary>Validation=true: _Validate false 면 구현 미호출 + ValidationFailed(7) 오류 응답.</summary>
+    [RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 13, Validation = true)]
+    int GuardedReject(int value);
+
+    /// <summary>제네릭 Validation: T 가 int 일 때만 통과, 그 외는 ValidationFailed.</summary>
+    [RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 14, Validation = true)]
+    [GenericProcedure(typeof(int), typeof(string))]
+    T GuardedDefault<T>();
 }
 
 public interface IClientProcedures : IClientProcedureDeclarations
@@ -176,6 +189,19 @@ public partial class E2EServerHub : ServerHub<IServerProcedures, IClientProcedur
         ReceivedGeneric.Enqueue($"Deliver:{typeof(T).Name}:{detail}");
         return Task.CompletedTask;
     }
+
+    private partial Task<bool> GuardedAdd_Validate(int value1, int value2) => Task.FromResult(value1 >= 0);
+
+    private partial Task<int> GuardedAdd_Implementation(int value1, int value2) => Task.FromResult(value1 + value2);
+
+    private partial Task<bool> GuardedReject_Validate(int value) => Task.FromResult(false);
+
+    // _Validate 가 항상 false 라 이 구현은 호출되면 안 된다 — 만약 호출되면 ValidationFailed 대신 Unhandled(1) 로 드러난다.
+    private partial Task<int> GuardedReject_Implementation(int value) => throw new InvalidOperationException("GuardedReject_Implementation must not run");
+
+    private partial Task<bool> GuardedDefault_Validate<T>() => Task.FromResult(typeof(T) == typeof(int));
+
+    private partial Task<T> GuardedDefault_Implementation<T>() => Task.FromResult<T>(default!);
 }
 
 /// <summary>

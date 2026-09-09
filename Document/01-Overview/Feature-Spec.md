@@ -14,7 +14,7 @@ updated: 2026-09-09
 
 ## 구현 상태 (2026-09-09)
 
-F1–F9·F11 구현 완료 + **제네릭 프로시저(F12)·**패킷 암호화(F13) 구현 완료**(`dotnet test DRPC.slnx -c Release` 124개 통과) — 형제 NuGet **MessageProtocol 2.3.9**, **Communication.Network.RUDP.*/Communication.Shared 2.5.0**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 + **DTLS 1.2 패킷 암호화** 채택). F10(Template)만 범위 밖.
+F1–F9·F11 구현 완료 + **제네릭 프로시저(F12)·**패킷 암호화(F13)**·구현 전 검증 게이트(F14)** 구현 완료**(`dotnet test DRPC.slnx -c Release` 131개 통과) — 형제 NuGet **MessageProtocol 2.3.9**, **Communication.Network.RUDP.*/Communication.Shared 2.5.0**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 + **DTLS 1.2 패킷 암호화** 채택). F10(Template)만 범위 밖.
 **`v2.1.0` 릴리스** — 태그 푸시 → run 34136624883 success, 5개 패키지 2.1.0 NuGet 업로드 확인.
 형제 스택은 NuGet 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 
@@ -120,7 +120,7 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 
 - **탐지**: 클라 `ClientHub`, 서버 `ServerHub` 상속 partial class (명명 정렬 — [[../05-Decisions/0001-hub-naming-and-version-2|ADR-0001]]).
 - **Outgoing**: `{Method}Async` **만** 생성(sync `[Obsolete]` 스텁 없음 — ADR-0002 결정 1). OneWay → `SendRPC`, 아니면 `RequestRPC`. 왕복 스텁은 맨 끝 선택 `CancellationToken`(기본 `default`)을 받아 `RequestRPC` 에 전달 — 취소는 대기만 즉시 종료(슬롯 반납·늦은 응답 무시)하고 송신된 요청은 회수하지 않는다. OneWay 는 대기가 없어 토큰을 받지 않는다. 매개변수 없는 스텁도 앞 쉼표 없이 토큰을 받는다.
-- **Incoming**: `async Task<byte[]>` 디스패치(`{Name}_Requested`) + 사용자 `partial Task` / `Task<T>` `{Name}_Implementation`.
+- **Incoming**: `async Task<byte[]>` 디스패치(`{Name}_Requested`) + 사용자 `partial Task` / `Task<T>` `{Name}_Implementation`. `Validation = true` 면 구현 호출 전 `{Name}_Validate`(partial `Task<bool>`) 게이트를 건다(F14).
 - **연결**: 클라 `ConnectAsync(host, port, connectionKey?, ct)`, 서버 `ListenAsync(port, connectionKey?, onConnected, ct)` → `RpcListenHandle`.
 - **페이로드**: 메서드별 래퍼 메시지 타입 없이, 매개변수·반환을 `MessageBufferWriter` 에 선언 순서로 이어 붙인다(ADR-0002 결정 4).
   메시지 타입 값만 MessageProtocol 에 위임한다 — `[NonIdMessage]` 은 타입 고정 `Serialize<T>`/`Deserialize<T>`,
@@ -248,7 +248,7 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 
 - `Sandbox.Contracts`(계약·메시지) / `Sandbox.Server` / `Sandbox.Client`, TFM net10.0.
 - Analyzer 규칙: `MessageProtocol` 패키지 참조는 `Sandbox.Contracts` 만 한다(NuGet 기본 PrivateAssets 가 analyzers 를 전파하지 않음 → Client/Server 로 안 퍼진다). Client/Server 는 `DRPC.CodeGenerator` 를 `OutputItemType=Analyzer` 로만 참조.
-- 기본: `127.0.0.1:9050`, key `sandbox-key`. 데모 내용: 기본 ReliableOrdered 호출, `Sequenced`/`ReliableUnordered` 오버라이드, OneWay, DTO(NonId) 왕복, 양방향 역호출, 그룹 다형성(`ShoutChatLine`), stdin 종료.
+- 기본: `127.0.0.1:9050`, key `sandbox-key`. 데모 내용: 기본 ReliableOrdered 호출, `Sequenced`/`ReliableUnordered` 오버라이드, OneWay, DTO(NonId) 왕복, 양방향 역호출, 그룹 다형성(`ShoutChatLine`), 검증 게이트(`TransferGold` — F14: 통과 호출은 구현 실행, `amount <= 0`·동일 플레이어 이체는 `_Validate` false → 코드 7 거부 관찰), stdin 종료.
 
 ## F10 — Template (`TemplateSource/`, 비배포)
 
@@ -302,6 +302,18 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 ### 수용 기준
 
 - E2E(실제 RUDP 소켓): 핀닝 왕복·TargetHost 왕복·핀 불일치 거부·검증 수단 없음 거부(fail-closed)·평문 클라이언트 비호환 5건 통과.
+
+## F14 — 구현 전 검증 게이트 (`Validation` 옵트인)
+
+- **옵트인** — `[RemoteProcedure(Validation = true)]` 만 게이트가 켜진다(기본 false — 기존 생성 텍스트·와이어 불변). 제네릭 메서드도 같은 `[RemoteProcedure]` 속성으로 지정한다(`[GenericProcedure]` 는 타입 슬롯 선언 전용이라 속성을 두지 않는다).
+- **계약** — 사용자는 `private partial Task<bool> {Name}_Validate(매개변수 원본과 동일)` 을 구현한다(제네릭은 `{Name}_Validate<T...>` 열림 partial 하나, 디스패치는 구성별 닫힌 타입으로 호출). 디스패치가 `_Implementation` 호출 전 `await` 하고 **true 를 반환해야만** 구현을 호출한다 — 인자 수준 사전 검증(권한·범위·상태 체크) 용도.
+- **실패 경로** — false 시 `DRPC.Shared.RpcValidationFailedException`(서버 내부 신호) → 허브가 `RpcErrorCode.ValidationFailed`(7) 오류 응답으로 변환, 클라는 `RpcFaultException.ErrorCode == 7` 로 관찰. one-way 는 응답 채널이 없어 구현을 조용히 스킵. 예상된 거부이므로 `Unhandled` 트레이스에 남지 않는다.
+- **Fail-closed** — `Validation = true` 인데 `_Validate` partial 를 구현하지 않으면 partial 선언이 컴파일에서 소택되어 호출 지점이 컴파일 에러로 실패한다(검증 누락이 조용히 통과되는 일 없음).
+
+### 수용 기준
+
+- 생성기 형태 테스트 4건: 게이트 방출·partial 선언 동반·미구현 컴파일 실패·미지정 시 무방출(일반+제네릭 구성별).
+- E2E(실제 RUDP 루프백) 3건: 통과 시 구현 호출·false 시 구현 미호출 + 코드 7·제네릭 구성별 게이트. `dotnet test` 총 131개 통과.
 
 ## 오픈 이슈
 

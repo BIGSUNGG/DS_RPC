@@ -346,6 +346,14 @@ public abstract class HubBase : IHubBase, IDisposable
                     .ConfigureAwait(false);
             }
         }
+        catch (RpcValidationFailedException ex)
+        {
+            // 검증 거부는 예상된 결과(미구현 버그 아님) — 오류 응답만 한다. one-way 는 응답 채널이 없어 스킵.
+            if (!oneWay)
+            {
+                await SendErrorAsync(message.CallId, RpcErrorCode.ValidationFailed, ex.Message, ResolveMode(message.MethodId)).ConfigureAwait(false);
+            }
+        }
         catch (Exception ex)
         {
             // 서버 측 관측 — 원격 전송 여부·상세 여부와 무관하게 항상 기록한다(콘솔 의존 금지 — Trace 만).

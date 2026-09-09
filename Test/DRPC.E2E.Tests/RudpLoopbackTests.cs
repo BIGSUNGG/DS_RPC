@@ -408,6 +408,41 @@ public class RudpLoopbackTests
         Assert.Contains("unknown generic construction index", fault.Message);
     }
 
+    [Fact]
+    public async Task Validation_pass_runs_implementation()
+    {
+        var (_, client, handle) = await PairAsync();
+        await using var _ = handle;
+
+        Assert.Equal(30, await Within(client.GuardedAddAsync(10, 20)));
+        client.Dispose();
+    }
+
+    [Fact]
+    public async Task Validation_failure_returns_error_code_7_without_calling_implementation()
+    {
+        var (_, client, handle) = await PairAsync();
+        await using var _ = handle;
+
+        // GuardedReject_Implementation 은 호출되면 예외를 던지므로, 코드 7 이 오는 것이 곧 미호출 증명이다.
+        RpcFaultException fault = await Assert.ThrowsAsync<RpcFaultException>(() => Within(client.GuardedRejectAsync(1)));
+        Assert.Equal(RpcErrorCode.ValidationFailed, fault.ErrorCode);
+        client.Dispose();
+    }
+
+    [Fact]
+    public async Task Generic_validation_gates_implementation()
+    {
+        var (_, client, handle) = await PairAsync();
+        await using var _ = handle;
+
+        // T=int 통과(기본값 0 왕복), T=string 은 _Validate false → ValidationFailed(7).
+        Assert.Equal(0, await Within(client.GuardedDefaultAsync<int>()));
+        RpcFaultException fault = await Assert.ThrowsAsync<RpcFaultException>(() => Within(client.GuardedDefaultAsync<string>()));
+        Assert.Equal(RpcErrorCode.ValidationFailed, fault.ErrorCode);
+        client.Dispose();
+    }
+
     static async Task<(E2EServerHub Server, E2EClientHub Client, RpcListenHandle Handle)> PairAsync()
     {
         int port = NextPort();

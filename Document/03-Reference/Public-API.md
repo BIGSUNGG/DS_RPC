@@ -6,7 +6,7 @@ tags: [reference, api, packages, nuget]
 updated: 2026-09-09
 ---
 
-# Public-API — 재구축 2.1.0
+# Public-API — 재구축 2.13.0
 
 사용자가 실제로 만지는 표면만 싣는다. 생성 산출물(`{Hub}.g.cs`)의 멤버는 §생성기가 만드는 것 참고.
 
@@ -16,11 +16,11 @@ updated: 2026-09-09
 
 | 프로퍼티 | 값 | 패키지 |
 | --------- | ----- | -------- |
-| `MessageProtocolPackageVersion` | `2.1.0` | `MessageProtocol`(런타임 + analyzers/dotnet/cs 생성기 포함, GenericMessage 포함) |
-| `CommunicationPackageVersion` | `2.0.0` | `Communication.Shared`, `Communication.Network.RUDP.{Shared,Client,Server}` |
+| `MessageProtocolPackageVersion` | `2.3.9` | `MessageProtocol`(런타임 + analyzers/dotnet/cs 생성기 포함, GenericMessage 포함) |
+| `CommunicationPackageVersion` | `2.5.0` | `Communication.Shared`, `Communication.Network.RUDP.{Shared,Client,Server}` |
 
 저장소 자체는 어떤 형제 프로젝트 경로도 참조하지 않는다(`Source/Sandbox/Test`의 csproj에서 `ProjectReference` 가
-`../../DS_…` 로 가는 경우 없음 — 계약 확인 항목). DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **2.1.0**.
+`../../DS_…` 로 가는 경우 없음 — 계약 확인 항목). DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **2.13.0**.
 
 ## DRPC.Attribute
 
@@ -107,12 +107,14 @@ public abstract class ServerHub<TSPD, TCPD> : HubBase<TSPD, TCPD> { /* 위와 �
 ```csharp
 public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClientProcedures>
 {
-    // 접속 (클라이언트 측)
+    // 접속 (클라이언트 측) — connectionKey 단일 지정 또는 RpcEndpointOptions 일괄 지정
     public static Task<GameClientHub> ConnectAsync(string host, int port, CancellationToken ct = default);
     public static Task<GameClientHub> ConnectAsync(string host, int port, string? connectionKey, CancellationToken ct = default);
+    public static Task<GameClientHub> ConnectAsync(string host, int port, RpcEndpointOptions options, CancellationToken ct = default);   // 키·DTLS·타임아웃 일괄
 
-    // 리스닝 (서버 측) — ListenAsync(port, onConnected, ct) / (port, connectionKey, onConnected, ct) / (port, ct)
+    // 리스닝 (서버 측) — ListenAsync(port, onConnected, ct) / (port, connectionKey, onConnected, ct) / (port, options, onConnected, ct) / (port, ct)
     public static Task<RpcListenHandle> ListenAsync(int port, string? connectionKey, Func<GameServerHub, Task> onConnected, CancellationToken ct = default);
+    public static Task<RpcListenHandle> ListenAsync(int port, RpcEndpointOptions options, Func<GameServerHub, Task> onConnected, CancellationToken ct = default);   // 옵션 일괄
 
     // Outgoing 스텁 (Async 전용 — sync 스텁은 없다). 왕복 호출은 맨 끝 선택 CancellationToken 을 받는다.
     public Task<int> AddAsync(int value1, int value2, CancellationToken cancellationToken = default);
@@ -180,7 +182,7 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
 
 ```powershell
 dotnet build DRPC.slnx -c Release        # 5 라이브러리 + Sandbox 3 + Test 3
-dotnet test  DRPC.slnx -c Release        # 58개 통과 (19 단위 / 22 생성기 / 17 RUDP 루프백·생성 형태)
+dotnet test  DRPC.slnx -c Release        # 132개 통과 (47 생성기 / 47 단위 / 38 E2E RUDP 루프백)
 ```
 
 `Debug` 로 CLI 빌드하면 Roslyn 언어 서버가 `DRPC.CodeGenerator.dll`(bin/Debug) 을 점유해 복사가 실패할 수 있다 —

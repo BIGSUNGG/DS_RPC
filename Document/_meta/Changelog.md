@@ -10,6 +10,14 @@ updated: 2026-09-09
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-09 (21차)
+
+- **v2.13.0 릴리스(minor)** — 생성 허브 `RpcEndpointOptions` 오버로드(옵션 사용 시에도 간단 경로 유지). 태그 `v2.13.0` → Actions verify(build Release + test) → publish → 5개 패키지 게시 확인. README·CONTEXT 릴리스 사슬·`Source/Directory.Build.props` Version 동기화.
+
+## 2026-09-09 (20차)
+
+- **생성 허브 `RpcEndpointOptions` 오버로드 추가** — 옵션(키·DTLS·타임아웃)이 필요한 순간에도 간단 경로 유지가 최우선 원칙. `RpcHubEmitter` 가 `ConnectAsync(host, port, options, ct)`·`ListenAsync(port, options, onConnected, ct)` 를 emit 하고, 기존 위임 본문 `(port, null, …)` 의 `string?`↔options 모호성(CS0121)은 `(string?)null` 캐스트로 해소. Sandbox Client/Server 가 `RpcClient.ConnectWithOptionsAsync`·`RpcHost.ListenWithOptionsAsync` + `HubSessionFactory` 중첩 람다 대신 생성된 오버로드 한 줄로 복귀. 생성기 형태 테스트 1건 추가 — 테스트 132(생성기 47 / 단위 47 / E2E 38, 실측). Public-API 버전표 실측 동기화(MP 2.3.9·Comm 2.5.0·릴리스 2.12.0) + 오버로드 표기 추가.
+
 ## 2026-09-09 (19차)
 
 - **v2.12.0 릴리스(minor)** — F14 구현 전 검증 게이트. 태그 → Actions verify+publish success(run 34314132311) → 5개 패키지 게시 확인(registration 2.12.0 등록 — flatcontainer 는 유입 지연 후 전파). README 버전 표기·CONTEXT 릴리스 사슬 동기화.

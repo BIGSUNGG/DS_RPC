@@ -10,6 +10,10 @@ updated: 2026-09-11
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-11 (23차)
+
+- **Communication 2.5.1 채택(패치)** — `Directory.Build.props` `CommunicationPackageVersion` 2.5.0 → 2.5.1. 형제 상용 하드닝(수용 루프 생존성·TLS/plain 스트림 생성 가드·소켓 오류 로그 스로틀) 반영 — **공개 API 무변화**라 코드 마이그레이션 없음. Release 빌드 0 오류·테스트 133/133·Sandbox 전 시나리오(exit 0) 확인. 버전 표기 동기화: CONTEXT·Overview·Feature-Spec·Public-API. DRPC 패키지 버전 무변동(2.13.0).
+
 ## 2026-09-11 (22차)
 
 - **MessageProtocol 3.0.0 마이그레이션** — 형제 파괴 변경 릴리스(단일 `[Message(MessageKind, id, category)]` 속성화) 대응. `Directory.Build.props` 2.3.9 → 3.0.0. DRPC.Shared 프로토콜 3종 신문법 이전(명시 ID 0/1/2 불변, Category1 — `DRPC.Shared.Message` 네임스페이스가 `Message` 를 가려 완전 한정 필요), Sandbox.Contracts 이전(11/60/61 불변·Category2, NonId 4종은 kind 만, `ShoutChatLine` 은 수동 id 0 표현 불가로 FullName 해시로 이전 — 형식 불변·양측 동시 재빌드로 무영향). 생성기 `AttributeReferences.MessageStyleOf` 가 구문법 이름 매칭 대신 `[Message]`+`MessageKind` 해독(위치·명명 인자 양쪽)으로 교체, 신규 인식 테스트 1건 추가(총 133). 문서 동기화: 카테고리 배분표 Public-API 신설, CONTEXT·Overview·Feature-Spec·Getting-Started·ADR-0002 구문법 표기 갱신. Sandbox 전 시나리오 통과(client exit 0). DRPC 패키지 버전 무변동(2.13.0).

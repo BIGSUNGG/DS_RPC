@@ -17,7 +17,7 @@ updated: 2026-09-11
 | 프로퍼티 | 값 | 패키지 |
 | --------- | ----- | -------- |
 | `MessageProtocolPackageVersion` | `3.0.0` | `MessageProtocol`(런타임 + analyzers/dotnet/cs 생성기 포함, GenericMessage 포함) |
-| `CommunicationPackageVersion` | `2.5.0` | `Communication.Shared`, `Communication.Network.RUDP.{Shared,Client,Server}` |
+| `CommunicationPackageVersion` | `2.5.1` | `Communication.Shared`, `Communication.Network.RUDP.{Shared,Client,Server}` |
 
 저장소 자체는 어떤 형제 프로젝트 경로도 참조하지 않는다(`Source/Sandbox/Test`의 csproj에서 `ProjectReference` 가
 `../../DS_…` 로 가는 경우 없음 — 계약 확인 항목). DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **2.13.0**.

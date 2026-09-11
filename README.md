@@ -14,7 +14,7 @@ All runtime packages target `netstandard2.1` (the source generator targets `nets
 - Five delivery modes per method (`Unreliable`, `ReliableUnordered`, `Sequenced`, `ReliableOrdered`, `ReliableSequenced`) — chosen per declaration, mapped onto the RUDP stack.
 - Fire-and-forget one-way calls (`OneWay = true`) with no response wait.
 - Two-way RPC: the server can call back into connected clients through the same stub pattern.
-- DTO parameters and returns via MessageProtocol messages (`[NonIdMessage]`), plus polymorphic delivery through message groups.
+- DTO parameters and returns via MessageProtocol messages (`[Message(MessageKind.NonId)]`), plus polymorphic delivery through message groups.
 - Generic procedures (`[GenericProcedure]`) with compile-time-checked allowed type sets.
 - Per-call response timeouts (`TimeoutMs`), caller-side cancellation tokens, and an opt-in server-side validation gate (`Validation = true`).
 - Opt-in DTLS 1.2 packet encryption with certificate pinning.
@@ -159,7 +159,7 @@ That is the full loop: `ListenAsync` on the server, `ConnectAsync` on the client
 | `DRPC.Client` / `DRPC.Server` | Side-specific hub bases, generated `ConnectAsync` / `ListenAsync` wiring |
 | `DRPC.CodeGenerator` | Roslyn source generator (development dependency, analyzer-only reference) |
 
-Current versions: DRPC packages **2.13.0** (release tags are authoritative), `MessageProtocol` **2.3.9**, `Communication.Network.RUDP.*` / `Communication.Shared` **2.5.0**.
+Current versions: DRPC packages **2.13.0** (release tags are authoritative), `MessageProtocol` **3.0.0** (the unified `[Message]` attribute — see below), `Communication.Network.RUDP.*` / `Communication.Shared` **2.5.1**.
 
 Runtime packages target `netstandard2.1` and run on Unity and other `netstandard2.1`-capable frameworks. Building this repository or the sandbox from source requires the .NET 10 SDK.
 
@@ -213,12 +213,12 @@ Naming is ownership-based: the client-side hub inherits `ClientHub`, the server-
 
 ## DTOs and Polymorphic Messages
 
-DTO parameters and return values are MessageProtocol message types. Decorate them once in the contract project:
+DTO parameters and return values are MessageProtocol message types. Decorate them once in the contract project with the unified `[Message]` attribute:
 
 ```csharp
 using MessageProtocol;
 
-[NonIdMessage]
+[Message(MessageKind.NonId)]   // plain DTO: no wire ID, no category argument allowed
 public partial class Player
 {
     public int Id { get; set; }
@@ -228,13 +228,13 @@ public partial class Player
 
 Then use them directly in contracts — `[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 1)] PlayerJoined Join(Player player);`
 
-**Group polymorphism:** declare a group root and elements, then send derived instances through the root-typed parameter. The concrete type is preserved on the wire and restored on arrival:
+**Group polymorphism:** declare a parent (`MessageKind.Parent`) with an explicit wire ID and category, and child types (`MessageKind.Child`) inheriting it, then send derived instances through the parent-typed parameter. The concrete type is preserved on the wire and restored on arrival:
 
 ```csharp
-[GroupRootMessage(11)]
+[Message(MessageKind.Parent, 11, MessageCategory.Category2)]
 public partial class ChatLine { public string Text { get; set; } = string.Empty; }
 
-[GroupElementMessage(0)]
+[Message(MessageKind.Child)]   // no ID argument — omitted ID defaults to a hash of the type's full name
 public partial class ShoutChatLine : ChatLine { }
 
 // Declared as: void ChatMessage(ChatLine line);  — sending ShoutChatLine arrives as ShoutChatLine.
@@ -260,7 +260,7 @@ string Describe<T>(T value);            // call: await hub.DescribeAsync(42) —
 T1 Blend<T1, T2, T3>(T2 left, T3 right); // supported combinations are the Cartesian product
 ```
 
-- A generic method whose type parameter appears only as a `[GenericMessage]` parameter (e.g. `void Unwrap<T>(GiftBox<T> box)`) inherits the allowed set from that message's `[GenericMessage]` composition declarations instead. `T` must be an ID-header message type there (`[StandaloneMessage]` / group types — not `[NonIdMessage]` or primitives).
+- A generic method whose type parameter appears only as a `[GenericMessage]` parameter (e.g. `void Unwrap<T>(GiftBox<T> box)`) inherits the allowed set from that message's `[GenericMessage]` composition declarations instead. `T` must be an ID-header message type there (`MessageKind.Standalone` / `Parent`/`Child` types — not `MessageKind.NonId` or primitives).
 - Calls or declarations outside the allowed sets fail at compile time (`DRPCGEN008` / `DRPCGEN007`, `DRPCGEN009`) with a runtime throw as backstop.
 - Generic type-parameter constraints (`where T : ...`) are not supported.
 - **Wire compatibility warning:** the emitted combination index depends on declaration order. Reordering `[GenericProcedure]` lists changes the wire format for existing peers — this is not detected at compile time; manage it as a versioning concern.

@@ -10,6 +10,10 @@ updated: 2026-09-11
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-11 (24차)
+
+- **v3.0.0 릴리스(major)** — MP 3.0.0 채택 대응 파괴 변경 릴리스. 계약 코드가 구 메시지 속성(`NonIdMessage` 등 4종)에서 `[Message(MessageKind, id, category)]` 신문법으로 이전 필요(DRPC 생성기도 신문법만 해독). `Source/Directory.Build.props` Version 2.13.0 → 3.0.0, README·CONTEXT 릴리스 사슬·Public-API 버전표 동기화.
+
 ## 2026-09-11 (23차)
 
 - **Communication 2.5.1 채택(패치)** — `Directory.Build.props` `CommunicationPackageVersion` 2.5.0 → 2.5.1. 형제 상용 하드닝(수용 루프 생존성·TLS/plain 스트림 생성 가드·소켓 오류 로그 스로틀) 반영 — **공개 API 무변화**라 코드 마이그레이션 없음. Release 빌드 0 오류·테스트 133/133·Sandbox 전 시나리오(exit 0) 확인. 버전 표기 동기화: CONTEXT·Overview·Feature-Spec·Public-API. DRPC 패키지 버전 무변동(2.13.0).

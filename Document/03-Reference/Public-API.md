@@ -6,7 +6,7 @@ tags: [reference, api, packages, nuget]
 updated: 2026-09-11
 ---
 
-# Public-API — 재구축 2.13.0
+# Public-API — 재구축 3.0.0
 
 사용자가 실제로 만지는 표면만 싣는다. 생성 산출물(`{Hub}.g.cs`)의 멤버는 §생성기가 만드는 것 참고.
 
@@ -20,7 +20,7 @@ updated: 2026-09-11
 | `CommunicationPackageVersion` | `2.5.1` | `Communication.Shared`, `Communication.Network.RUDP.{Shared,Client,Server}` |
 
 저장소 자체는 어떤 형제 프로젝트 경로도 참조하지 않는다(`Source/Sandbox/Test`의 csproj에서 `ProjectReference` 가
-`../../DS_…` 로 가는 경우 없음 — 계약 확인 항목). DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **2.13.0**.
+`../../DS_…` 로 가는 경우 없음 — 계약 확인 항목). DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **3.0.0**(MP 3.0.0 채택 대응 major — 계약 코드가 `[Message]` 신문법 필요).
 
 ### MessageCategory 니블 배분표 (MessageProtocol 3.0.0 마이그레이션, 2026-09-11)
 

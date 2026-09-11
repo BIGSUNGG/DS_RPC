@@ -107,7 +107,7 @@ public class HubSessionFactoryTests
         converter.Serialize(request, writer);
 
         byte[] corrupt = writer.WrittenSpan.ToArray();
-        // 헤더 상위 니블 = 플래그(NonIdMessage 0x01 단독 — 독립/그룹 루트/그룹 요소 어느 것도 아님), 하위 니블 = 카테고리 유지.
+        // 헤더 상위 니블 = 플래그(NonId 0x01 단독 — 독립/그룹 루트/그룹 요소 어느 것도 아님), 하위 니블 = 카테고리 유지.
         corrupt[0] = (byte)((corrupt[0] & 0x0F) | (0x01 << 4));
 
         Assert.Throws<System.IO.InvalidDataException>(() => converter.Deserialize(corrupt));

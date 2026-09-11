@@ -148,7 +148,28 @@ public class RpcHubGeneratorTests
         string source = GeneratorHarness.ClientHub(
                 "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 8)] void Send(Player player);")
             + """
-              [MessageProtocol.NonIdMessage]
+              [MessageProtocol.Message(MessageProtocol.MessageKind.NonId)]
+              public partial class Player
+              {
+                  public int Id { get; set; }
+              }
+              """;
+
+        var result = GeneratorHarness.Run(source);
+
+        Assert.Contains("MessageSerializer.Serialize(player, ref __buf);", result.GeneratedSource);
+        Assert.Contains("MessageSerializer.Deserialize<global::Player>(ref __rd)", result.GeneratedSource);
+    }
+
+    [Fact]
+    public void Named_kind_argument_Message_attribute_is_recognized()
+    {
+        // 3.0.0 [Message] 신문법 커버리지: kind 를 명명 인자(kind:)로 준 NonId 선언도
+        // 위치 인자와 동일하게 NonId 스타일(타입 고정 직렬화)로 인식해야 한다.
+        string source = GeneratorHarness.ClientHub(
+                "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 8)] void Send(Player player);")
+            + """
+              [MessageProtocol.Message(kind: MessageProtocol.MessageKind.NonId)]
               public partial class Player
               {
                   public int Id { get; set; }
@@ -167,13 +188,13 @@ public class RpcHubGeneratorTests
         string source = GeneratorHarness.ClientHub(
                 "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 8)] void Send(ChatLine line);")
             + """
-              [MessageProtocol.GroupRootMessage(30)]
+              [MessageProtocol.Message(MessageProtocol.MessageKind.Parent, 30)]
               public partial class ChatLine
               {
                   public string Text { get; set; } = string.Empty;
               }
 
-              [MessageProtocol.GroupElementMessage(1)]
+              [MessageProtocol.Message(MessageProtocol.MessageKind.Child, 1)]
               public partial class ShoutChatLine : ChatLine
               {
               }

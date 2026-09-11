@@ -38,7 +38,7 @@ Accepted (2026-09-05) — 재구축 구현과 함께 확정.
    `message.CallId == 0` 으로만 판정한다. `OneWayMethodIds` 등록표는 폐기.
 4. **flat 페이로드 + 래퍼 타입 폐기**: 매개변수와 반환 값은 메서드별 래퍼 메시지 없이
    `MessageBufferWriter` 에 선언 순서대로 이어 붙인다. 메시지 타입 값은 MessageProtocol 런타임에 위임한다.
-   - `[NonIdMessage]`(또는 타입 고정 직렬화) → 생성된 정적 `MessageSerializer.Serialize<T>/Deserialize<T>`
+   - `[Message(MessageKind.NonId)]`(또는 타입 고정 직렬화) → 생성된 정적 `MessageSerializer.Serialize<T>/Deserialize<T>`
    - ID 헤더를 가진 메시지(Standalone/Group/Generic) → `SerializeToWriter`/`DeserializeFromReader` (object dispatch, 그룹 다형성 유지)
    DRPC.CodeGenerator 는 `Microsoft.CodeAnalysis.CSharp` 만 참조하고 **MessageProtocol 생성기를 참조하지 않는다**.
 

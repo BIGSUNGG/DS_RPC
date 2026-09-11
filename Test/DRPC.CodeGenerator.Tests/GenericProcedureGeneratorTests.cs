@@ -126,13 +126,13 @@ public class GenericProcedureGeneratorTests
                 void Deliver<T>(Package<T> box);
                 """)
             + """
-              [MessageProtocol.StandaloneMessage(9)]
+              [MessageProtocol.Message(MessageProtocol.MessageKind.Standalone, 9)]
               public partial class Payload
               {
                   public int Id { get; set; }
               }
 
-              [MessageProtocol.StandaloneMessage(50)]
+              [MessageProtocol.Message(MessageProtocol.MessageKind.Standalone, 50)]
               [MessageProtocol.GenericMessage(typeof(Package<Payload>), ClassId = 1)]
               public partial class Package<T>
               {
@@ -159,7 +159,7 @@ public class GenericProcedureGeneratorTests
                 void Deliver<T>(Package<T> box);
                 """)
             + """
-              [MessageProtocol.StandaloneMessage(50)]
+              [MessageProtocol.Message(MessageProtocol.MessageKind.Standalone, 50)]
               [MessageProtocol.GenericMessage(typeof(Package<int>), ClassId = 1)]
               public partial class Package<T>
               {

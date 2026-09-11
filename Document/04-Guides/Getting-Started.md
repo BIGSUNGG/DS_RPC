@@ -3,7 +3,7 @@ project: DS_RPC
 type: guide
 status: stable
 tags: [guide, quickstart, usage]
-updated: 2026-09-05
+updated: 2026-09-11
 ---
 
 # Getting-Started — RPC 선언하고 호출하기
@@ -46,7 +46,7 @@ public interface IGameServerProcedures : IServerProcedureDeclarations
     void LogChat(string text);                                  // 응답 없음
 }
 
-[NonIdMessage]                                                  // DTO 직렬화는 MessageProtocol 이 만든다
+[Message(MessageKind.NonId)]                                          // DTO 직렬화는 MessageProtocol 이 만든다
 public partial class Player
 {
     public int Id { get; set; }

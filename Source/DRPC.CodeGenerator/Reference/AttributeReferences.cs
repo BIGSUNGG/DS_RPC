@@ -18,8 +18,11 @@ internal sealed class AttributeReferences
     public const string ClientDeclarationsTypeName = "DRPC.Shared.Interface.IClientProcedureDeclarations";
     public const string MessageSerializableTypeName = "MessageProtocol.Serialize.IMessageSerializable";
 
-    /// <summary>MessageProtocol 의 메시지 표시 속성류 (StandaloneMessage, NonIdMessage, GroupRoot/Element, Generic).</summary>
+    /// <summary>MessageProtocol 의 메시지 표시 속성류 ([Message(MessageKind, …)], Generic).</summary>
     public const string MessageNamespace = "MessageProtocol";
+
+    /// <summary>MessageProtocol.MessageKind.NonId 열거값과 동결(와이어 플래그처럼 불변 계약). 3.0.0 부터 종류·ID·카테고리는 [Message] 단일 속성로 선언한다.</summary>
+    public const int MessageKindNonIdValue = 4;
 
     public INamedTypeSymbol? RemoteProcedureAttributeType { get; }
     public INamedTypeSymbol? GenericProcedureAttributeType { get; }
@@ -101,11 +104,12 @@ internal sealed class AttributeReferences
 
             switch (name)
             {
-                case "NonIdMessageAttribute":
-                    return MessageStyle.NonId;
-                case "StandaloneMessageAttribute":
-                case "GroupRootMessageAttribute":
-                case "GroupElementMessageAttribute":
+                case "MessageAttribute":
+                    // [Message(kind, id, category)] — Kind 가 NonId 면 헤더 없는 타입 고정 직렬화,
+                    // 나머지(Automatic/Standalone/Parent/Child)는 모두 ID 헤더를 얹는다.
+                    return IsNonIdKind(attribute)
+                        ? MessageStyle.NonId
+                        : MessageStyle.HasId;
                 case "GenericMessageAttribute":
                     style = MessageStyle.HasId;
                     break;
@@ -118,6 +122,32 @@ internal sealed class AttributeReferences
         }
 
         return style;
+    }
+
+    /// <summary>[Message] 의 Kind 인자가 NonId 인지 — 위치 인자와 명명 인자(kind:) 양쪽을 본다. 인자가 없으면 Automatic(=ID 헤더 종류).</summary>
+    static bool IsNonIdKind(AttributeData attribute)
+    {
+        foreach (var argument in attribute.ConstructorArguments)
+        {
+            if (argument.Type?.TypeKind == TypeKind.Enum &&
+                argument.Type.Name == "MessageKind" &&
+                argument.Type.ContainingNamespace?.ToDisplayString() == MessageNamespace)
+            {
+                return argument.Value is int value && value == MessageKindNonIdValue;
+            }
+        }
+
+        foreach (var named in attribute.NamedArguments)
+        {
+            if (named.Key == "kind" &&
+                named.Value.Type?.TypeKind == TypeKind.Enum &&
+                named.Value.Type.Name == "MessageKind")
+            {
+                return named.Value.Value is int value && value == MessageKindNonIdValue;
+            }
+        }
+
+        return false;
     }
 
     public bool ImplementsMessageSerializable(ITypeSymbol type)
@@ -145,7 +175,7 @@ internal enum MessageStyle
     /// <summary>MessageProtocol 메시지가 아님.</summary>
     None,
 
-    /// <summary><c>[NonIdMessage]</c>(또는 타입 고정 직렬화) — 생성된 정적 Serialize/Deserialize 로 왕복한다.</summary>
+    /// <summary><c>[Message(MessageKind.NonId)]</c>(또는 타입 고정 직렬화) — 생성된 정적 Serialize/Deserialize 로 왕복한다.</summary>
     NonId,
 
     /// <summary>Standalone/Group/Generic — 헤더의 ID 로 라우팅하므로 object dispatch 가 가능하다(그룹 다형성 유지).</summary>

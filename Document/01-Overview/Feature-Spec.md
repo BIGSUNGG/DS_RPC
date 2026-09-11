@@ -3,7 +3,7 @@ project: DS_RPC
 type: overview
 status: stable
 tags: [scope, spec, feature]
-updated: 2026-09-09
+updated: 2026-09-11
 ---
 
 # Feature Spec — 재구축 구현 기능 명세
@@ -14,7 +14,7 @@ updated: 2026-09-09
 
 ## 구현 상태 (2026-09-09)
 
-F1–F9·F11 구현 완료 + **제네릭 프로시저(F12)·**패킷 암호화(F13)**·구현 전 검증 게이트(F14)** 구현 완료**(`dotnet test DRPC.slnx -c Release` 131개 통과) — 형제 NuGet **MessageProtocol 2.3.9**, **Communication.Network.RUDP.*/Communication.Shared 2.5.0**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 + **DTLS 1.2 패킷 암호화** 채택). F10(Template)만 범위 밖.
+F1–F9·F11 구현 완료 + **제네릭 프로시저(F12)·**패킷 암호화(F13)**·구현 전 검증 게이트(F14)** 구현 완료**(`dotnet test DRPC.slnx` 133개 통과) — 형제 NuGet **MessageProtocol 3.0.0**(2026-09-11 파괴 변경 마이그레이션 - 단일 `[Message(MessageKind, id, category)]` 속성·카테고리 배분표는 [[../03-Reference/Public-API|Public-API]]), **Communication.Network.RUDP.*/Communication.Shared 2.5.0**(CRC32c 무결성·흐름제어·프레임 상한·ConnectTimeout·끊김 레치 재생 + **DTLS 1.2 패킷 암호화** 채택). F10(Template)만 범위 밖.
 **`v2.1.0` 릴리스** — 태그 푸시 → run 34136624883 success, 5개 패키지 2.1.0 NuGet 업로드 확인.
 형제 스택은 NuGet 안정판으로만 참조한다(형제 저장소 소스 참조 없음).
 
@@ -95,7 +95,7 @@ RPC 호출의 실질 런타임 전부.
 | 1 | `ProcedureCallResponseMessage` | `CallId`, `ReturnData` |
 | 2 | `ProcedureCallErrorMessage` | `CallId`, `ErrorCode`, `Message` |
 
-- `[StandaloneMessage]` 등록, MessageProtocol 직렬화.
+- `[Message(MessageKind.Standalone)]` 등록, MessageProtocol 직렬화.
 - `RpcErrorCode`: `Unhandled` / `UnknownMethod` / `Timeout` / `Disconnected` / `Overloaded` / `PermissionDenied`.
 - `Unhandled` 응답의 상세 문구는 `SendErrorDetails`(기본 true)로 제어 — false면 고정 문구(정보유출 방어), 서버측 Trace 는 항상 기록.
 - 원격 오류는 호출측에서 `RpcFaultException`으로 관찰.
@@ -123,7 +123,7 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - **Incoming**: `async Task<byte[]>` 디스패치(`{Name}_Requested`) + 사용자 `partial Task` / `Task<T>` `{Name}_Implementation`. `Validation = true` 면 구현 호출 전 `{Name}_Validate`(partial `Task<bool>`) 게이트를 건다(F14).
 - **연결**: 클라 `ConnectAsync(host, port, connectionKey?, ct)`, 서버 `ListenAsync(port, connectionKey?, onConnected, ct)` → `RpcListenHandle`.
 - **페이로드**: 메서드별 래퍼 메시지 타입 없이, 매개변수·반환을 `MessageBufferWriter` 에 선언 순서로 이어 붙인다(ADR-0002 결정 4).
-  메시지 타입 값만 MessageProtocol 에 위임한다 — `[NonIdMessage]` 은 타입 고정 `Serialize<T>`/`Deserialize<T>`,
+  메시지 타입 값만 MessageProtocol 에 위임한다 — `[Message(MessageKind.NonId)]` 은 타입 고정 `Serialize<T>`/`Deserialize<T>`,
   ID 헤더 메시지(Standalone/Group/Generic)는 `SerializeToWriter`/`DeserializeFromReader`(그룹 다형성 보존).
 - **진단**: DRPCGEN001 partial / 002 Hub 베이스 / 003 지원 타입·오버로드·`Task` 반환 / 004 명시 methodId 권장(warning) / 005 중복 methodId(error) / 006 OneWay+non-void(error).
   DRPCGEN001 은 실제로 발화해야 하므로 생성기 파이프라인 전제조건에서 `partial` 을 빼고(베이스명에 `Hub` 포함만으로 후보 선별) 판정한다.
@@ -154,6 +154,10 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 - `Source/` 5개 라이브러리, TFM `netstandard2.1`(CodeGenerator 는 netstandard2.0), `IsPackable=true` (CodeGenerator는 `DevelopmentDependency`).
 - 버전은 루트 `Directory.Build.props`(`MessageProtocolPackageVersion`·`CommunicationPackageVersion` 포함).
 - 태그 `v*` → GitHub Actions pack·publish — 이미 존재하던 `.github/workflows/nuget-publish.yml`(런 이름 "NuGet Publish")가 그 동작이다.
+
+### 채택: MessageProtocol 3.0.0 (2026-09-11, DRPC 릴리스 아님)
+
+- 파괴 변경 마이그레이션 — 구문법 4종 메시지 속성·`MessageCategoryAttribute` 제거에 따른 전면 이전. 기존 명시 ID 불변(DRPC 0/1/2, Sandbox 11/60/61), 카테고리 계열별 배분(DRPC=Category1, Sandbox 게임=Category2 — 배분표는 [[../03-Reference/Public-API|Public-API]]), 생성기 `AttributeReferences` 신문법 `[Message]`+`MessageKind` 해독 교체, 신규 인식 테스트 1건 추가(총 133). DRPC 패키지 버전은 무변동(2.13.0).
 
 ### 게시 상태 (2.10.0)
 

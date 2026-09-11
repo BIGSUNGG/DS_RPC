@@ -3,7 +3,7 @@ project: DS_RPC
 type: reference
 status: stable
 tags: [reference, api, packages, nuget]
-updated: 2026-09-09
+updated: 2026-09-11
 ---
 
 # Public-API — 재구축 2.13.0
@@ -16,11 +16,26 @@ updated: 2026-09-09
 
 | 프로퍼티 | 값 | 패키지 |
 | --------- | ----- | -------- |
-| `MessageProtocolPackageVersion` | `2.3.9` | `MessageProtocol`(런타임 + analyzers/dotnet/cs 생성기 포함, GenericMessage 포함) |
+| `MessageProtocolPackageVersion` | `3.0.0` | `MessageProtocol`(런타임 + analyzers/dotnet/cs 생성기 포함, GenericMessage 포함) |
 | `CommunicationPackageVersion` | `2.5.0` | `Communication.Shared`, `Communication.Network.RUDP.{Shared,Client,Server}` |
 
 저장소 자체는 어떤 형제 프로젝트 경로도 참조하지 않는다(`Source/Sandbox/Test`의 csproj에서 `ProjectReference` 가
 `../../DS_…` 로 가는 경우 없음 — 계약 확인 항목). DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **2.13.0**.
+
+### MessageCategory 니블 배분표 (MessageProtocol 3.0.0 마이그레이션, 2026-09-11)
+
+3.0.0 부터 종류·ID·카테고리는 `[Message(MessageKind, id, MessageCategory)]` 단일 속성으로 선언한다(구문법
+`StandaloneMessage`/`GroupRootMessage`/`GroupElementMessage`/`NonIdMessage`/`MessageCategory` 제거).
+
+| 계열 | Category | 대상(종류·ID) | 비고 |
+| ---- | -------- | ------------- | ---- |
+| DRPC 프로토콜 | `Category1` | `ProcedureCallRequestMessage`(Standalone·0)·`ProcedureCallResponseMessage`(Standalone·1)·`ProcedureCallErrorMessage`(Standalone·2) | 기존 명시 ID 불변. `DRPC.Shared.Message` 네임스페이스가 `Message` 를 가려 완전 한정(`MessageProtocol.Message`) 필요 |
+| Sandbox 게임 | `Category2` | `ChatLine`(Parent·11)·`GiftBox<T>`(Standalone·60)·`Token`(Standalone·61) | 기존 명시 ID 불변 |
+| NonId 메시지 | 기본(Category0) | `Player`·`PlayerJoined`·`ScoreLine`·`ScoreBoard` + 테스트 인라인 | 3.0.0 제약: NonId 는 id·category 인자 사용 불가(MSGPROT018) |
+
+특이 사항: `ShoutChatLine` 은 구문법 `[GroupElementMessage(0)]`(수동 위치 0) 이었으나 3.0.0 은 수동 id 0 을
+표현할 수 없다(id 0 = 생략 → FullName 해시) — `[Message(MessageKind.Child)]` 해시 id 로 이전. 요소 id 와이어 **값**이
+0 → 해시로 바뀌었으나 형식은 불변이고 Sandbox 양측 동시 재빌드로 무영향.
 
 ## DRPC.Attribute
 

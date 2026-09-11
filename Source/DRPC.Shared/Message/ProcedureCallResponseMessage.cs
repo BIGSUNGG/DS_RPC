@@ -3,7 +3,7 @@ using MessageProtocol;
 namespace DRPC.Shared.Message;
 
 /// <summary>RPC 성공 응답. 요청의 CallId 를 그대로 되돌린다.</summary>
-[StandaloneMessage(1)]
+[MessageProtocol.Message(MessageProtocol.MessageKind.Standalone, 1, MessageProtocol.MessageCategory.Category1)]
 public partial class ProcedureCallResponseMessage
 {
     public uint CallId { get; private set; }

@@ -89,7 +89,7 @@ public interface IClientProcedures : IClientProcedureDeclarations
     void ReceiveLine(ChatLine line);
 }
 
-[NonIdMessage]
+[Message(MessageKind.NonId)]
 public partial class Order
 {
     public string Item { get; set; } = string.Empty;
@@ -97,27 +97,27 @@ public partial class Order
     public List<int> Tags { get; set; } = new();
 }
 
-[NonIdMessage]
+[Message(MessageKind.NonId)]
 public partial class OrderSummary
 {
     public string Receipt { get; set; } = string.Empty;
     public decimal Total { get; set; }
 }
 
-[GroupRootMessage(20)]
+[Message(MessageKind.Parent, 20)]
 public partial class ChatLine
 {
     public string Text { get; set; } = string.Empty;
 }
 
-[GroupElementMessage(1)]
+[Message(MessageKind.Child, 1)]
 public partial class ShoutChatLine : ChatLine
 {
 }
 
 /// <summary>제네릭 ④용 [GenericMessage]. 구성(ClassId)마다 와이어 (MessageId, ClassId) 로 식별된다.
 /// T 는 ID 헤더 메시지(Standalone/Group)여야 한다 — NonId 는 제네릭 구성 등록이 막힌다.</summary>
-[StandaloneMessage(50)]
+[Message(MessageKind.Standalone, 50)]
 [GenericMessage(typeof(Package<ChatLine>), ClassId = 1)]
 [GenericMessage(typeof(Package<Receipt>), ClassId = 2)]
 public partial class Package<T>
@@ -125,7 +125,7 @@ public partial class Package<T>
     public T Value { get; set; } = default!;
 }
 
-[StandaloneMessage(51)]
+[Message(MessageKind.Standalone, 51)]
 public partial class Receipt
 {
     public string Tag { get; set; } = string.Empty;

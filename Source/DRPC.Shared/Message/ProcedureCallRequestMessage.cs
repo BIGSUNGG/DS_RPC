@@ -3,7 +3,7 @@ using MessageProtocol;
 namespace DRPC.Shared.Message;
 
 /// <summary>RPC 요청. 응답을 기다리는 호출과 one-way 호출이 같은 메시지를 쓴다(one-way 은 <see cref="CallId"/> 가 0).</summary>
-[StandaloneMessage(0)]
+[MessageProtocol.Message(MessageProtocol.MessageKind.Standalone, 0, MessageProtocol.MessageCategory.Category1)]
 public partial class ProcedureCallRequestMessage
 {
     /// <summary>호출 식별자. 0이면 one-way(응답 없음).</summary>

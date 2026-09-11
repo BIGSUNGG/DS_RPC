@@ -3,7 +3,7 @@ using MessageProtocol;
 namespace DRPC.Shared.Message;
 
 /// <summary>RPC 실패 응답. 호출 측은 <c>RpcFaultException</c> 으로 관찰한다.</summary>
-[StandaloneMessage(2)]
+[MessageProtocol.Message(MessageProtocol.MessageKind.Standalone, 2, MessageProtocol.MessageCategory.Category1)]
 public partial class ProcedureCallErrorMessage
 {
     public uint CallId { get; private set; }

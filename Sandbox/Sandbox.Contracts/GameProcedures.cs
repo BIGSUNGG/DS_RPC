@@ -14,7 +14,7 @@ public interface IGameServerProcedures : IServerProcedureDeclarations
     [RemoteProcedure(methodId: 0)]
     int Add(int value1, int value2);
 
-    /// <summary>MessageProtocol 메시지 타입([NonIdMessage])은 매개변수·반환 값으로 그대로 쓰면 된다.</summary>
+    /// <summary>MessageProtocol 메시지 타입([Message(MessageKind.NonId)])은 매개변수·반환 값으로 그대로 쓰면 된다.</summary>
     [RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 1)]
     PlayerJoined Join(Player player);
 
@@ -71,29 +71,29 @@ public interface IGameClientProcedures : IClientProcedureDeclarations
     void NotifyScore(ScoreBoard score);
 }
 
-/// <summary>DTO 는 MessageProtocol 메시지 표시를 붙인다 — RPC 는 이 직렬화를 그대로 재사용한다.</summary>
-[NonIdMessage]
+/// <summary>DTO 는 MessageProtocol 메시지 표시를 붙인다 — RPC 는 이 직렬화를 그대로 재사용한다. (NonId 는 id·category 인자 사용 불가)</summary>
+[Message(MessageKind.NonId)]
 public partial class Player
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
 }
 
-[NonIdMessage]
+[Message(MessageKind.NonId)]
 public partial class PlayerJoined
 {
     public int PlayerId { get; set; }
     public int RoomId { get; set; }
 }
 
-[NonIdMessage]
+[Message(MessageKind.NonId)]
 public partial class ScoreLine
 {
     public int PlayerId { get; set; }
     public int Score { get; set; }
 }
 
-[NonIdMessage]
+[Message(MessageKind.NonId)]
 public partial class ScoreBoard
 {
     public string Map { get; set; } = string.Empty;
@@ -101,7 +101,7 @@ public partial class ScoreBoard
 }
 
 /// <summary>그룹 루트. 이 타입을 매개변수로 받으면 아래 요소 타입들이 그대로 올라온다.</summary>
-[GroupRootMessage(11)]
+[Message(MessageKind.Parent, 11, MessageCategory.Category2)]
 public partial class ChatLine
 {
     public string Text { get; set; } = string.Empty;
@@ -109,7 +109,8 @@ public partial class ChatLine
     public virtual string Describe() => $"chat: {Text}";
 }
 
-[GroupElementMessage(0)]
+// 3.0.0 마이그레이션: 구문법 수동 위치 0 은 신문법에서 표현 불가(id 0 = 생략→FullName 해시) — 해시 id 사용.
+[Message(MessageKind.Child)]
 public partial class ShoutChatLine : ChatLine
 {
     public override string Describe() => $"SHOUT: {Text.ToUpperInvariant()}";
@@ -119,7 +120,7 @@ public partial class ShoutChatLine : ChatLine
 /// 제네릭 ④용 [GenericMessage]. T 는 ID 헤더 메시지(Standalone/Group)여야 한다 —
 /// 구성 등록이 (MessageId, ClassId) 디스패치를 요구한다(NonId·프리미티브는 DRPCGEN009 로 거부).
 /// </summary>
-[StandaloneMessage(60)]
+[Message(MessageKind.Standalone, 60, MessageCategory.Category2)]
 [GenericMessage(typeof(GiftBox<ChatLine>), ClassId = 1)]
 [GenericMessage(typeof(GiftBox<Token>), ClassId = 2)]
 public partial class GiftBox<T>
@@ -127,7 +128,7 @@ public partial class GiftBox<T>
     public T Gift { get; set; } = default!;
 }
 
-[StandaloneMessage(61)]
+[Message(MessageKind.Standalone, 61, MessageCategory.Category2)]
 public partial class Token
 {
     public int Value { get; set; }

@@ -10,6 +10,15 @@ updated: 2026-09-11
 
 문서 변경 기록(최신 위). 코드 변경은 커밋 메시지로 추적한다.
 
+## 2026-09-11 (25차)
+
+- **v3.1.0 릴리스(minor, 암시 id 와이어 파괴)** — 암시 MethodId 이름 해시 할당. methodId 생략 시 선언 순서 폴백을 폐기하고 이름 해시(인터페이스 FQN+메서드명+매개변수 시그니처의 FNV-1a 32비트)로 자동 할당. 선언 순서 재배치에도 와이어 id 유지(구동기: 순서 변경으로 id 가 몰래 밀리는 호환 파괴 방지). 명시 methodId 는 여전히 우선, 해시 충돌은 DRPCGEN005 컴파일 에러로 차단. DRPCGEN004(descriptor·발생부·관련 테스트) 삭제.
+  릴리스 게이트: Release 빌드 0 오류 · 테스트 134/134 · Sandbox 전 시나리오(exit 0) 확인.
+  코드 변경: `DRPC.CodeGenerator`(MethodMetadata 해시 폴백·DeclarationsMetadata ordinal 제거·진단 삭제)·`DRPC.Attribute`(XML 주석).
+  테스트: 기존 DRPCGEN004 테스트를 이름 해시 안정성(동일 식별자 동일 값·선언 순서 무관) 2건으로 교체 — 총 134개 통과.
+  문서: Feature-Spec(F1·재구축 결정 표)·Public-API(암시 할당·진단 표)·Known-Issues(함정 주석 갱신) 갱신.
+  주의: methodId 생략 계약은 재빌드 시 와이어 id 가 바뀐다 — 클라/서버 동시 재빌드 필요.
+
 ## 2026-09-11 (24차)
 
 - **v3.0.0 릴리스(major)** — MP 3.0.0 채택 대응 파괴 변경 릴리스. 계약 코드가 구 메시지 속성(`NonIdMessage` 등 4종)에서 `[Message(MessageKind, id, category)]` 신문법으로 이전 필요(DRPC 생성기도 신문법만 해독). `Source/Directory.Build.props` Version 2.13.0 → 3.0.0, README·CONTEXT 릴리스 사슬·Public-API 버전표 동기화.

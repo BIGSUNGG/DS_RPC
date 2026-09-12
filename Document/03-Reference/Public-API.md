@@ -6,7 +6,7 @@ tags: [reference, api, packages, nuget]
 updated: 2026-09-11
 ---
 
-# Public-API — 재구축 3.0.0
+# Public-API — 재구축 3.1.0
 
 사용자가 실제로 만지는 표면만 싣는다. 생성 산출물(`{Hub}.g.cs`)의 멤버는 §생성기가 만드는 것 참고.
 
@@ -20,7 +20,7 @@ updated: 2026-09-11
 | `CommunicationPackageVersion` | `2.5.1` | `Communication.Shared`, `Communication.Network.RUDP.{Shared,Client,Server}` |
 
 저장소 자체는 어떤 형제 프로젝트 경로도 참조하지 않는다(`Source/Sandbox/Test`의 csproj에서 `ProjectReference` 가
-`../../DS_…` 로 가는 경우 없음 — 계약 확인 항목). DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **3.0.0**(MP 3.0.0 채택 대응 major — 계약 코드가 `[Message]` 신문법 필요).
+`../../DS_…` 로 가는 경우 없음 — 계약 확인 항목). DRPC 패키지 자체 버전은 릴리스 태그(`v*`)가 권위 — 현재 **3.1.0**(암시 MethodId 이름 해시 할당, minor).
 
 ### MessageCategory 니블 배분표 (MessageProtocol 3.0.0 마이그레이션, 2026-09-11)
 
@@ -69,7 +69,8 @@ public sealed class GenericProcedureAttribute : Attribute
 }
 ```
 
-`[RemoteProcedure]` 인자 없이 붙이면 ReliableOrdered·MethodId 는 선언 순서(DRPCGEN004 경고).
+`[RemoteProcedure]` 인자 없이 붙이면 ReliableOrdered·MethodId 는 **이름 해시**(인터페이스 FQN+메서드명+매개변수 시그니처의 FNV-1a 32비트)로 자동 할당된다 —
+선언 순서와 무관하게 이름이 같으면 항상 같은 값. 해시 충돌(한 계약 안 중복 MethodId)은 DRPCGEN005 컴파일 에러로 차단 → 충돌 메서드만 명시 methodId 지정.
 **주의**: 첫 positional 인자는 `mode` 다. `[RemoteProcedure(0)]` 은 methodId 0 이 아니라 `Unreliable` —
 methodId 만 지정할 때는 `[RemoteProcedure(methodId: 3)]` 을 쓴다(ADR-0002 결정 2).
 
@@ -189,8 +190,7 @@ public partial class GameClientHub : ClientHub<IGameServerProcedures, IGameClien
 | DRPCGEN001 | error | 허브 클래스가 `partial` 이 아님 |
 | DRPCGEN002 | error | `ClientHub<,>`/`ServerHub<,>` 를 상속하지 않음(또는 형식 인자가 계약 아님) |
 | DRPCGEN003 | error | 지원 안 되는 타입·`ref/out`·제네릭 메서드·`Task` 반환·중복 메서드명(오버로드) |
-| DRPCGEN004 | warning | methodId 명시 없이 선언 순서 의존 |
-| DRPCGEN005 | error | 한 계약 안에서 MethodId 중복 |
+| DRPCGEN005 | error | 한 계약 안에서 MethodId 중복(명시 중복·이름 해시 충돌 포함) |
 | DRPCGEN006 | error | `OneWay = true` 인데 반환이 void 가 아님 |
 
 ## 빌드·테스트

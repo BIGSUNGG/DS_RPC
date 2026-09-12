@@ -30,14 +30,6 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    public static readonly DiagnosticDescriptor MissingExplicitMethodId = new(
-        id: "DRPCGEN004",
-        title: "DRPC method should declare an explicit MethodId",
-        messageFormat: "Method '{0}' relies on declaration-order MethodId {1}. Pass an explicit methodId to [RemoteProcedure] for a stable contract.",
-        category: Category,
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true);
-
     public static readonly DiagnosticDescriptor DuplicateMethodId = new(
         id: "DRPCGEN005",
         title: "DRPC MethodId is duplicated",

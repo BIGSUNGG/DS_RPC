@@ -66,12 +66,6 @@ internal static class RpcHubSourceGenerator
             IMethodSymbol symbol = method.Symbol;
             Location location = symbol.Locations.FirstOrDefault() ?? Location.None;
 
-            if (!method.HasExplicitMethodId)
-            {
-                report(Diagnostic.Create(DiagnosticDescriptors.MissingExplicitMethodId, location,
-                    symbol.Name, method.MethodId));
-            }
-
             if (!methodIds.Add(method.MethodId))
             {
                 report(Diagnostic.Create(DiagnosticDescriptors.DuplicateMethodId, location,

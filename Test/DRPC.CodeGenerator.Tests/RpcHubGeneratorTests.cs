@@ -5,12 +5,30 @@ using Xunit;
 namespace DRPC.CodeGenerator.Tests;
 
 /// <summary>
-/// 생성기 진단(DRPCGEN001–006)과 생성 결과의 형태를 검사한다.
+/// 생성기 진단(DRPCGEN001–011, 004 제외)과 생성 결과의 형태를 검사한다.
 /// 레거시 대비 확정 동작: Outgoing 은 <c>{Method}Async</c> 만 생성한다(sync [Obsolete] 스텁 없음).
 /// </summary>
 public class RpcHubGeneratorTests
 {
     const string AddContract = "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered, 3)] int Add(int value1, int value2);";
+
+    /// <summary>
+    /// 제너레이터와 동일한 FNV-1a 32비트. 암시 MethodId가 프로세스 랜덤(string.GetHashCode)이
+    /// 아니라는 와이어 계약을 테스트가 고정한다.
+    /// </summary>
+    static int NameHash(string text)
+    {
+        unchecked
+        {
+            uint hash = 2166136261;
+            foreach (char c in text)
+            {
+                hash ^= c;
+                hash *= 16777619;
+            }
+            return (int)hash;
+        }
+    }
 
     [Fact]
     public void Outgoing_generates_async_only_stub()
@@ -27,11 +45,10 @@ public class RpcHubGeneratorTests
     [Fact]
     public void Omitted_mode_defaults_to_reliable_ordered()
     {
-        // 인자 없는 [RemoteProcedure] = 기본 ReliableOrdered (MethodId 는 선언 순서 → DRPCGEN004 경고).
+        // 인자 없는 [RemoteProcedure] = 기본 ReliableOrdered. MethodId 는 이름 해시로 자동 할당.
         var result = GeneratorHarness.Run(GeneratorHarness.ClientHub("[RemoteProcedure] int A();"));
 
-        Assert.Contains("RequestRPC(0, __payload, global::DRPC.RpcDeliveryMode.ReliableOrdered, cancellationToken)", result.GeneratedSource);
-        Assert.True(result.HasDiagnostic("DRPCGEN004"));
+        Assert.Contains($"RequestRPC({NameHash("global::ITestServerProcedures.A()")}, __payload, global::DRPC.RpcDeliveryMode.ReliableOrdered, cancellationToken)", result.GeneratedSource);
     }
 
     [Fact]
@@ -285,14 +302,32 @@ public class RpcHubGeneratorTests
     }
 
     [Fact]
-    public void DRPCGEN004_when_method_id_is_implicit()
+    public void Implicit_method_id_is_a_stable_name_hash()
     {
         var result = GeneratorHarness.Run(GeneratorHarness.ClientHub(
             "[RemoteProcedure(RpcDeliveryMode.ReliableOrdered)] int Implicit();"));
 
-        Microsoft.CodeAnalysis.Diagnostic warning = Assert.Single(result.WithId("DRPCGEN004"));
-        Assert.Equal(DiagnosticSeverity.Warning, warning.Severity);
-        Assert.Contains("declaration-order MethodId 0", warning.GetMessage());
+        // 같은 식별자면 항상 같은 값 — string.GetHashCode(프로세스 랜덤)가 아니라는 고정.
+        Assert.DoesNotContain("RequestRPC(0,", result.GeneratedSource);
+        Assert.Contains($"RequestRPC({NameHash("global::ITestServerProcedures.Implicit()")}, __payload", result.GeneratedSource);
+    }
+
+    [Fact]
+    public void Implicit_method_ids_do_not_shift_when_declaration_order_changes()
+    {
+        var ab = GeneratorHarness.Run(GeneratorHarness.ClientHub("[RemoteProcedure] int A();\n[RemoteProcedure] int B();"));
+        var ba = GeneratorHarness.Run(GeneratorHarness.ClientHub("[RemoteProcedure] int B();\n[RemoteProcedure] int A();"));
+
+        int a = NameHash("global::ITestServerProcedures.A()");
+        int b = NameHash("global::ITestServerProcedures.B()");
+
+        foreach (string source in new[] { ab.GeneratedSource, ba.GeneratedSource })
+        {
+            Assert.Contains($"RequestRPC({a}, __payload", source);
+            Assert.Contains($"RequestRPC({b}, __payload", source);
+        }
+
+        Assert.NotEqual(a, b);
     }
 
     [Fact]

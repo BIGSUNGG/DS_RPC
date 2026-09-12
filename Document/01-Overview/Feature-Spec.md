@@ -52,6 +52,7 @@ F1–F9·F11 구현 완료 + **제네릭 프로시저(F12)·**패킷 암호화(F
 인터페이스 메서드에 원격 호출 계약을 표시한다.
 
 - `[RemoteProcedure(RpcDeliveryMode mode = ReliableOrdered, int methodId = -1)]`, `OneWay` named 프로퍼티.
+- 암시 MethodId 는 **이름 해시**(인터페이스 FQN+메서드명+매개변수 시그니처의 FNV-1a) — 선언 순서 재배치에도 값 유지(결정 2026-09-11, DRPCGEN004 폐기).
 - 계약 마커 인터페이스: `IServerProcedureDeclarations` / `IClientProcedureDeclarations` (Shared).
 - 메서드별 전송 방식(DRPC 자체 `RpcDeliveryMode`)을 계약에서 고정 — 전송 스택 열거형은 계약면에 노출하지 않는다(ADR-0002 결정 2).
 
@@ -280,6 +281,7 @@ Roslyn incremental generator. `partial` Hub + Hub 베이스 상속을 탐지해 
 | 메서드별 래퍼 메시지 타입(`{Method}_Paramter`) | **결정(2026-09-05)**: 래퍼 타입 폐기, flat 페이로드 인코딩(오타 교정 자체가 무효화됨) |
 | sync Outgoing `[Obsolete]` 생성 | **결정(2026-09-05)**: Async 전용 — 오픈 이슈 1 해소 |
 | one-way 를 수신 측 등록표로 판정 | **결정(2026-09-05)**: `CallId == 0` 만 신호, `OneWayMethodIds` 폐기 |
+| 암시 MethodId 를 선언 순서로 할당 | **결정(2026-09-11)**: 이름 해시(FNV-1a, FQN+메서드+시그니처)로 변경 — 순서 재배치에도 와이어 id 안정, DRPCGEN004 폐기, 충돌은 DRPCGEN005 차단 |
 | Template 계약 파일명 오타 | 보류(F10 범위 밖) |
 | 버전 `1.1.0` | **결정(2026-08-31)**: `2.0.0` 출발 |
 

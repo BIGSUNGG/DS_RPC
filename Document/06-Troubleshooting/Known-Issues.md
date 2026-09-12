@@ -3,7 +3,7 @@ project: DS_RPC
 type: troubleshoot
 status: stable
 tags: [troubleshooting, known-issues, build]
-updated: 2026-09-05
+updated: 2026-09-11
 ---
 
 # Known-Issues — 재구축 2.0.0
@@ -16,7 +16,8 @@ updated: 2026-09-05
 
 `RemoteProcedure` 의 첫 positional 인자는 `RpcDeliveryMode mode` 다. `0` 은 열거형 첫 값 `Unreliable` 로 해석된다.
 methodId 만 지정하려면 **명명 인자**를 쓴다: `[RemoteProcedure(methodId: 3)]`.
-생성기가 DRPCGEN004 로 명시 methodId 를 권고하는 이유도 이 모호성 때문이다.
+생성기가 예전 DRPCGEN004 로 명시 methodId 를 권고했던 이유도 이 모호성 때문이었다(현재는 암시 MethodId 가
+이름 해시로 안정 할당되고 DRPCGEN004 는 폐기 — 이 함정만 남아 있다).
 
 ### 계약 메서드에서 `Task`/`Task<T>` 를 쓰면 DRPCGEN003
 

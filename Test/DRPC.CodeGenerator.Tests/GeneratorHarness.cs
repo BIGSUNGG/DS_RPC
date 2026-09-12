@@ -127,7 +127,6 @@ internal static class GeneratorHarness
         /// <summary>생성 코드가 그 자체로 컴파일되는지(멤버·타입 참조가 맞는지) 본다.</summary>
         public ImmutableArray<Diagnostic> CompileErrors()
             => Compilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error)
-                .Where(static d => d.Id != "DRPCGEN004")
                 .ToImmutableArray();
     }
 }

@@ -64,7 +64,7 @@ internal sealed class MethodMetadata
     /// <summary>생성된 코드 안에서 쓰는 반환 타입 표시(네임스페이스 차이 안전을 위해 항상 fully qualified).</summary>
     public string ReturnTypeDisplay => ReturnType.ToDisplayString(RpcPayload.Qualified);
 
-    public MethodMetadata(IMethodSymbol methodSymbol, int ordinalMethodId, AttributeReferences references)
+    public MethodMetadata(IMethodSymbol methodSymbol, AttributeReferences references)
     {
         Symbol = methodSymbol;
         References = references;
@@ -76,7 +76,7 @@ internal sealed class MethodMetadata
 
         AttributeData? attribute = methodSymbol.FindAttribute(references.RemoteProcedureAttributeType);
         ModeExpression = BuildModeExpression(attribute, references);
-        (MethodId, HasExplicitMethodId) = ResolveMethodId(attribute, ordinalMethodId);
+        (MethodId, HasExplicitMethodId) = ResolveMethodId(attribute, methodSymbol);
         OneWay = ResolveNamedFlag(attribute, nameof(OneWay));
         TimeoutMs = ResolveNamedInt(attribute, nameof(TimeoutMs), -1);
         Validation = ResolveNamedFlag(attribute, nameof(Validation));
@@ -86,27 +86,51 @@ internal sealed class MethodMetadata
     public string ParameterDeclarationList() => string.Join(", ", Parameters.Select(p =>
         $"{p.Type.ToDisplayString(RpcPayload.Qualified)} {p.Name}"));
 
-    static (int methodId, bool explicitId) ResolveMethodId(AttributeData? attribute, int ordinalMethodId)
+    /// <summary>
+    /// 와이어 MethodId 자동 할당용 안정 식별자: 인터페이스 FQN + 메서드명 + 매개변수 타입 시그니처.
+    /// 선언 순서와 무관하게 이름이 같으면 항상 같은 값이 나온다.
+    /// </summary>
+    static string BuildWireIdentity(IMethodSymbol method)
     {
-        if (attribute == null)
-        {
-            return (ordinalMethodId, false);
-        }
+        string owner = method.ContainingType?.ToDisplayString(RpcPayload.Qualified) ?? "";
+        string signature = string.Join(",", method.Parameters.Select(p => p.Type.ToDisplayString(RpcPayload.Qualified)));
+        return $"{owner}.{method.Name}({signature})";
+    }
 
-        if (attribute.ConstructorArguments.Length >= 2 && attribute.ConstructorArguments[1].Value is int ctorId && ctorId >= 0)
+    /// <summary>FNV-1a 32비트. string.GetHashCode 는 프로세스마다 랜덤이라 와이어 계약에 쓸 수 없다.</summary>
+    static int StableHash(string text)
+    {
+        unchecked
         {
-            return (ctorId, true);
-        }
-
-        foreach (var named in attribute.NamedArguments)
-        {
-            if (named.Key == "MethodId" && named.Value.Value is int namedId && namedId >= 0)
+            uint hash = 2166136261;
+            foreach (char c in text)
             {
-                return (namedId, true);
+                hash ^= c;
+                hash *= 16777619;
+            }
+            return (int)hash;
+        }
+    }
+
+    static (int methodId, bool explicitId) ResolveMethodId(AttributeData? attribute, IMethodSymbol method)
+    {
+        if (attribute != null)
+        {
+            if (attribute.ConstructorArguments.Length >= 2 && attribute.ConstructorArguments[1].Value is int ctorId && ctorId >= 0)
+            {
+                return (ctorId, true);
+            }
+
+            foreach (var named in attribute.NamedArguments)
+            {
+                if (named.Key == "MethodId" && named.Value.Value is int namedId && namedId >= 0)
+                {
+                    return (namedId, true);
+                }
             }
         }
 
-        return (ordinalMethodId, false);
+        return (StableHash(BuildWireIdentity(method)), false);
     }
 
     static bool ResolveNamedFlag(AttributeData? attribute, string key)

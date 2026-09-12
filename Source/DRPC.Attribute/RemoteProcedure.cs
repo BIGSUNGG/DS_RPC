@@ -23,8 +23,9 @@ public sealed class RemoteProcedure : System.Attribute
     public RpcDeliveryMode Mode { get; }
 
     /// <summary>
-    /// 와이어에서 메서드를 식별하는 번호. 생략(기본 -1)하면 선언 순서로 채워지고
-    /// 생성기가 DRPCGEN004 경고로 명시 지정을 권고한다.
+    /// 와이어에서 메서드를 식별하는 번호. 생략(기본 -1)하면 인터페이스 FQN·메서드명·매개변수 시그니처의
+    /// FNV-1a 해시로 자동 할당된다 — 선언 순서와 무관하게 이름이 같으면 항상 같은 값이다.
+    /// 해시 충돌(같은 선언 안 중복 MethodId)은 DRPCGEN005 컴파일 에러로 차단된다.
     /// </summary>
     public int MethodId { get; }
 
